@@ -129,7 +129,7 @@ public class Web extends Controller {
     tag = fixEncodingForIE(tag);
     WebPage.News page = WebPage.forPath(request.path);
     List<WebPage> allNews = findNews(page, tag);
-    if (isNotEmpty(tag) && allNews.isEmpty()) redirect(request.url.replace(page.dir.getName() + '/', ""));
+    if (isNotEmpty(tag) && allNews.isEmpty() && page.level >= 2) redirect(page.parent().path + "?" + request.querystring);
     List<WebPage> news = page.isStory() ? asList((WebPage)page) : limit(allNews, 30);
     renderArgs.put("tagFreq", tagFreq(page));
     int total = allNews.size();
