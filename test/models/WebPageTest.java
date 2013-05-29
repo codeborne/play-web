@@ -1,0 +1,106 @@
+package models;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import play.Play;
+import play.vfs.VirtualFile;
+
+import java.io.File;
+import java.util.Properties;
+
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.*;
+
+public class WebPageTest {
+  private static String currentDirName;
+
+  @BeforeClass
+  public static void setUp() throws Exception {
+    Play.configuration = new Properties();
+    currentDirName = new File(".").getCanonicalFile().getName();
+    Play.configuration.setProperty("web.content", "../" + currentDirName);
+    WebPage.ROOT = new WebPage();
+  }
+
+  @Test
+  public void rootHasCanonicalPath() throws Exception {
+    assertEquals(new File("../" + currentDirName).getCanonicalPath(), new WebPage().dir.getRealFile().getPath());
+  }
+
+  @Test(expected = SecurityException.class)
+  public void cantGoOutsideOfRoot() throws Exception {
+    WebPage.forPath("../../");
+  }
+
+  @Test
+  public void allPathsEndWithSlash() throws Exception {
+    WebPage root = WebPage.ROOT;
+    assertEquals("/", root.path);
+    assertEquals(0, root.level);
+    assertNull(root.parent());
+
+    WebPage page = WebPage.forPath("/test");
+    assertTrue(page.path.endsWith("/"));
+    assertEquals(1, page.level);
+    assertNotNull(page.parent());
+
+    assertEquals(2, page.children().get(0).level);
+  }
+
+  @Test
+  public void preprocessDownloadableFileLinks() throws Exception {
+    VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
+    when(dir.getRealFile().getPath()).thenReturn("/page");
+    when(dir.child("document.pdf").length()).thenReturn(197133L);
+    when(dir.child("document.pdf").exists()).thenReturn(true);
+    when(dir.child("big.zip").length()).thenReturn(197336500L);
+    when(dir.child("big.zip").exists()).thenReturn(true);
+    WebPage page = new WebPage(dir);
+
+    assertEquals("<a class=\"download pdf\" href=\"/page/document.pdf\">Document (PDF, 193 Kb)</a>",
+                 page.processContent("<a href=\"document.pdf\">Document</a>"));
+
+    assertEquals("<a class=\"download zip\" href=\"/page/big.zip\">Download (ZIP, 188.2 Mb)</a>",
+                 page.processContent("<a href=\"big.zip\">Download</a>"));
+
+    assertEquals("<a href=\"document.pdf\"><img src=\"something.png\"></a>",
+                 page.processContent("<a href=\"document.pdf\"><img src=\"something.png\"></a>"));
+
+    assertEquals("<a class=\"download pdf\" href=\"/page/document.pdf\" target=\"_blank\">Document (PDF, 193 Kb)</a>",
+                 page.processContent("<a href=\"document.pdf\" target=\"_blank\">Document</a>"));
+
+    assertEquals("<a target=\"_blank\" class=\"download pdf\" href=\"/page/document.pdf\">Document (PDF, 193 Kb)</a>",
+                 page.processContent("<a target=\"_blank\" href=\"document.pdf\">Document</a>"));
+
+    assertEquals("<a\thref=\"/about/\">Simple Link</a>",
+                 page.processContent("<a\thref=\"/about/\">Simple Link</a>"));
+
+    assertEquals("<a class=\"external\" href=\"http://www.something.com/document.pdf\">Simple PDF Link</a>",
+                 page.processContent("<a href=\"http://www.something.com/document.pdf\">Simple PDF Link</a>"));
+
+    assertEquals("<a class=\"email\" href=\"mailto:privet@gmail.com\">privet@gmail.com</a>",
+                 page.processContent("<a href=\"mailto:privet@gmail.com\">privet@gmail.com</a>"));
+
+    assertEquals("<a\nclass=\"email\" href=\"mailto:privet@gmail.com\">privet@gmail.com</a>",
+                 page.processContent("<a\nhref=\"mailto:privet@gmail.com\">privet@gmail.com</a>"));
+
+    assertEquals("<a\nclass=\"email\" href=\"mailto:privet@gmail.com\">privet@\ngmail\n.com</a>",
+                 page.processContent("<a\nhref=\"mailto:privet@gmail.com\">privet@\ngmail\n.com</a>"));
+
+    assertEquals("<div><a class=\"download pdf\" href=\"/page/document.pdf\">Document 1 (PDF, 193 Kb)</a> Hello <a class=\"download pdf\" href=\"/page/document.pdf\">Document 2 (PDF, 193 Kb)</a></div>",
+                 page.processContent("<div><a href=\"document.pdf\">Document 1</a> Hello <a href=\"document.pdf\">Document 2</a></div>"));
+
+    assertEquals("<a class=\"download pdf unavailable\" href=\"/page/document2.pdf\">Document (PDF, 0 Kb)</a>",
+        page.processContent("<a href=\"document2.pdf\">Document</a>"));
+  }
+
+  @Test
+  public void removeBOM() {
+    assertEquals(
+        new WebPage().removeBOM(new String(new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF, (byte) 0x2B})),
+        new String(new byte[] {(byte) 0x2B}));
+  }
+}
