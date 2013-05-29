@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static ext.CustomExtensions.removeTags;
 import static java.util.Collections.unmodifiableMap;
+import static models.WebPage.removeTags;
 import static org.apache.commons.lang.StringUtils.join;
 import static org.apache.commons.lang.StringUtils.split;
 

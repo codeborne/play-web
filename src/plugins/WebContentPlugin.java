@@ -2,7 +2,7 @@ package plugins;
 
 import models.WebPage;
 import play.Logger;
-import play.modules.excel.Plugin;
+import play.PlayPlugin;
 import play.mvc.Router;
 import play.mvc.Scope;
 
@@ -12,7 +12,7 @@ import java.util.List;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.apache.commons.lang.StringUtils.substring;
 
-public class WebContentPlugin extends Plugin {
+public class WebContentPlugin extends PlayPlugin {
   private long lastModified;
 
   @Override public void onApplicationStart() {

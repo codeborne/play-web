@@ -2,3 +2,9 @@ self: play -> web 0.1
 
 require:
     - play 1.2.5
+
+    - org.apache.lucene -> lucene-core 4.3.0
+    - org.apache.lucene -> lucene-analyzers-common 4.3.0
+    - org.apache.lucene -> lucene-queries 4.3.0
+    - org.apache.lucene -> lucene-queryparser 4.3.0
+    - com.google.guava -> guava 14.0

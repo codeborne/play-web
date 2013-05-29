@@ -1,5 +1,6 @@
 package models;
 
+import ext.CustomExtensions;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import play.Play;
@@ -102,5 +103,10 @@ public class WebPageTest {
     assertEquals(
         new WebPage().removeBOM(new String(new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF, (byte) 0x2B})),
         new String(new byte[] {(byte) 0x2B}));
+  }
+
+  @Test
+  public void removeTags() throws Exception {
+    assertEquals("test link", CustomExtensions.removeTags("test <a>link</a>"));
   }
 }

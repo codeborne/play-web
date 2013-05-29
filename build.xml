@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="play-logger" default="build" basedir=".">
+<project name="play-web" default="build" basedir=".">
 
     <target name="check" unless="play.path">
         <fail message="Please specify Play framework path using -Dplay.path=/path/to/framework/home" />
@@ -12,6 +12,9 @@
             <include name="*.jar"/>
         </fileset>
         <fileset dir="${play.path}/framework">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="lib">
             <include name="*.jar"/>
         </fileset>
     </path>
@@ -26,10 +29,10 @@
                 <include name="**/play.static"/>
             </fileset>
         </copy>
-        <jar destfile="lib/play-logger.jar" basedir="tmp/classes">
+        <jar destfile="lib/play-web.jar" basedir="tmp/classes">
             <manifest>
                 <section name="Play-module">
-                    <attribute name="Specification-Title" value="play-logger"/>
+                    <attribute name="Specification-Title" value="play-web"/>
                 </section>
             </manifest>
         </jar>

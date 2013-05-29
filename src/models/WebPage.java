@@ -1,15 +1,12 @@
 package models;
 
-import ext.CustomExtensions;
 import play.Logger;
 import play.Play;
 import play.i18n.Lang;
+import play.templates.JavaExtensions;
 import play.vfs.VirtualFile;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.Serializable;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -24,7 +21,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.reverse;
 import static java.util.Collections.sort;
 import static org.apache.commons.lang.StringUtils.*;
-import static util.NoExceptions.canonicalPath;
 
 public class WebPage implements Serializable, Comparable<WebPage> {
   public static final Set<String> ALLOWED_FILE_TYPES = new HashSet<>(asList("png", "jpg", "gif", "pdf", "rtf", "swf", "mp3", "zip", "rar", "7z", "xls", "xlsx", "ppt", "pptx", "doc", "docx"));
@@ -179,10 +175,6 @@ public class WebPage implements Serializable, Comparable<WebPage> {
     return result.toString();
   }
 
-  protected String removeBOM(String content) {
-    return content.replace(BOM, "");
-  }
-
   @Override public int compareTo(WebPage that) {
     int result = this.order - that.order;
     if (result == 0) result = this.path.compareTo(that.path);
@@ -275,13 +267,30 @@ public class WebPage implements Serializable, Comparable<WebPage> {
     }
   }
 
+  static String canonicalPath(File file) {
+    try {
+      return file.getCanonicalPath();
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static String removeTags(String s) {
+    return s.replaceAll("<br\\s*/?>", "\n").replaceAll("</?.+?>", "");
+  }
+
+  static String removeBOM(String content) {
+    return content.replace(BOM, "");
+  }
+
   public static class News extends WebPage {
     public News(VirtualFile dir) {
       super(dir);
     }
 
     protected String generateTitle() {
-      if (isMonth()) return CustomExtensions.format(date(), "MMMM");
+      if (isMonth()) return JavaExtensions.format(date(), "MMMM");
       else return super.generateTitle();
     }
 
