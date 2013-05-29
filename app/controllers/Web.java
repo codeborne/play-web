@@ -104,7 +104,6 @@ public class Web extends Controller {
     for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
       WebPage page = WebPage.forPath(indexer.reader.document(scoreDoc.doc).get("path"));
       results.add(page);
-//      System.out.println(scoreDoc.score + " " + page.path + "\n" + WebPageIndexer.searcher.explain(query, scoreDoc.doc));
     }
 
     renderArgs.put("numResults", topDocs.totalHits);
@@ -123,7 +122,7 @@ public class Web extends Controller {
     Lang.change(locale);
     // play puts only session cookie, let's have a longer one
     response.setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), locale, "10000d");
-    if (locale.equals("ru")) redirect("/individual"); else redirect("/en/about");
+    redirect(Play.configuration.getProperty("web." + locale + ".home"));
   }
 
   public static void news(String tag) throws Exception {
