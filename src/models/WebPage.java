@@ -44,7 +44,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
 
   WebPage(VirtualFile dir) {
     this.dir = dir;
-    this.path = dir.getRealFile().getPath().replace(ROOT.dir.getRealFile().getPath(), "").replace("\\", "/") + "/";
+    this.path = dir.getRealFile().getPath().replace(ROOT.dir.getRealFile().getPath(), "").replace('\\', '/') + "/";
     this.level = countMatches(path, "/") - 1;
 
     metadata = loadMetadata();
@@ -79,7 +79,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
 
   @SuppressWarnings("unchecked")
   static <P extends WebPage> P forPath(VirtualFile dir) {
-    String path = dir.getRealFile().getPath().replace(ROOT.dir.getRealFile().getPath(), "");
+    String path = dir.getRealFile().getPath().replace(ROOT.dir.getRealFile().getPath(), "").replace('\\', '/');
     if (path.contains("/news")) return (P)new News(dir);
     if (path.startsWith("/analytics")) return (P)new Analytics(dir);
     else return (P)new WebPage(dir);
