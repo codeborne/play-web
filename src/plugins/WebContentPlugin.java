@@ -27,10 +27,10 @@ public class WebContentPlugin extends PlayPlugin {
       }
     }
 
-    Router.addRoute("GET", "/news/?.*", "Web.news");
-    Router.addRoute("GET", "/analytics/?.*", "Web.news");
-    Router.addRoute("GET", "/about/depository/news/?.*", "Web.news");
-    Router.addRoute("GET", "/en/news/?.*", "Web.news");
+    Router.addRoute("GET", "/news/?[^.]*", "Web.news");
+    Router.addRoute("GET", "/analytics/?[^.]*", "Web.news");
+    Router.addRoute("GET", "/about/depository/news/?[^.]*", "Web.news");
+    Router.addRoute("GET", "/en/news/?[^.]*", "Web.news");
 
     lastModified = WebPage.ROOT.dir.lastModified();
   }
