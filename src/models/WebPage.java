@@ -21,6 +21,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.reverse;
 import static java.util.Collections.sort;
 import static org.apache.commons.lang.StringUtils.*;
+import static play.templates.JavaExtensions.urlEncode;
 
 public class WebPage implements Serializable, Comparable<WebPage> {
   public static final Set<String> ALLOWED_FILE_TYPES = new HashSet<>(asList("png", "jpg", "gif", "pdf", "rtf", "swf", "mp3", "zip", "rar", "7z", "xls", "xlsx", "ppt", "pptx", "doc", "docx"));
@@ -167,7 +168,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
         VirtualFile file = dir.child(filename);
         double lengthKb = file.length() / 1024.0;
         String size = lengthKb > 1024 ? format("%.1f Mb", lengthKb / 1024) : format("%.0f Kb", lengthKb);
-        m.appendReplacement(result, "<a$1class=\"download " + filetype + (file.exists() ? "" : " unavailable") + "\" href=\"" + path + "$2\"$3>" +
+        m.appendReplacement(result, "<a$1class=\"download " + filetype + (file.exists() ? "" : " unavailable") + "\" href=\"" + path + urlEncode(m.group(2)) + "\"$3>" +
             "$4 (" + filetype.toUpperCase() + ", " + size + ")</a>");
       }
     }
