@@ -14,23 +14,27 @@ import static org.apache.commons.lang.StringUtils.substring;
 
 public class WebContentPlugin extends PlayPlugin {
   private long lastModified;
+  private int genericRouteIndex;
 
   @Override public void onApplicationStart() {
+    genericRouteIndex = Router.routes.size();
+    for (int i = 0; i < Router.routes.size(); i++) {
+      Router.Route route = Router.routes.get(i);
+      if (route.action.equals("{controller}.{action}")) {
+        genericRouteIndex = i; break;
+      }
+    }
+
     addWebRoutes(WebPage.ROOT.children());
-    Router.addRoute("GET", "/en/?.*", "Web.serveContent");
+    Router.addRoute(genericRouteIndex, "GET", WebPage.ROOT_EN.path + "?.*", "Web.serveContent", null);
 
     for (WebPage page : WebPage.all()) {
       String alias = page.metadata.getProperty("alias");
       if (isNotEmpty(alias)) {
         if (!alias.startsWith("/")) alias = "/" + alias;
-        Router.addRoute("GET", alias + "/?", "Web.redirectAlias", "{path:'" + page.path + "'}", "");
+        Router.appendRoute("GET", alias + "/?", "Web.redirectAlias", "{path:'" + page.path + "'}", null, null, 0);
       }
     }
-
-    Router.addRoute("GET", "/news/?[^.]*", "Web.news");
-    Router.addRoute("GET", "/analytics/?[^.]*", "Web.news");
-    Router.addRoute("GET", "/about/depository/news/?[^.]*", "Web.news");
-    Router.addRoute("GET", "/en/news/?[^.]*", "Web.news");
 
     lastModified = WebPage.ROOT.dir.lastModified();
   }
@@ -50,7 +54,7 @@ public class WebContentPlugin extends PlayPlugin {
     for (WebPage page : pages) {
       String path = page.path;
       if (path.endsWith("/")) path = substring(path, 0, -1);
-      Router.addRoute("GET", path + "/?.*", "Web.serveContent");
+      Router.addRoute(genericRouteIndex, "GET", path + "/?.*", "Web.serveContent", null);
     }
   }
 }
