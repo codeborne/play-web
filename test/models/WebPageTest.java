@@ -7,6 +7,9 @@ import play.Play;
 import play.vfs.VirtualFile;
 
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Properties;
 
 import static junit.framework.Assert.assertNotNull;
@@ -108,5 +111,26 @@ public class WebPageTest {
   @Test
   public void removeTags() throws Exception {
     assertEquals("test link", CustomExtensions.removeTags("test <a>link</a>"));
+  }
+
+  @Test
+  public void dateForNews() throws Exception {
+    WebPage.News news = WebPage.forPath("/news");
+
+    news.path = "/hello/news/2013/05/13/";
+    assertEquals(date("13.05.2013"), news.date());
+
+    news.path = "/analytics/2012/05/10/";
+    assertEquals(date("10.05.2012"), news.date());
+
+    news.path = "/analytics/2012/05/10-2/";
+    assertEquals(date("10.05.2012"), news.date());
+
+    news.path = "/analytics/2012/05/";
+    assertEquals(date("1.05.2012"), news.date());
+  }
+
+  private Date date(String ddMMyyyy) throws ParseException {
+    return new SimpleDateFormat("dd.MM.yyyy").parse(ddMMyyyy);
   }
 }

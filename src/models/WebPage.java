@@ -296,12 +296,14 @@ public class WebPage implements Serializable, Comparable<WebPage> {
 
     public Date date() {
       String path = this.path.replaceFirst("^.*/(news|analytics)/", "");
+      if (path.endsWith("/")) path = path.substring(0, path.length()-1);
+      if (path.lastIndexOf('-') > path.length() - 3) path = path.substring(0, path.lastIndexOf('-')); // remove trailing '-' from dates, eg 2013/05/03-2
       try {
-        return new SimpleDateFormat("yyyy/MM/dd/").parse(path);
+        return new SimpleDateFormat("yyyy/MM/dd").parse(path);
       }
       catch (ParseException e) {
         try {
-          return new SimpleDateFormat("yyyy/MM/").parse(path);
+          return new SimpleDateFormat("yyyy/MM").parse(path);
         }
         catch (ParseException ignore) {
         }
