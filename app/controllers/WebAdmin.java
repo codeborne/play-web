@@ -76,10 +76,19 @@ public class WebAdmin extends BaseController {
     render(parent);
   }
 
-  public static void addPage(String parentPath, @Required String name) {
+  public static void addPage(@Required String parentPath, @Required String name) {
     checkAuthenticPost();
+    if (validation.hasErrors()) forbidden();
     WebPage page = WebPage.forPath(parentPath + "/" + name);
     // TODO: securely implement
     Web.sitemap();
+  }
+
+  public static void saveContent(@Required String path, @Required String part, @Required String html) {
+    checkAuthenticPost();
+    if (validation.hasErrors()) forbidden();
+    WebPage page = WebPage.forPath(path);
+    page.dir.child(part).write(html);
+    renderText("OK");
   }
 }

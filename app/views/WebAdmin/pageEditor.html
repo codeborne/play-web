@@ -1,0 +1,63 @@
+<style type="text/css">
+  .editable:hover, .editable.modified {
+    outline: 1px dashed red;
+    position: relative;
+  }
+  .editable:hover:before, .editable.modified:before {
+    content: attr(data-from);
+    color: white;
+    background: red;
+    position: absolute;
+    font-size: 14px;
+    line-height: 14px;
+    top: -22px;
+    left: -1px;
+    padding: 4px;
+    z-index: 1000;
+  }
+  .editable-controls {
+    z-index: 1000;
+  }
+  .editable-controls button {
+    line-height: 14px;
+    font-size: 14px;
+    padding: 4px;
+  }
+</style>
+
+<script type="text/javascript">
+  $(function() {
+    $('.editable').each(function() {
+      $(this).attr('data-from', $(this).attr('class').replace(' editable', '.html'))
+             .attr('contenteditable', true);
+
+      $(this).on('keyup', function() {
+        var editable = $(this);
+        if (editable.is('.modified')) return;
+        editable.addClass('modified');
+        var pos = $(this).offset();
+
+        var controls = $($('#editable-controls-template').html()).appendTo('body');
+        controls.offset({top: pos.top - 50, left: pos.left});
+        controls.find('.save').click(function() {
+          $.post('@{WebAdmin.saveContent()}', {
+            path:'${page.path}',
+            part: editable.attr('data-from'),
+            html: editable.html(),
+            authenticityToken: '${session.authenticityToken}'
+          }, function() {
+            controls.remove();
+            editable.removeClass('modified');
+          });
+        });
+      });
+    });
+  });
+</script>
+
+<div id="editable-controls-template" style="display:none">
+  <div class="editable-controls">
+    <button class="save">&{'web.admin.save'}</button>
+    <button onclick="location.reload()">&{'web.admin.revert'}</button>
+  </div>
+</div>
