@@ -35,20 +35,29 @@
         var editable = $(this);
         if (editable.is('.modified')) return;
         editable.addClass('modified');
-        var pos = $(this).offset();
+        var oldContent = editable.html();
 
+        var pos = $(this).offset();
         var controls = $($('#editable-controls-template').html()).appendTo('body');
         controls.offset({top: pos.top - 50, left: pos.left});
+
+        function restoreEditable() {
+          controls.remove();
+          editable.removeClass('modified');
+        }
+
         controls.find('.save').click(function() {
           $.post('@{WebAdmin.saveContent()}', {
             path:'${page.path}',
             part: editable.attr('data-from'),
             html: editable.html(),
             authenticityToken: '${session.authenticityToken}'
-          }, function() {
-            controls.remove();
-            editable.removeClass('modified');
-          });
+          }, restoreEditable);
+        });
+
+        controls.find('.revert').click(function() {
+          editable.html(oldContent);
+          restoreEditable();
         });
       });
     });
@@ -58,6 +67,6 @@
 <div id="editable-controls-template" style="display:none">
   <div class="editable-controls">
     <button class="save">&{'web.admin.save'}</button>
-    <button onclick="location.reload()">&{'web.admin.revert'}</button>
+    <button class="revert">&{'web.admin.revert'}</button>
   </div>
 </div>
