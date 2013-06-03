@@ -23,7 +23,7 @@ public class MetadataField {
 
   public String name;
   public String help;
-  public String type;
+  public String type = "text";
   public Object defaultValue;
 
   public MetadataField(String name, String help) {

@@ -1,0 +1,25 @@
+<style type="text/css">
+  #page-metadata-editor label {
+    display: inline-block;
+    width: 100px;
+    text-align: right;
+  }
+</style>
+
+<div id="page-metadata-editor" class="modal" style="display: none">
+  <div class="modal-header"><h3>Metadata editor</h3></div>
+  <form>
+    <div class="modal-body">
+      #{list models.MetadataField.ALL, as:'field'}
+        <label>${field.name}</label>
+        <input type="${field.type}" #{if field.type == 'number'}min="1"#{/if} #{if field.type == 'checkbox' && field.defaultValue}checked#{/if}>
+      #{/list}
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-primary">&{'web.admin.save'}</button>
+    </div>
+  </form>
+</div>
+
+<button class="btn" onclick="$('#page-metadata-editor').modal()">Metadata</button>
