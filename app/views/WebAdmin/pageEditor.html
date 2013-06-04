@@ -1,9 +1,11 @@
+<button class="btn btn-primary" onclick="enablePageEditing(this)">&{'web.admin.editPage'}</button>
+
 <style type="text/css">
-  .editable:hover, .editable.modified {
+  .editable[data-from]:hover, .editable.modified {
     outline: 1px dashed red;
     position: relative;
   }
-  .editable:hover:before, .editable.modified:before {
+  .editable[data-from]:hover:before, .editable.modified:before {
     content: attr(data-from);
     color: white;
     background: red;
@@ -26,10 +28,11 @@
 </style>
 
 <script type="text/javascript">
-  $(function() {
+  function enablePageEditing(button) {
+    $(button).attr('disabled', true);
     $('.editable').each(function() {
       $(this).attr('data-from', $(this).attr('class').replace(' editable', '.html'))
-             .attr('contenteditable', true);
+          .attr('contenteditable', true);
 
       $(this).on('keyup', function() {
         var editable = $(this);
@@ -61,7 +64,8 @@
         });
       });
     });
-  });
+    alert('&{'web.admin.editPage.enabled'}');
+  }
 </script>
 
 <div id="editable-controls-template" style="display:none">
