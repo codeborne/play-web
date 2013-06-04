@@ -18,7 +18,7 @@
 
 <ul>
   #{list models.MetadataField.ALL, as:'field'}
-    <li><b>${field.name}</b>: ${field.help.raw()}</li>
+    <li><b>${field.name}</b>: &{'web.metadata.' + field.name}</li>
   #{/list}
 </ul>
 
