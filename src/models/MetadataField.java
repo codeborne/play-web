@@ -16,6 +16,7 @@ public class MetadataField {
       new MetadataField("mainMenu", "страница показывается в главном меню (только для страниц верхнего уровня)", "checkbox", false),
       new MetadataField("hidden", "<b>true</b> - чтобы спрятать страницу из меню", "checkbox", false),
       new MetadataField("submenuColumns", "позволяет переопределить количество колонок подменю (по умолчанию, 5)", "number", 5),
+      new MetadataField("redirect", "чтобы страница перенаправляла на другую указанную страницу"),
       new MetadataField("contentFrom", "если у страницы нет своего содержания и надо показывать содержание другой страницы (например, в английской версии показывается русская страница)"),
       new MetadataField("contentFromNewestChild", "<b>true</b>, если у страницы нет своего содержания и надо показывать содержание от самой новой под-страницы (например, когда под-страницы - это годы)"),
       new MetadataField("sitemap", "<b>false</b>, чтобы страница не показывалась на карте сайта", "checkbox", true)
