@@ -46,7 +46,6 @@ import static org.apache.commons.lang.StringUtils.*;
 
 public class Web extends Controller {
   @Inject static CurrencyService currencyService;
-  @Inject static NewsService newsService;
   @Inject static MessageService messageService;
   @Inject static WebPageIndexer indexer;
 
