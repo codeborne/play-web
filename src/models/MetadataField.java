@@ -7,7 +7,7 @@ import static java.util.Arrays.asList;
 public class MetadataField {
   public static List<MetadataField> ALL = asList(
       new MetadataField("title", "заголовок страницы, видимый пользователю."),
-      new MetadataField("template", "шаблон страницы, список ниже. Если не указан, то будет использоваться custom - страница со свободным контентом."),
+      new MetadataField("template", "шаблон страницы, список ниже. Если не указан, то будет использоваться <b>custom</b> - страница со свободным контентом."),
       new MetadataField("order", "порядок отображения в меню и на карте сайта, целое число. Страницы с указанным порядком будут всегда перед теми, для которых он не указан. Другие страницы будут сортироваться в алфавитном порядке названий их папок.", "number", null),
       new MetadataField("description", "описание страницы для поисковиков. Будет вставлено в html meta-тег."),
       new MetadataField("keywords", "ключевые слова для поисковиков. Будут вставлены в html meta-тег."),
