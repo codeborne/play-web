@@ -1,10 +1,11 @@
 package models;
 
+import java.io.Serializable;
 import java.util.List;
 
 import static java.util.Arrays.asList;
 
-public class MetadataField {
+public class MetadataField implements Serializable {
   public static List<MetadataField> ALL = asList(
       new MetadataField("title"),
       new MetadataField("template"),
