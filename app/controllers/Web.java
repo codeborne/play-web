@@ -1,6 +1,5 @@
 package controllers;
 
-import com.google.common.base.Predicate;
 import models.Config;
 import models.WebPage;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -27,8 +26,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.google.common.collect.Collections2.filter;
-import static com.google.common.collect.Lists.newArrayList;
 import static ext.CustomExtensions.safeUrlEncode;
 import static java.lang.Math.min;
 import static java.util.Arrays.asList;
@@ -109,7 +106,7 @@ public class Web extends Controller {
   public static void news(String tag) throws Exception {
     tag = fixEncodingForIE(tag);
     WebPage.News page = WebPage.forPath(request.path);
-    List<WebPage> allNews = findNews(page, tag);
+    List<WebPage> allNews = page.findNews(tag);
     if (isNotEmpty(tag) && allNews.isEmpty() && page.level >= 2) redirect(page.parent().path + "?" + request.querystring);
     List<WebPage> news = page.isStory() ? asList((WebPage)page) : limit(allNews, 30);
     renderArgs.put("tagFreq", tagFreq(page));
@@ -155,17 +152,6 @@ public class Web extends Controller {
 
   static <T> List<T> limit(List<T> list, int limit) {
     return list.subList(0, min(list.size(), limit));
-  }
-
-  static List<WebPage> findNews(WebPage page, final String tag) {
-    // TODO: need more effective implementation
-    List<WebPage> news = newArrayList(filter(page.childrenRecursively(), new Predicate<WebPage>() {
-      @Override public boolean apply(WebPage page) {
-        return !page.metadata.isEmpty() && (tag == null || page.metadata.getProperty("tags","").contains(tag));
-      }
-    }));
-    Collections.reverse(news);
-    return news;
   }
 
   public static void sitemap() {

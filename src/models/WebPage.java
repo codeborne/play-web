@@ -1,5 +1,6 @@
 package models;
 
+import com.google.common.base.Predicate;
 import play.Logger;
 import play.Play;
 import play.i18n.Lang;
@@ -13,6 +14,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.Iterables.getLast;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.Integer.parseInt;
@@ -318,6 +320,17 @@ public class WebPage implements Serializable, Comparable<WebPage> {
 
     public boolean isMonth() {
       return path.matches(".*/\\d{4}/\\d{2}/");
+    }
+
+    List<WebPage> findNews(final String tag) {
+      // TODO: need more effective implementation
+      List<WebPage> news = newArrayList(filter(page.childrenRecursively(), new Predicate<WebPage>() {
+        @Override public boolean apply(WebPage page) {
+          return !page.metadata.isEmpty() && (tag == null || page.metadata.getProperty("tags","").contains(tag));
+          }
+      }));
+      reverse(news);
+      return news;
     }
   }
 
