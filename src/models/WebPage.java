@@ -322,12 +322,12 @@ public class WebPage implements Serializable, Comparable<WebPage> {
       return path.matches(".*/\\d{4}/\\d{2}/");
     }
 
-    List<WebPage> findNews(final String tag) {
-      // TODO: need more effective implementation
-      List<WebPage> news = newArrayList(filter(page.childrenRecursively(), new Predicate<WebPage>() {
+    public List<WebPage> findNews(final String tag) {
+      // TODO: need more efficient implementation
+      List<WebPage> news = newArrayList(filter(childrenRecursively(), new Predicate<WebPage>() {
         @Override public boolean apply(WebPage page) {
-          return !page.metadata.isEmpty() && (tag == null || page.metadata.getProperty("tags","").contains(tag));
-          }
+          return !page.metadata.isEmpty() && (tag == null || page.metadata.getProperty("tags", "").contains(tag));
+        }
       }));
       reverse(news);
       return news;
