@@ -3,7 +3,6 @@ package controllers;
 import com.google.common.base.Predicate;
 import models.Config;
 import models.WebPage;
-import org.apache.commons.mail.EmailException;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -17,8 +16,6 @@ import play.mvc.*;
 import play.templates.BaseTemplate;
 import play.templates.TagContext;
 import play.vfs.VirtualFile;
-import services.CurrencyService;
-import services.MessageService;
 import util.WebPageIndexer;
 
 import javax.inject.Inject;
@@ -32,7 +29,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.Lists.newArrayList;
-import static controllers.BaseController.checkAuthenticPost;
 import static ext.CustomExtensions.safeUrlEncode;
 import static java.lang.Math.min;
 import static java.util.Arrays.asList;
@@ -42,8 +38,6 @@ import static org.apache.commons.lang.StringUtils.*;
 
 @With(Security.class)
 public class Web extends Controller {
-  @Inject static CurrencyService currencyService;
-  @Inject static MessageService messageService;
   @Inject static WebPageIndexer indexer;
 
   @Before public static void checkNotProd() {
@@ -64,7 +58,6 @@ public class Web extends Controller {
       fixLocale(page);
       String redirectUrl = page.metadata.getProperty("redirect");
       if (isNotEmpty(redirectUrl)) redirect((redirectUrl.startsWith("/") ? "" : request.path) + safeUrlEncode(redirectUrl));
-      if (page.level == 1 || page.equals(WebPage.ROOT_EN)) loadCurrenciesAndNews(page); // only in case of front pages and english front page
       renderPage(page);
     }
     else if (isAllowed(file)) {
@@ -83,14 +76,6 @@ public class Web extends Controller {
     String name = file.getName();
     String ext = name.substring(name.lastIndexOf('.')+1);
     return ALLOWED_FILE_TYPES.contains(ext);
-  }
-
-  private static void loadCurrenciesAndNews(WebPage page) {
-    renderArgs.put("currencyRates", currencyService.rates());
-    List<WebPage> news;
-    if (page.equals(WebPage.ROOT_EN)) news = limit(findNews(WebPage.forPath("/en/news"), null), 3);
-    else news = limit(findNews(WebPage.forPath("/news"), page.title), 2);
-    renderArgs.put("latestNews", news);
   }
 
   public static void search(String q) throws ParseException, IOException {
@@ -168,11 +153,11 @@ public class Web extends Controller {
     return new String(bytes, "UTF-8");
   }
 
-  private static <T> List<T> limit(List<T> list, int limit) {
+  static <T> List<T> limit(List<T> list, int limit) {
     return list.subList(0, min(list.size(), limit));
   }
 
-  private static List<WebPage> findNews(WebPage page, final String tag) {
+  static List<WebPage> findNews(WebPage page, final String tag) {
     // TODO: need more effective implementation
     List<WebPage> news = newArrayList(filter(page.childrenRecursively(), new Predicate<WebPage>() {
       @Override public boolean apply(WebPage page) {
@@ -199,12 +184,6 @@ public class Web extends Controller {
     appendEntryToSitemap(sitemap, Router.reverse("Application.home").url, new File(".").lastModified(), "weekly");
     appendEntryToSitemap(sitemap, Router.reverse("Application.wallet").url, new File(".").lastModified(), "weekly");
     renderXml(sitemap);
-  }
-
-  public static void sendMessage(String name, String email, String subject, String text, File[] attachment) throws EmailException {
-    checkAuthenticPost();
-    messageService.sendAnonymously(name, email, play.i18n.Messages.get("web.email.subject") + ": " + subject, text, attachment);
-    renderText("OK");
   }
 
   private static void appendToSitemapRecursively(Document sitemap, WebPage page) {
