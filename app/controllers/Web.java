@@ -9,6 +9,7 @@ import org.apache.lucene.search.TopDocs;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import play.Play;
+import play.db.jpa.JPAPlugin;
 import play.db.jpa.NoTransaction;
 import play.i18n.Lang;
 import play.libs.XML;
@@ -202,6 +203,14 @@ public class Web extends Controller {
     renderArgs.put("metaKeywords", page.metadata.getProperty("keywords"));
 
     String template = page.metadata.getProperty("template", "custom");
-    renderTemplate("Web/templates/" + template + ".html", page);
+
+    try {
+      if ("demo".equals(Play.id)) JPAPlugin.startTx(true);
+
+      renderTemplate("Web/templates/" + template + ".html", page);
+    }
+    finally {
+      if ("demo".equals(Play.id)) JPAPlugin.closeTx(true);
+    }
   }
 }
