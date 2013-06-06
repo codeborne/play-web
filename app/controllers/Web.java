@@ -13,16 +13,12 @@ import org.w3c.dom.Node;
 import play.Play;
 import play.i18n.Lang;
 import play.libs.XML;
-import play.mvc.After;
-import play.mvc.Before;
-import play.mvc.Controller;
-import play.mvc.Router;
+import play.mvc.*;
 import play.templates.BaseTemplate;
 import play.templates.TagContext;
 import play.vfs.VirtualFile;
 import services.CurrencyService;
 import services.MessageService;
-import services.NewsService;
 import util.WebPageIndexer;
 
 import javax.inject.Inject;
@@ -44,6 +40,7 @@ import static java.util.Collections.sort;
 import static models.WebPage.ALLOWED_FILE_TYPES;
 import static org.apache.commons.lang.StringUtils.*;
 
+@With(Security.class)
 public class Web extends Controller {
   @Inject static CurrencyService currencyService;
   @Inject static MessageService messageService;
@@ -235,7 +232,6 @@ public class Web extends Controller {
     TagContext.init();
     renderArgs.put("_isLayout", true); // tell play not to reset layoutData itself
 
-    renderArgs.put("title", page.title);
     renderArgs.put("metaDescription", page.metadata.getProperty("description"));
     renderArgs.put("metaKeywords", page.metadata.getProperty("keywords"));
 
