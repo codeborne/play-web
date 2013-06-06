@@ -9,6 +9,7 @@ import org.apache.lucene.search.TopDocs;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import play.Play;
+import play.db.jpa.NoTransaction;
 import play.i18n.Lang;
 import play.libs.XML;
 import play.mvc.*;
@@ -33,7 +34,7 @@ import static java.util.Collections.sort;
 import static models.WebPage.ALLOWED_FILE_TYPES;
 import static org.apache.commons.lang.StringUtils.*;
 
-@With(Security.class)
+@With(Security.class) @NoTransaction
 public class Web extends Controller {
   @Inject static WebPageIndexer indexer;
 

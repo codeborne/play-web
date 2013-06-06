@@ -3,6 +3,7 @@ package controllers;
 import models.WebPage;
 import play.Logger;
 import play.data.validation.Required;
+import play.db.jpa.NoTransaction;
 import play.mvc.Catch;
 import util.Git;
 
@@ -18,7 +19,7 @@ import static org.apache.commons.lang.StringUtils.split;
 import static util.Git.git;
 import static util.Git.safePull;
 
-@Check("cms")
+@Check("cms") @NoTransaction
 public class WebAdmin extends BaseController {
   public static void status() throws IOException, InterruptedException, Git.ExecException {
     git("add", ".");
