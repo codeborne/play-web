@@ -34,7 +34,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
   public String path;
   public VirtualFile dir;
   public int level;
-  public Properties metadata;
+  public Properties metadata = new Properties();
   public String title;
   public int order;
 
@@ -49,7 +49,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
     this.path = dir.getRealFile().getPath().replace(ROOT.dir.getRealFile().getPath(), "").replace('\\', '/') + "/";
     this.level = countMatches(path, "/") - 1;
 
-    metadata = loadMetadata();
+    loadMetadata();
     title = metadata.getProperty("title");
     if (isEmpty(title)) title = generateTitle();
     try {
@@ -89,6 +89,9 @@ public class WebPage implements Serializable, Comparable<WebPage> {
 
   public List<WebPage> children() {
     List<WebPage> children = new ArrayList<>();
+    if (metadata.getProperty("contentFrom") != null)
+      return forPath(metadata.getProperty("contentFrom")).children();
+
     for (VirtualFile entry : dir.list()) {
       if (entry.isDirectory() && !entry.getName().startsWith(".") && !entry.equals(ROOT_EN.dir)) {
         WebPage child = forPath(entry);
@@ -111,8 +114,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
     return dir.child(filename).contentAsString();
   }
 
-  private Properties loadMetadata() {
-    Properties metadata = new Properties();
+  private void loadMetadata() {
     VirtualFile metaFile = dir.child("metadata.properties");
     if (metaFile.exists()) {
       try (Reader reader = new InputStreamReader(metaFile.inputstream(), "UTF-8")) {
@@ -122,7 +124,6 @@ public class WebPage implements Serializable, Comparable<WebPage> {
         Logger.error("Cannot load " + metaFile, e);
       }
     }
-    return metadata;
   }
 
   public Map<String, String> contentParts() {
