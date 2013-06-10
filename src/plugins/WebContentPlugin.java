@@ -2,7 +2,10 @@ package plugins;
 
 import models.WebPage;
 import play.Logger;
+import play.Play;
 import play.PlayPlugin;
+import play.i18n.Lang;
+import play.mvc.Http;
 import play.mvc.Router;
 import play.mvc.Scope;
 
@@ -47,7 +50,18 @@ public class WebContentPlugin extends PlayPlugin {
   }
 
   @Override public void beforeActionInvocation(Method actionMethod) {
+    fixLocale();
     Scope.RenderArgs.current().put("rootPage", WebPage.rootForLocale());
+  }
+
+  private void fixLocale() {
+    String locale = Lang.get();
+    String expectedLocale = Http.Request.current().path.startsWith("/en") ? "en" : "ru";
+    if (!expectedLocale.equals(locale)) {
+      Lang.change(expectedLocale);
+      // play puts only session cookie, let's have a longer one
+      Http.Response.current().setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), locale, "10000d");
+    }
   }
 
   private void addWebRoutes(List<WebPage> pages) {

@@ -54,7 +54,6 @@ public class Web extends Controller {
     if (file.isDirectory()) {
       if (!request.path.endsWith("/")) redirect(request.path + "/");
       WebPage page = WebPage.forPath(request.path);
-      fixLocale(page);
       String redirectUrl = page.metadata.getProperty("redirect");
       if (isNotEmpty(redirectUrl)) redirect((redirectUrl.startsWith("/") ? "" : request.path) + safeUrlEncode(redirectUrl));
       renderPage(page);
@@ -63,12 +62,6 @@ public class Web extends Controller {
       renderBinary(file.getRealFile());
     }
     else notFound();
-  }
-
-  private static void fixLocale(WebPage page) {
-    String locale = Lang.get();
-    String expectedLocale = page.path.startsWith("/en") ? "en" : "ru";
-    if (!expectedLocale.equals(locale)) locale(expectedLocale);
   }
 
   static boolean isAllowed(VirtualFile file) {
@@ -99,9 +92,6 @@ public class Web extends Controller {
   }
 
   public static void locale(String locale) {
-    Lang.change(locale);
-    // play puts only session cookie, let's have a longer one
-    response.setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), locale, "10000d");
     redirect(Play.configuration.getProperty("web." + locale + ".home"));
   }
 
