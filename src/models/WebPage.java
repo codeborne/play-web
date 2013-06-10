@@ -23,7 +23,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.reverse;
 import static java.util.Collections.sort;
 import static org.apache.commons.lang.StringUtils.*;
-import static play.templates.JavaExtensions.urlEncode;
 
 public class WebPage implements Serializable, Comparable<WebPage> {
   public static final Set<String> ALLOWED_FILE_TYPES = new HashSet<>(asList("png", "jpg", "gif", "pdf", "rtf", "swf", "mp3", "zip", "rar", "7z", "xls", "xlsx", "ppt", "pptx", "doc", "docx"));
@@ -151,6 +150,22 @@ public class WebPage implements Serializable, Comparable<WebPage> {
     return parts;
   }
 
+  private static String safeUrlEncode(String url) {
+    try {
+      byte[] bytes = url.getBytes("UTF-8");
+      StringBuffer sb = new StringBuffer(url.length() * 2);
+      for (int i = 0; i < bytes.length; i++) {
+        if (bytes[i] == ' ') sb.append('+');
+        else if ((bytes[i] & 0xFF) < 0x7F) sb.append((char)bytes[i]);
+        else sb.append(String.format("%%%02X", bytes[i]));
+      }
+      return sb.toString();
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   String processContent(String content) {
     Pattern linkPattern = Pattern.compile("<a([^>]*?)href=\"([^\"]+?)\"([^>]*?)>([^<>]+?)</a>", Pattern.DOTALL);
     Matcher m = linkPattern.matcher(removeBOM(content));
@@ -165,12 +180,12 @@ public class WebPage implements Serializable, Comparable<WebPage> {
         m.appendReplacement(result, "<a$1class=\"email\" href=\"$2\"$3>$4</a>");
       }
       else if (filename.contains("://") || !ALLOWED_FILE_TYPES.contains(filetype))
-        m.appendReplacement(result, m.group());
+        m.appendReplacement(result, "<a$1href=\"" + safeUrlEncode(m.group(2)) + "\"$3>$4</a>");
       else {
         VirtualFile file = dir.child(filename);
         double lengthKb = file.length() / 1024.0;
         String size = lengthKb > 1024 ? format("%.1f Mb", lengthKb / 1024) : format("%.0f Kb", lengthKb);
-        m.appendReplacement(result, "<a$1class=\"download " + filetype + (file.exists() ? "" : " unavailable") + "\" href=\"" + path + urlEncode(m.group(2)) + "\"$3>" +
+        m.appendReplacement(result, "<a$1class=\"download " + filetype + (file.exists() ? "" : " unavailable") + "\" href=\"" + path + safeUrlEncode(m.group(2)) + "\"$3>" +
             "$4 (" + filetype.toUpperCase() + ", " + size + ")</a>");
       }
     }

@@ -112,6 +112,14 @@ public class WebPageTest {
   }
 
   @Test
+  public void cyrillicsInLinksAreFixedForIE() throws Exception {
+    VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
+    WebPage page = new WebPage(dir);
+    assertEquals("<a href=\"/map?branch=%D0%A6%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9\">Центральный</a>",
+        page.processContent("<a href=\"/map?branch=Центральный\">Центральный</a>"));
+  }
+
+  @Test
   public void removeBOM() {
     assertEquals(
         new WebPage().removeBOM(new String(new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF, (byte) 0x2B})),
