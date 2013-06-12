@@ -25,7 +25,7 @@ import static java.util.Collections.sort;
 import static org.apache.commons.lang.StringUtils.*;
 
 public class WebPage implements Serializable, Comparable<WebPage> {
-  public static final Set<String> ALLOWED_FILE_TYPES = new HashSet<>(asList("png", "jpg", "gif", "pdf", "rtf", "swf", "mp3", "zip", "rar", "7z", "xls", "xlsx", "ppt", "pptx", "doc", "docx"));
+  public static final Set<String> ALLOWED_FILE_TYPES = new HashSet<>(asList(Play.configuration.getProperty("web.downloadable.files", "png,jpg,gif,pdf,rtf,swf,mp3,flv").split("\\s*,\\s*")));
   public static final String BOM = new String(new byte[]{(byte)0xEF, (byte)0xBB, (byte)0xBF});
 
   public static WebPage ROOT = new WebPage();
