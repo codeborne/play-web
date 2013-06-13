@@ -217,6 +217,14 @@ public class WebPage implements Serializable, Comparable<WebPage> {
     return false;
   }
 
+  @Override public int hashCode() {
+    return path.hashCode();
+  }
+
+  @Override public String toString() {
+    return getClass().getSimpleName() + "[" + path + "]";
+  }
+
   public static class Template implements Comparable<Template> {
     public String name;
     public String description;
