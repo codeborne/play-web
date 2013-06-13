@@ -1,0 +1,13 @@
+#{extends 'Web/layout.html'/}
+
+<h1>&{'web.admin.problems'}</h1>
+
+<ul>
+#{list problems, as:'problem'}
+  <li>${problem}</li>
+#{/list}
+</ul>
+
+#{ifnot params.checkExternal}
+  <a class="btn btn-danger" href="@{WebAdmin.checkLinks(true)}" onclick="return confirm('&{'web.admin.checkExternalLinks.confirm'}')">&{'web.admin.checkExternalLinks'}</a>
+#{/ifnot}

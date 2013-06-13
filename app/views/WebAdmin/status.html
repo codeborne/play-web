@@ -3,7 +3,8 @@
 #{if flash.success}<pre class="alert alert-success">${flash.success}</pre>#{/if}
 #{if flash.error}<pre class="alert alert-error">${flash.error}</pre>#{/if}
 
-<a href="@{WebAdmin.doc()}" class="pull-right">&{'web.admin.doc'}</a>
+<a href="@{WebAdmin.doc()}" class="pull-right">&{'web.admin.doc'}</a><br>
+<a href="@{WebAdmin.checkLinks()}" class="pull-right">&{'web.admin.checkLinks'}</a>
 
 #{if status}
   <h3>&{'web.admin.changes'}</h3>

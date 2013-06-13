@@ -18,6 +18,10 @@ web.admin.title=Заглавие
 web.admin.url=URL
 web.admin.template=Тип страницы
 web.admin.doc=Руководство вебмастера
+web.admin.checkLinks=Проверка ссылок
+web.admin.problems=Найдены следующие проблемы
+web.admin.checkExternalLinks=Проверить также внешние ссылки
+web.admin.checkExternalLinks.confirm=Это может занять много времени, действительно запустить проверку?
 
 web.metadata.title=заголовок страницы, видимый пользователю.
 web.metadata.template=шаблон страницы, список ниже. Если не указан, то будет использоваться <b>custom</b> - страница со свободным контентом.
