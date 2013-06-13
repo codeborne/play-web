@@ -50,7 +50,8 @@ public class WebContentPlugin extends PlayPlugin {
   }
 
   @Override public void beforeActionInvocation(Method actionMethod) {
-    fixLocale();
+    if (actionMethod.getDeclaringClass().getSimpleName().equals("Web"))
+      fixLocale();
     Scope.RenderArgs.current().put("rootPage", WebPage.rootForLocale());
   }
 
