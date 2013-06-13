@@ -61,7 +61,7 @@ public class WebContentPlugin extends PlayPlugin {
     if (!expectedLocale.equals(locale)) {
       Lang.change(expectedLocale);
       // play puts only session cookie, let's have a longer one
-      Http.Response.current().setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), locale, "10000d");
+      Http.Response.current().setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), expectedLocale, "10000d");
     }
   }
 
