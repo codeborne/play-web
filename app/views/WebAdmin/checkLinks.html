@@ -6,6 +6,9 @@
 #{list problems, as:'problem'}
   <li>${problem}</li>
 #{/list}
+#{else}
+  <li>All good!</li>
+#{/else}
 </ul>
 
 #{ifnot params.checkExternal}

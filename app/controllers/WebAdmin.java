@@ -105,17 +105,21 @@ public class WebAdmin extends BaseController {
         Matcher m = links.matcher(html);
         while (m.find()) {
           String url = m.group(2);
-          url = url.replaceFirst("[#\\?].*$", "");
+          url = url.replaceFirst("#.*$", "");
           url = url.replace("+", " ");
           if (isEmpty(url)) continue;
 
           try {
-            if (url.startsWith("/public")) checkPublic(url);
-            else if (fixIfAlias(page, part.getKey(), url)) continue;
-            else if (url.startsWith("/")) checkAbsolute(url);
+            if (url.startsWith("/public")) { checkPublic(url); continue; }
             else if (url.startsWith("mailto:")) continue;
-            else if (url.startsWith("http:") || url.startsWith("https:"))
-              if (checkExternal) checkExternal(url); else continue;
+            else if (url.startsWith("http:") || url.startsWith("https:")) {
+              if (checkExternal) checkExternal(url);
+              continue;
+            }
+
+            url = url.replaceFirst("\\?.*$", "");
+            if (fixIfAlias(page, part.getKey(), url)) continue;
+            else if (url.startsWith("/")) checkAbsolute(url);
             else checkRelative(page, url);
           }
           catch (Exception e) {
@@ -147,10 +151,15 @@ public class WebAdmin extends BaseController {
   }
 
   private static void checkExternal(String url) throws IOException {
-    WS.HttpResponse response = WS.url(url).timeout("5s").get();
-    int status = response.getStatus();
-    if (status != 200 && status != 301 && status != 302)
-      throw new IOException(url + " - " + status + ": " + response.getStatusText());
+    try {
+      WS.HttpResponse response = WS.url(url).timeout("5s").get();
+      int status = response.getStatus();
+      if (status != 200 && status != 301 && status != 302)
+        throw new IOException(url + " - " + status + ": " + response.getStatusText());
+    }
+    catch (RuntimeException e) {
+      throw new IOException(url, e);
+    }
   }
 
   private static void checkAbsolute(String url) throws FileNotFoundException {
