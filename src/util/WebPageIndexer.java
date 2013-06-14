@@ -13,6 +13,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 import play.Logger;
+import play.Play;
 
 import javax.inject.Singleton;
 import java.io.File;
@@ -22,7 +23,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Collections.unmodifiableMap;
-import static models.Config.isTestMode;
 import static models.WebPage.removeTags;
 import static org.apache.commons.lang.StringUtils.join;
 import static org.apache.commons.lang.StringUtils.split;
@@ -54,7 +54,7 @@ public class WebPageIndexer {
   }
 
   public final boolean shouldIndex() {
-    return WebPage.ROOT.dir.exists() && !isTestMode();
+    return WebPage.ROOT.dir.exists() && !Play.runingInTestMode();
   }
 
   public synchronized void indexWebPages() throws IOException {
