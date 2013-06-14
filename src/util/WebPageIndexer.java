@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Collections.unmodifiableMap;
+import static models.Config.isTestMode;
 import static models.WebPage.removeTags;
 import static org.apache.commons.lang.StringUtils.join;
 import static org.apache.commons.lang.StringUtils.split;
@@ -53,7 +54,7 @@ public class WebPageIndexer {
   }
 
   public final boolean shouldIndex() {
-    return WebPage.ROOT.dir.exists();
+    return WebPage.ROOT.dir.exists() && !isTestMode();
   }
 
   public synchronized void indexWebPages() throws IOException {
