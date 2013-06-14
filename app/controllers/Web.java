@@ -1,6 +1,5 @@
 package controllers;
 
-import models.Config;
 import models.WebPage;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.Query;
@@ -13,7 +12,10 @@ import play.db.jpa.JPAPlugin;
 import play.db.jpa.NoTransaction;
 import play.i18n.Lang;
 import play.libs.XML;
-import play.mvc.*;
+import play.mvc.After;
+import play.mvc.Controller;
+import play.mvc.Router;
+import play.mvc.With;
 import play.templates.BaseTemplate;
 import play.templates.TagContext;
 import play.vfs.VirtualFile;
@@ -38,10 +40,6 @@ import static org.apache.commons.lang.StringUtils.*;
 @With(Security.class) @NoTransaction
 public class Web extends Controller {
   @Inject static WebPageIndexer indexer;
-
-  @Before public static void checkNotProd() {
-    if (Config.isProdEnv()) notFound();
-  }
 
   @After public static void setHeaders() {
     BaseController.addGlobalHeaders();
