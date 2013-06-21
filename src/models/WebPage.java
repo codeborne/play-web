@@ -146,7 +146,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
     Map<String, String> parts = child.contentParts();
     for (String key : parts.keySet()) {
       // fix images and links
-      parts.put(key, parts.get(key).replaceAll("(src|href)=\"([^/]+?)\"", "$1=\"" + child.path + "$2\""));
+      parts.put(key, parts.get(key).replaceAll("(src|href)=\"([^/:]+?)\"", "$1=\"" + child.path + "$2\""));
     }
     return parts;
   }
