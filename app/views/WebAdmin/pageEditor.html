@@ -37,7 +37,7 @@
           $.post('@{WebAdmin.saveContent()}', {
             path:'${page.path}',
             part: editable.attr('data-from'),
-            html: editable.html(),
+            html: editor.getData(),
             authenticityToken: '${session.authenticityToken}'
           }, function() {
             editable.trigger('blur');
@@ -59,7 +59,9 @@
 
       var editor = CKEDITOR.inline(this, {
         language: '${lang}',
-        extraPlugins: 'ajaxsave'
+        ignoreEmptyParagraph: true,
+        extraPlugins: 'ajaxsave',
+        allowedContent: true
       });
     });
   }
