@@ -29,7 +29,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
   public static final String BOM = new String(new byte[]{(byte)0xEF, (byte)0xBB, (byte)0xBF});
 
   public static WebPage ROOT = new WebPage();
-  public static WebPage ROOT_EN = new WebPage(ROOT.dir.child("en"));
+  public static WebPage ROOT_EN = forPath("/en/");
 
   public String path;
   public VirtualFile dir;
@@ -44,9 +44,9 @@ public class WebPage implements Serializable, Comparable<WebPage> {
     this.path = "/";
   }
 
-  WebPage(VirtualFile dir) {
+  WebPage(VirtualFile dir, String path) {
     this.dir = dir;
-    this.path = dir.getRealFile().getPath().replace(ROOT.dir.getRealFile().getPath(), "").replace('\\', '/') + "/";
+    this.path = path.endsWith("/") ? path : path + "/";
     this.level = countMatches(path, "/") - 1;
 
     loadMetadata();
@@ -89,15 +89,19 @@ public class WebPage implements Serializable, Comparable<WebPage> {
   }
 
   public static <P extends WebPage> P forPath(String path) {
-    return forPath(toVirtualFile(path));
+    return forPath(toVirtualFile(path), path);
   }
 
   @SuppressWarnings("unchecked")
+  static <P extends WebPage> P forPath(VirtualFile dir, String path) {
+    if (path.contains("/news")) return (P)new News(dir, path);
+    if (path.startsWith("/analytics")) return (P)new Analytics(dir, path);
+    else return (P)new WebPage(dir, path);
+  }
+
   static <P extends WebPage> P forPath(VirtualFile dir) {
     String path = dir.getRealFile().getPath().replace(ROOT.dir.getRealFile().getPath(), "").replace('\\', '/');
-    if (path.contains("/news")) return (P)new News(dir);
-    if (path.startsWith("/analytics")) return (P)new Analytics(dir);
-    else return (P)new WebPage(dir);
+    return forPath(dir, path);
   }
 
   public List<WebPage> children() {
@@ -277,7 +281,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
   }
 
   public List<WebPage> parents() {
-    List<WebPage> structure = newArrayList();
+    List<WebPage> structure = new ArrayList<>();
     WebPage current = this;
     while (current.level > 1) {
       current = current.parent();
@@ -329,8 +333,8 @@ public class WebPage implements Serializable, Comparable<WebPage> {
   }
 
   public static class News extends WebPage {
-    public News(VirtualFile dir) {
-      super(dir);
+    public News(VirtualFile dir, String path) {
+      super(dir, path);
     }
 
     protected String generateTitle() {
@@ -376,8 +380,8 @@ public class WebPage implements Serializable, Comparable<WebPage> {
   }
 
   public static class Analytics extends News {
-    public Analytics(VirtualFile dir) {
-      super(dir);
+    public Analytics(VirtualFile dir, String path) {
+      super(dir, path);
     }
   }
 }
