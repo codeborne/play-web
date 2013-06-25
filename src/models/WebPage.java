@@ -4,6 +4,7 @@ import com.google.common.base.Predicate;
 import play.Logger;
 import play.Play;
 import play.i18n.Lang;
+import play.libs.Codec;
 import play.templates.JavaExtensions;
 import play.vfs.VirtualFile;
 
@@ -23,6 +24,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.reverse;
 import static java.util.Collections.sort;
 import static org.apache.commons.lang.StringUtils.*;
+import static play.libs.Codec.byteToHexString;
 
 public class WebPage implements Serializable, Comparable<WebPage> {
   public static final Set<String> ALLOWED_FILE_TYPES = new HashSet<>(asList(Play.configuration.getProperty("web.downloadable.files", "png,jpg,gif,pdf,rtf,swf,mp3,flv,zip").split("\\s*,\\s*")));
@@ -199,7 +201,11 @@ public class WebPage implements Serializable, Comparable<WebPage> {
         m.appendReplacement(result, "<a$1class=\"external\" href=\"$2\"$3>$4</a>");
       }
       else if (filename.startsWith("mailto:")) {
-        m.appendReplacement(result, "<a$1class=\"email\" href=\"$2\"$3>$4</a>");
+        String email = m.group(2).replace("mailto:", "");
+        String href = byteToHexString(email.getBytes());
+        String text = m.group(4);
+        if (text.equals(email)) text = href;
+        m.appendReplacement(result, "<a$1class=\"email\" href=\"cryptmail:" + href + "\"$3>" + text + "</a>");
       }
       else if (filename.contains("://") || !ALLOWED_FILE_TYPES.contains(filetype))
         m.appendReplacement(result, "<a$1href=\"" + safeUrlEncode(m.group(2)) + "\"$3>$4</a>");

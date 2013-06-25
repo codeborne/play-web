@@ -97,15 +97,6 @@ public class WebPageTest {
     assertEquals("<a class=\"external\" href=\"http://www.something.com/document.pdf\">Simple PDF Link</a>",
                  page.processContent("<a href=\"http://www.something.com/document.pdf\">Simple PDF Link</a>"));
 
-    assertEquals("<a class=\"email\" href=\"mailto:privet@gmail.com\">privet@gmail.com</a>",
-                 page.processContent("<a href=\"mailto:privet@gmail.com\">privet@gmail.com</a>"));
-
-    assertEquals("<a\nclass=\"email\" href=\"mailto:privet@gmail.com\">privet@gmail.com</a>",
-                 page.processContent("<a\nhref=\"mailto:privet@gmail.com\">privet@gmail.com</a>"));
-
-    assertEquals("<a\nclass=\"email\" href=\"mailto:privet@gmail.com\">privet@\ngmail\n.com</a>",
-                 page.processContent("<a\nhref=\"mailto:privet@gmail.com\">privet@\ngmail\n.com</a>"));
-
     assertEquals("<div><a class=\"download pdf\" href=\"/page/document.pdf\">Document 1 (PDF, 193 Kb)</a> Hello <a class=\"download pdf\" href=\"/page/document.pdf\">Document 2 (PDF, 193 Kb)</a></div>",
                  page.processContent("<div><a href=\"document.pdf\">Document 1</a> Hello <a href=\"document.pdf\">Document 2</a></div>"));
 
@@ -119,6 +110,24 @@ public class WebPageTest {
     WebPage page = new WebPage(dir, "/page");
     assertEquals("<a href=\"/map?branch=%D0%A6%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9\">Центральный</a>",
         page.processContent("<a href=\"/map?branch=Центральный\">Центральный</a>"));
+  }
+
+  @Test
+  public void mailLinksAreProtectedFromSpamBots() throws Exception {
+    VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
+    WebPage page = new WebPage(dir, "/page");
+
+    assertEquals("<a class=\"email\" href=\"cryptmail:somebody#example/com\">somebody#example/com</a>",
+        page.processContent("<a href=\"mailto:somebody@example.com\">somebody@example.com</a>"));
+
+    assertEquals("<a\nclass=\"email\" href=\"cryptmail:somebody#example/com\">somebody#example/com</a>",
+        page.processContent("<a\nhref=\"mailto:somebody@example.com\">somebody@example.com</a>"));
+
+    assertEquals("<a class=\"email\" href=\"cryptmail:somebody#example/com\">Ivan Examploff</a>",
+        page.processContent("<a href=\"mailto:somebody@example.com\">Ivan Examploff</a>"));
+
+    assertEquals("<a class=\"email\" href=\"cryptmail:somebody#example/com\">Ivan\nExamploff</a>",
+        page.processContent("<a href=\"mailto:somebody@example.com\">Ivan\nExamploff</a>"));
   }
 
   @Test
