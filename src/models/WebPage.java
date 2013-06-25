@@ -183,10 +183,10 @@ public class WebPage implements Serializable, Comparable<WebPage> {
       else if (filename.contains("://") || !ALLOWED_FILE_TYPES.contains(filetype))
         m.appendReplacement(result, "<a$1href=\"" + safeUrlEncode(m.group(2)) + "\"$3>$4</a>");
       else {
-        VirtualFile file = dir.child(filename);
+        VirtualFile file = (filename.startsWith("/") ? ROOT.dir : dir).child(filename);
         double lengthKb = file.length() / 1024.0;
         String size = lengthKb > 1024 ? format("%.1f Mb", lengthKb / 1024) : format("%.0f Kb", lengthKb);
-        m.appendReplacement(result, "<a$1class=\"download " + filetype + (file.exists() ? "" : " unavailable") + "\" href=\"" + path + safeUrlEncode(m.group(2)) + "\"$3>" +
+        m.appendReplacement(result, "<a$1class=\"download " + filetype + (file.exists() ? "" : " unavailable") + "\" href=\"" + (filename.startsWith("/") ? "" : path) + safeUrlEncode(m.group(2)) + "\"$3>" +
             "$4 (" + filetype.toUpperCase() + ", " + size + ")</a>");
       }
     }

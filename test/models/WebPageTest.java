@@ -74,6 +74,9 @@ public class WebPageTest {
     assertEquals("<a class=\"download zip\" href=\"/page/big.zip\">Download (ZIP, 188.2 Mb)</a>",
                  page.processContent("<a href=\"big.zip\">Download</a>"));
 
+    assertEquals("<a class=\"download zip unavailable\" href=\"/page/absolute.zip\">Download (ZIP, 0 Kb)</a>",
+                 page.processContent("<a href=\"/page/absolute.zip\">Download</a>"));
+
     assertEquals("<a class=\"download zip\" href=\"/page/%D0%BF%D1%80%D0%B8%D0%B2%D0%B5%D1%82.zip\">Download (ZIP, 188.2 Mb)</a>",
                  page.processContent("<a href=\"привет.zip\">Download</a>"));
 
