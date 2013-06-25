@@ -11,6 +11,7 @@ web.admin.message=Описание
 web.admin=Админ сайта
 web.admin.save=Сохранить
 web.admin.saved=Изменения переданы на сервер
+web.admin.revert=Отменить
 web.admin.editPage=Менять
 web.admin.editMode=Режим редактирования страницы включен
 web.admin.addPage=Добавить страницу

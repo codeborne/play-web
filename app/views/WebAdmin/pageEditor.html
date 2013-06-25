@@ -26,7 +26,11 @@
 <script type="text/javascript" src="/public/editor/ckeditor.js"></script>
 <script type="text/javascript">
   function enablePageEditing(button) {
-    $(button).attr('disabled', true).attr('title', '&{'web.admin.editMode'}');
+    $(button).attr('title', '&{'web.admin.editMode'}').text('&{'web.admin.revert'}').removeClass('btn-primary').click(function() {
+      location.reload();
+      return false;
+    });
+
     $('.editable').each(function() {
       var editable = $(this);
       editable.attr('data-from', $(this).attr('class').replace(' editable', '.html')).attr('contenteditable', true);
@@ -66,10 +70,3 @@
     });
   }
 </script>
-
-<div id="editable-controls-template" style="display:none">
-  <div class="editable-controls">
-    <button class="save">&{'web.admin.save'}</button>
-    <button class="revert">&{'web.admin.revert'}</button>
-  </div>
-</div>
