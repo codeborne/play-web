@@ -90,7 +90,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
   public List<WebPage> children() {
     List<WebPage> children = new ArrayList<>();
     if (metadata.getProperty("contentFrom") != null)
-      return forPath(metadata.getProperty("contentFrom")).children();
+      children.addAll(forPath(metadata.getProperty("contentFrom")).children());
 
     for (VirtualFile entry : dir.list()) {
       if (entry.isDirectory() && !entry.getName().startsWith(".") && !entry.equals(ROOT_EN.dir)) {
