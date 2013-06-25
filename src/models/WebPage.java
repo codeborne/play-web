@@ -175,11 +175,11 @@ public class WebPage implements Serializable, Comparable<WebPage> {
   private static String safeUrlEncode(String url) {
     try {
       byte[] bytes = url.getBytes("UTF-8");
-      StringBuffer sb = new StringBuffer(url.length() * 2);
-      for (int i = 0; i < bytes.length; i++) {
-        if (bytes[i] == ' ') sb.append('+');
-        else if ((bytes[i] & 0xFF) < 0x7F) sb.append((char)bytes[i]);
-        else sb.append(String.format("%%%02X", bytes[i]));
+      StringBuilder sb = new StringBuilder(url.length() * 2);
+      for (byte b : bytes) {
+        if (b == ' ') sb.append('+');
+        else if ((b & 0xFF) < 0x7F) sb.append((char) b);
+        else sb.append(String.format("%%%02X", b));
       }
       return sb.toString();
     }
