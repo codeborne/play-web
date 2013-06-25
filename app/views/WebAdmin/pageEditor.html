@@ -1,70 +1,67 @@
 <button class="btn btn-primary" onclick="enablePageEditing(this)">&{'web.admin.editPage'}</button>
 
 <style type="text/css">
-  .editable[data-from]:hover, .editable.modified {
+  .editable[data-from]:hover, .editable:focus {
     outline: 1px dashed red;
     position: relative;
   }
-  .editable[data-from]:hover:before, .editable.modified:before {
-    content: attr(data-from);
+
+  .editable[data-from]:hover:before, .editable:focus:before {
+    content: attr(data-from) !important;
     color: white;
     background: red;
     position: absolute;
     font-size: 14px;
     line-height: 14px;
     top: -22px;
-    left: -1px;
+    right: 0;
     padding: 4px;
     z-index: 1000;
   }
-  .editable-controls {
-    z-index: 1000;
-  }
-  .editable-controls button {
-    line-height: 14px;
-    font-size: 14px;
-    padding: 4px;
-  }
+
+  .cke_button__ajaxsave_icon { display: none; }
+  .cke_button__ajaxsave_label { display: block; }
 </style>
 
+<script type="text/javascript" src="/public/editor/ckeditor.js"></script>
 <script type="text/javascript">
   function enablePageEditing(button) {
     $(button).attr('disabled', true);
     $('.editable').each(function() {
-      $(this).attr('data-from', $(this).attr('class').replace(' editable', '.html'))
-          .attr('contenteditable', true);
+      var editable = $(this);
+      editable.attr('data-from', $(this).attr('class').replace(' editable', '.html')).attr('contenteditable', true);
 
-      $(this).on('keyup', function() {
-        var editable = $(this);
-        if (editable.is('.modified')) return;
-        editable.addClass('modified');
-        var oldContent = editable.html();
-
-        var pos = $(this).offset();
-        var controls = $($('#editable-controls-template').html()).appendTo('body');
-        controls.offset({top: pos.top - 50, left: pos.left});
-
-        function restoreEditable() {
-          controls.remove();
-          editable.removeClass('modified');
-        }
-
-        controls.find('.save').click(function() {
+      var saveCmd = {
+        modes: { wysiwyg:1,source:1 },
+        exec: function(editor) {
           $.post('@{WebAdmin.saveContent()}', {
             path:'${page.path}',
             part: editable.attr('data-from'),
             html: editable.html(),
             authenticityToken: '${session.authenticityToken}'
-          }, restoreEditable);
-        });
+          }, function() {
+            editable.trigger('blur');
+            alert('&{'web.admin.saved'}');
+          });
+        }
+      };
 
-        controls.find('.revert').click(function() {
-          editable.html(oldContent);
-          restoreEditable();
-        });
+      CKEDITOR.plugins.add('ajaxsave', {
+        init: function( editor ) {
+          var command = editor.addCommand('ajaxsave', saveCmd);
+
+          editor.ui.addButton && editor.ui.addButton('ajaxsave', {
+            label: '&{'web.admin.save'}',
+            command: 'ajaxsave'
+          });
+        }
+      });
+
+      var editor = CKEDITOR.inline(this, {
+        language: '${lang}',
+        extraPlugins: 'ajaxsave'
       });
     });
-    alert('&{'web.admin.editPage.enabled'}');
   }
 </script>
 
