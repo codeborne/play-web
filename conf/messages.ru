@@ -12,6 +12,7 @@ web.admin=Админ сайта
 web.admin.save=Сохранить
 web.admin.saved=Изменения переданы на сервер
 web.admin.editPage=Менять
+web.admin.editMode=Режим редактирования страницы включен
 web.admin.addPage=Добавить страницу
 web.admin.title=Заглавие
 web.admin.url=URL

@@ -12,6 +12,7 @@ web.admin.save=Save
 web.admin.saved=Changed saved
 web.admin=Site Admin
 web.admin.editPage=Edit
+web.admin.editMode=Page editing enabled
 web.admin.addPage=Add page
 web.admin.title=Title
 web.admin.url=URL
