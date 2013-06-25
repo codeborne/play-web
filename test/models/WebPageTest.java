@@ -57,7 +57,6 @@ public class WebPageTest {
   @Test
   public void preprocessDownloadableFileLinks() throws Exception {
     VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
-    when(dir.getRealFile().getPath()).thenReturn("/page");
     when(dir.child("document.pdf").length()).thenReturn(197133L);
     when(dir.child("document.pdf").exists()).thenReturn(true);
     when(dir.child("big.zip").length()).thenReturn(197336500L);
@@ -66,7 +65,7 @@ public class WebPageTest {
     when(dir.child("привет.zip").exists()).thenReturn(true);
     when(dir.child("white space.zip").length()).thenReturn(197336500L);
     when(dir.child("white space.zip").exists()).thenReturn(true);
-    WebPage page = new WebPage(dir);
+    WebPage page = new WebPage(dir, "/page");
 
     assertEquals("<a class=\"download pdf\" href=\"/page/document.pdf\">Document (PDF, 193 Kb)</a>",
                  page.processContent("<a href=\"document.pdf\">Document</a>"));
@@ -117,8 +116,7 @@ public class WebPageTest {
   @Test
   public void cyrillicsInLinksAreFixedForIE() throws Exception {
     VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
-    when(dir.getRealFile().getPath()).thenReturn("/page");
-    WebPage page = new WebPage(dir);
+    WebPage page = new WebPage(dir, "/page");
     assertEquals("<a href=\"/map?branch=%D0%A6%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9\">Центральный</a>",
         page.processContent("<a href=\"/map?branch=Центральный\">Центральный</a>"));
   }

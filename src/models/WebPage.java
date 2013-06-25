@@ -47,7 +47,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
   WebPage(VirtualFile dir, String path) {
     this.dir = dir;
     this.path = path.endsWith("/") ? path : path + "/";
-    this.level = countMatches(path, "/") - 1;
+    this.level = countMatches(this.path, "/") - 1;
 
     loadMetadata();
     title = metadata.getProperty("title");
