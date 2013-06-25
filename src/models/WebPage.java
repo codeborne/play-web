@@ -70,9 +70,22 @@ public class WebPage implements Serializable, Comparable<WebPage> {
 
   public static VirtualFile toVirtualFile(String path) {
     VirtualFile file = ROOT.dir.child(path);
+    if (!file.exists()) file = resolveLinkedPages(file);
     if (!canonicalPath(file.getRealFile()).startsWith(ROOT.dir.getRealFile().getPath()))
       throw new SecurityException("Access denied");
     return file;
+  }
+
+  private static VirtualFile resolveLinkedPages(VirtualFile file) {
+    File parent = file.getRealFile();
+    while (!parent.exists()) parent = parent.getParentFile();
+
+    WebPage existingParent = forPath(VirtualFile.open(parent));
+    String contentFrom = existingParent.metadata.getProperty("contentFrom");
+    if (isEmpty(contentFrom)) return file;
+
+    WebPage contentParent = forPath(contentFrom);
+    return VirtualFile.open(new File(contentParent.dir.getRealFile(), file.getRealFile().getPath().replace(parent.getPath(), "")));
   }
 
   public static <P extends WebPage> P forPath(String path) {
@@ -89,8 +102,12 @@ public class WebPage implements Serializable, Comparable<WebPage> {
 
   public List<WebPage> children() {
     List<WebPage> children = new ArrayList<>();
-    if (metadata.getProperty("contentFrom") != null)
-      children.addAll(forPath(metadata.getProperty("contentFrom")).children());
+    if (metadata.getProperty("contentFrom") != null) {
+      for (WebPage child : forPath(metadata.getProperty("contentFrom")).children()) {
+        child.path = path + child.dir.getName() + "/";
+        children.add(child);
+      }
+    }
 
     for (VirtualFile entry : dir.list()) {
       if (entry.isDirectory() && !entry.getName().startsWith(".") && !entry.equals(ROOT_EN.dir)) {
@@ -103,7 +120,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
   }
 
   public WebPage parent() {
-    return path.equals(ROOT.path) ? null : new WebPage(VirtualFile.open(dir.getRealFile().getParent()));
+    return path.equals(ROOT.path) ? null : forPath(path.substring(0, path.lastIndexOf('/', path.length() - 2)));
   }
 
   public String topParentName() {
