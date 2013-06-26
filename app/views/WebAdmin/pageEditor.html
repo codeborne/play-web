@@ -64,6 +64,8 @@
       var editor = CKEDITOR.inline(this, {
         language: '${lang}',
         ignoreEmptyParagraph: true,
+        autoParagraph: false,
+        fillEmptyBlocks: false,
         extraPlugins: 'ajaxsave',
         allowedContent: true
       });
