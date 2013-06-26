@@ -117,16 +117,16 @@ public class WebPageTest {
     VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
     WebPage page = new WebPage(dir, "/page");
 
-    assertEquals("<a class=\"email\" href=\"cryptmail:somebody#example/com\">somebody#example/com</a>",
+    assertEquals("<a class=\"email\" href=\"cryptmail:736f6d65626f6479406578616d706c652e636f6d\">736f6d65626f6479406578616d706c652e636f6d</a>",
         page.processContent("<a href=\"mailto:somebody@example.com\">somebody@example.com</a>"));
 
-    assertEquals("<a\nclass=\"email\" href=\"cryptmail:somebody#example/com\">somebody#example/com</a>",
+    assertEquals("<a\nclass=\"email\" href=\"cryptmail:736f6d65626f6479406578616d706c652e636f6d\">736f6d65626f6479406578616d706c652e636f6d</a>",
         page.processContent("<a\nhref=\"mailto:somebody@example.com\">somebody@example.com</a>"));
 
-    assertEquals("<a class=\"email\" href=\"cryptmail:somebody#example/com\">Ivan Examploff</a>",
+    assertEquals("<a class=\"email\" href=\"cryptmail:736f6d65626f6479406578616d706c652e636f6d\">Ivan Examploff</a>",
         page.processContent("<a href=\"mailto:somebody@example.com\">Ivan Examploff</a>"));
 
-    assertEquals("<a class=\"email\" href=\"cryptmail:somebody#example/com\">Ivan\nExamploff</a>",
+    assertEquals("<a class=\"email\" href=\"cryptmail:736f6d65626f6479406578616d706c652e636f6d\">Ivan\nExamploff</a>",
         page.processContent("<a href=\"mailto:somebody@example.com\">Ivan\nExamploff</a>"));
   }
 
