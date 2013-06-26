@@ -36,11 +36,11 @@
       exec: function(editor) {
         $.post('@{WebAdmin.saveContent()}', {
           path:'${page.path}',
-          part: editable.attr('data-from'),
+          part: editor.fileName,
           html: editor.getData(),
           authenticityToken: '${session.authenticityToken}'
         }, function() {
-          editable.trigger('blur');
+          $(editor.element.$).trigger('blur');
           alert('&{'web.admin.saved'}');
         });
       }
@@ -67,6 +67,7 @@
         extraPlugins: 'ajaxsave',
         allowedContent: true
       });
+      editor.fileName = editable.attr('data-from');
     });
   }
 </script>
