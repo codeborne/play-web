@@ -24,6 +24,12 @@ web.admin.problems=Найдены следующие проблемы
 web.admin.checkExternalLinks=Проверить также внешние ссылки
 web.admin.checkExternalLinks.confirm=Это может занять много времени, действительно запустить проверку?
 
+web.admin.reallyDelete=Действительно удалить
+web.admin.uploadedFileAlreadyExists=Файл с таким именем уже существует
+web.admin.overwriteUploadedFile=Переписать?
+web.admin.upload=Загрузить
+web.admin.noImages=Нет изображений
+
 web.metadata.title=заголовок страницы, видимый пользователю.
 web.metadata.template=шаблон страницы, список ниже. Если не указан, то будет использоваться <b>custom</b> - страница со свободным контентом.
 web.metadata.order=порядок отображения в меню и на карте сайта, целое число. Страницы с указанным порядком будут всегда перед теми, для которых он не указан. Другие страницы будут сортироваться в алфавитном порядке названий их папок.

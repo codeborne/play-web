@@ -24,6 +24,12 @@ web.admin.problems=Found problems
 web.admin.checkExternalLinks=Check external links
 web.admin.checkExternalLinks.confirm=This can take several minutes, do you really want to continue?
 
+web.admin.reallyDelete=Really delete
+web.admin.uploadedFileAlreadyExists=Uploaded file already exists
+web.admin.overwriteUploadedFile=Overwrite uploaded file?
+web.admin.upload=Upload
+web.admin.noImages=No Images
+
 web.metadata.title=page title that is visible to the user
 web.metadata.template=page template, see the list below, <b>custom</b> if not specified
 web.metadata.order=the order in the menu and in the sitemap, an integer. Pages with defined order will always be in front of the others, which will be sorted in the alphabetical order of folder names.

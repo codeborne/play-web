@@ -1,6 +1,8 @@
 package controllers;
 
+import com.google.common.base.Predicate;
 import models.WebPage;
+import org.apache.commons.io.IOUtils;
 import play.Logger;
 import play.Play;
 import play.data.validation.Required;
@@ -10,12 +12,14 @@ import play.mvc.Router;
 import play.vfs.VirtualFile;
 import util.Git;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.google.common.collect.Collections2.filter;
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang.StringUtils.*;
 import static util.Git.git;
@@ -170,5 +174,39 @@ public class WebAdmin extends BaseController {
     VirtualFile file = page.dir.child(url);
     if (!file.exists())
       throw new FileNotFoundException(url);
+  }
+
+  public static void imageBrowser(String path) throws MalformedURLException {
+    if (isEmpty(path)) path = new URL(request.headers.get("referer").value()).getPath();
+    WebPage page = WebPage.forPath(path);
+    Collection<VirtualFile> images = filter(page.dir.list(), new Predicate<VirtualFile>() {
+      @Override public boolean apply(VirtualFile file) {
+        String name = file.getName();
+        return name.endsWith(".jpg") || name.endsWith(".png") || name.endsWith(".gif");
+      }
+    });
+    render(page, images);
+  }
+
+  public static void upload(String path, File data) throws Throwable {
+    checkAuthenticity();
+    WebPage page = WebPage.forPath(path);
+    VirtualFile file = page.dir.child(data.getName());
+    try (InputStream in = new FileInputStream(data)) {
+      try (OutputStream out = file.outputstream()) {
+        IOUtils.copy(in, out);
+      }
+    }
+    if (!request.querystring.contains("path=")) request.querystring += "&path=" + path;
+    redirect(Router.reverse("WebAdmin.imageBrowser").url + "?" + request.querystring);
+  }
+
+  public static void delete(String path, String name) throws Throwable {
+    checkAuthenticity();
+    WebPage page = WebPage.forPath(path);
+    VirtualFile file = page.dir.child(name);
+    file.getRealFile().delete();
+    if (!request.querystring.contains("path=")) request.querystring += "&path=" + path;
+    redirect(Router.reverse("WebAdmin.imageBrowser").url + "?" + request.querystring);
   }
 }

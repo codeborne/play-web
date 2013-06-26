@@ -66,8 +66,11 @@
         ignoreEmptyParagraph: true,
         autoParagraph: false,
         fillEmptyBlocks: false,
+        allowedContent: true,
         extraPlugins: 'ajaxsave',
-        allowedContent: true
+        filebrowserImageBrowseUrl : '@{WebAdmin.imageBrowser()}',
+        filebrowserWindowWidth  : 800,
+        filebrowserWindowHeight : 515
       });
       editor.fileName = editable.attr('data-from');
     });
