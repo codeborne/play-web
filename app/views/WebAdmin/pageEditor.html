@@ -31,38 +31,35 @@
       return false;
     });
 
+    var saveCmd = {
+      modes: { wysiwyg:1,source:1 },
+      exec: function(editor) {
+        $.post('@{WebAdmin.saveContent()}', {
+          path:'${page.path}',
+          part: editable.attr('data-from'),
+          html: editor.getData(),
+          authenticityToken: '${session.authenticityToken}'
+        }, function() {
+          editable.trigger('blur');
+          alert('&{'web.admin.saved'}');
+        });
+      }
+    };
+
+    CKEDITOR.plugins.add('ajaxsave', {
+      init: function( editor ) {
+        var command = editor.addCommand('ajaxsave', saveCmd);
+
+        editor.ui.addButton && editor.ui.addButton('ajaxsave', {
+          label: '&{'web.admin.save'}',
+          command: 'ajaxsave'
+        });
+      }
+    });
+
     $('.editable').each(function() {
       var editable = $(this);
       editable.attr('data-from', $(this).attr('class').replace(' editable', '.html')).attr('contenteditable', true);
-
-      try {
-        var saveCmd = {
-          modes: { wysiwyg:1,source:1 },
-          exec: function(editor) {
-            $.post('@{WebAdmin.saveContent()}', {
-              path:'${page.path}',
-              part: editable.attr('data-from'),
-              html: editor.getData(),
-              authenticityToken: '${session.authenticityToken}'
-            }, function() {
-              editable.trigger('blur');
-              alert('&{'web.admin.saved'}');
-            });
-          }
-        };
-
-        CKEDITOR.plugins.add('ajaxsave', {
-          init: function( editor ) {
-            var command = editor.addCommand('ajaxsave', saveCmd);
-
-            editor.ui.addButton && editor.ui.addButton('ajaxsave', {
-              label: '&{'web.admin.save'}',
-              command: 'ajaxsave'
-            });
-          }
-        });
-      }
-      catch (e) { *{ if already registered }* }
 
       var editor = CKEDITOR.inline(this, {
         language: '${lang}',
