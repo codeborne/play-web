@@ -190,6 +190,7 @@ public class Web extends Controller {
     checkAuthenticity();
     Map<String, String> data = params.allSimple();
     data.remove("body"); data.remove("authenticityToken"); data.remove("controller"); data.remove("action");
+    String replyTo = data.remove("replyTo");
 
     String path = new URL(request.headers.get("referer").value()).getPath();
     WebPage page = WebPage.forPath(path);
@@ -207,10 +208,12 @@ public class Web extends Controller {
     msg.setMsg(body.toString());
     msg.setFrom(to);
     msg.addTo(to);
-    if (data.containsKey("email"))
-      msg.addReplyTo(data.get("email"));
-    Mail.send(msg);
+    try {
+      if (isNotEmpty(replyTo)) msg.addReplyTo(replyTo);
+    }
+    catch (EmailException ignore) {}
 
+    Mail.send(msg);
     flash.success(play.i18n.Messages.get("web.form.sent"));
     redirect(page.path);
   }
