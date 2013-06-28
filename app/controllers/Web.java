@@ -196,7 +196,7 @@ public class Web extends Controller {
 
     StringBuilder body = new StringBuilder();
     for (Map.Entry<String, String> e : data.entrySet()) {
-      body.append(e.getKey()).append(": ").append(e.getValue());
+      body.append(e.getKey()).append(": ").append(e.getValue()).append("\n");
     }
 
     String to = page.metadata.getProperty("email", Play.configuration.getProperty("messages.to"));
