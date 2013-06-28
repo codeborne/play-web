@@ -44,3 +44,5 @@ web.metadata.redirect=path to another page where this page should redirect to
 web.metadata.contentFrom=if current page needs to show content from another page (without redirect)
 web.metadata.contentFromNewestChild=<b>true</b> - in order to show content of the newest child page. Useful, if child pages denote years or some other dates
 web.metadata.sitemap=<b>false</b> - in order to hide the page from sitemap
+
+web.form.sent=Message has been sent

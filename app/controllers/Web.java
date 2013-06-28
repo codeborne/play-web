@@ -1,6 +1,8 @@
 package controllers;
 
 import models.WebPage;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.SimpleEmail;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -11,6 +13,7 @@ import play.Play;
 import play.db.jpa.JPAPlugin;
 import play.db.jpa.NoTransaction;
 import play.i18n.Lang;
+import play.libs.Mail;
 import play.libs.XML;
 import play.mvc.After;
 import play.mvc.Controller;
@@ -25,6 +28,8 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -179,6 +184,35 @@ public class Web extends Controller {
 
   public static void redirectAlias(String path) {
     redirect(path, true);
+  }
+
+  public static void postForm() throws MalformedURLException, EmailException {
+    checkAuthenticity();
+    Map<String, String> data = params.allSimple();
+    data.remove("body"); data.remove("authenticityToken"); data.remove("controller"); data.remove("action");
+
+    String path = new URL(request.headers.get("referer").value()).getPath();
+    WebPage page = WebPage.forPath(path);
+
+    StringBuilder body = new StringBuilder();
+    for (Map.Entry<String, String> e : data.entrySet()) {
+      body.append(e.getKey()).append(": ").append(e.getValue());
+    }
+
+    String to = page.metadata.getProperty("email", Play.configuration.getProperty("messages.to"));
+    if (isEmpty(to)) throw new IllegalStateException("Recipient address is not configured");
+
+    SimpleEmail msg = new SimpleEmail();
+    msg.setSubject(page.title);
+    msg.setMsg(body.toString());
+    msg.setFrom(to);
+    msg.addTo(to);
+    if (data.containsKey("email"))
+      msg.addReplyTo(data.get("email"));
+    Mail.send(msg);
+
+    flash.success(play.i18n.Messages.get("web.form.sent"));
+    redirect(page.path);
   }
 
   @SuppressWarnings("unchecked")
