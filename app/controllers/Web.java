@@ -188,16 +188,16 @@ public class Web extends Controller {
 
   public static void postForm() throws MalformedURLException, EmailException {
     checkAuthenticity();
-    Map<String, String> data = params.allSimple();
+    Map<String, String[]> data = params.all();
     data.remove("body"); data.remove("authenticityToken"); data.remove("controller"); data.remove("action");
-    String replyTo = data.remove("replyTo");
+    String replyTo = data.containsKey("replyTo") ? data.remove("replyTo")[0] : null;
 
     String path = new URL(request.headers.get("referer").value()).getPath();
     WebPage page = WebPage.forPath(path);
 
     StringBuilder body = new StringBuilder();
-    for (Map.Entry<String, String> e : data.entrySet()) {
-      body.append(e.getKey()).append(": ").append(e.getValue()).append("\n");
+    for (Map.Entry<String, String[]> e : data.entrySet()) {
+      body.append(e.getKey()).append(": ").append(join(e.getValue(), ", ")).append("\n");
     }
 
     String to = page.metadata.getProperty("email", Play.configuration.getProperty("messages.to"));
