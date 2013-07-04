@@ -70,6 +70,8 @@ public class WebContentPlugin extends PlayPlugin {
       String path = page.path;
       if (path.endsWith("/")) path = substring(path, 0, -1);
       Router.addRoute(genericRouteIndex, "GET", path + "/?.*", "Web.serveContent", null);
+      if ("prod".equals(Play.id))  // cache top-level pages on production
+        Router.addRoute(genericRouteIndex, "GET", path + "/", "Web.serveCachedContent", null);
     }
   }
 }
