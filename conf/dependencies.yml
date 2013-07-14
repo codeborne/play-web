@@ -1,4 +1,4 @@
-self: play -> web 0.6.4
+self: play -> web 0.6.5
 
 require:
     - play
