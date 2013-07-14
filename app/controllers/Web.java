@@ -212,14 +212,17 @@ public class Web extends Controller {
       body.append(e.getKey()).append(": ").append(join(e.getValue(), ", ")).append("\n");
     }
 
-    String to = page.metadata.getProperty("email", Play.configuration.getProperty("messages.to"));
-    if (isEmpty(to)) throw new IllegalStateException("Recipient address is not configured");
-
     SimpleEmail msg = new SimpleEmail();
     msg.setSubject(page.title);
     msg.setMsg(body.toString());
-    msg.setFrom(to);
-    msg.addTo(to);
+
+    String branch = params.get("branch");
+    addTo(msg, page.metadata.getProperty("email", Play.configuration.getProperty("messages.to")));
+    if (isNotEmpty(branch)) addTo(msg, page.metadata.getProperty("email." + branch));
+    if (msg.getToAddresses().isEmpty())
+      throw new IllegalStateException("Recipient address is not configured");
+
+    msg.setFrom(Play.configuration.getProperty("messages.to"));
     try {
       if (isNotEmpty(replyTo)) msg.addReplyTo(replyTo);
     }
@@ -228,6 +231,11 @@ public class Web extends Controller {
     Mail.send(msg);
     flash.success(play.i18n.Messages.get("web.form.sent"));
     redirect(page.path);
+  }
+
+  private static void addTo(SimpleEmail msg, String addresses) throws EmailException {
+    if (isEmpty(addresses)) return;
+    for (String email : addresses.split("\\s*,\\s")) msg.addTo(email);
   }
 
   @SuppressWarnings("unchecked")
