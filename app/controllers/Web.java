@@ -227,12 +227,10 @@ public class Web extends Controller {
     renderArgs.put("metaDescription", page.metadata.getProperty("description"));
     renderArgs.put("metaKeywords", page.metadata.getProperty("keywords"));
 
-    String template = page.metadata.getProperty("template", "custom");
-
     try {
       if ("demo".equals(Play.id)) JPAPlugin.startTx(true);
 
-      renderTemplate("Web/templates/" + template + ".html", page);
+      renderTemplate("Web/templates/" + page.template + ".html", page);
     }
     finally {
       if ("demo".equals(Play.id)) JPAPlugin.closeTx(true);

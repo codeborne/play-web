@@ -4,7 +4,6 @@ import com.google.common.base.Predicate;
 import play.Logger;
 import play.Play;
 import play.i18n.Lang;
-import play.libs.Codec;
 import play.templates.JavaExtensions;
 import play.vfs.VirtualFile;
 
@@ -38,6 +37,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
   public int level;
   public Properties metadata = new Properties();
   public String title;
+  public String template;
   public int order;
 
   /** ROOT */
@@ -54,6 +54,8 @@ public class WebPage implements Serializable, Comparable<WebPage> {
     loadMetadata();
     title = metadata.getProperty("title");
     if (isEmpty(title)) title = generateTitle();
+    template = metadata.getProperty("template", "custom");
+
     try {
       order = parseInt(metadata.getProperty("order", "99"));
     }
@@ -165,11 +167,12 @@ public class WebPage implements Serializable, Comparable<WebPage> {
     return parts;
   }
 
-  private Map<String, String> contentPartsFromAnotherPage(WebPage child) {
-    Map<String, String> parts = child.contentParts();
+  private Map<String, String> contentPartsFromAnotherPage(WebPage page) {
+    template = page.template;
+    Map<String, String> parts = page.contentParts();
     for (String key : parts.keySet()) {
       // fix images and links
-      parts.put(key, parts.get(key).replaceAll("(src|href)=\"([^/:]+?)\"", "$1=\"" + child.path + "$2\""));
+      parts.put(key, parts.get(key).replaceAll("(src|href)=\"([^/:]+?)\"", "$1=\"" + page.path + "$2\""));
     }
     return parts;
   }
