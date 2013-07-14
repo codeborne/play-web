@@ -10,6 +10,7 @@ import org.apache.lucene.search.TopDocs;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import play.Play;
+import play.cache.CacheFor;
 import play.db.jpa.JPAPlugin;
 import play.db.jpa.NoTransaction;
 import play.i18n.Lang;
@@ -50,7 +51,16 @@ public class Web extends Controller {
     BaseController.addGlobalHeaders();
   }
 
+  @CacheFor("5mn")
+  public static void serveCachedContent() throws UnsupportedEncodingException {
+    serveContentInternal();
+  }
+
   public static void serveContent() throws UnsupportedEncodingException {
+    serveContentInternal();
+  }
+
+  private static void serveContentInternal() throws UnsupportedEncodingException {
     VirtualFile file = WebPage.toVirtualFile(URLDecoder.decode(request.path, "UTF-8"));
     if (!file.exists()) notFound();
 
@@ -59,9 +69,11 @@ public class Web extends Controller {
       WebPage page = WebPage.forPath(request.path);
       String redirectUrl = page.metadata.getProperty("redirect");
       if (isNotEmpty(redirectUrl)) redirect((redirectUrl.startsWith("/") ? "" : request.path) + safeUrlEncode(redirectUrl));
+      if ("prod".equals(Play.id)) response.cacheFor(Long.toString(page.dir.lastModified()), "12h", page.dir.lastModified());
       renderPage(page);
     }
     else if (isAllowed(file)) {
+      response.cacheFor("30d");
       renderBinary(file.getRealFile());
     }
     else notFound();
