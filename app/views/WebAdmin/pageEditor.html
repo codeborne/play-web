@@ -34,14 +34,15 @@
     var saveCmd = {
       modes: { wysiwyg:1,source:1 },
       exec: function(editor) {
-        $.post('@{WebAdmin.saveContent()}', {
-          path:'${page.path}',
-          part: editor.fileName,
-          html: editor.getData(),
-          authenticityToken: '${session.authenticityToken}'
-        }, function() {
-          $(editor.element.$).trigger('blur');
-          alert('&{'web.admin.saved'}');
+        $.ajax({
+          url: '@{WebAdmin.saveContent()}?path=${page.path}&part=' + editor.fileName + '&authenticityToken=${session.authenticityToken}',
+          type: 'POST',
+          contentType: 'text/html',
+          data: editor.getData(),
+          success: function(data) {
+            $(editor.element.$).trigger('blur');
+            alert(data);
+          }
         });
       }
     };

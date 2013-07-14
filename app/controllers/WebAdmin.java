@@ -91,12 +91,14 @@ public class WebAdmin extends BaseController {
     Web.sitemap();
   }
 
-  public static void saveContent(@Required String path, @Required String part, @Required String html) {
+  public static void saveContent(@Required String path, @Required String part) throws IOException {
     checkAuthenticPost();
     if (validation.hasErrors()) forbidden();
     WebPage page = WebPage.forPath(path);
-    page.dir.child(part).write(html);
-    renderText("OK");
+    try (OutputStream out = page.dir.child(part).outputstream()) {
+      IOUtils.copy(request.body, out);
+    }
+    renderText(play.i18n.Messages.get("web.admin.saved"));
   }
 
   public static void checkLinks(boolean checkExternal) {
