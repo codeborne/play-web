@@ -34,6 +34,7 @@ public class Git {
     catch (ExecException ignore) {}
 
     String pull = git("pull", mergeStrategy, "origin", "master");
+    if (pull.contains("Already up-to-date")) pull = "";
 
     try {
       exec("chmod", "-Rf", "g+w", ".");
