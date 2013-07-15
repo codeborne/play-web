@@ -6,8 +6,11 @@ import play.Play;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Scanner;
 
 public class Git {
+  public static PullListener pullListener;
+
   public static synchronized String git(String ... command) throws IOException, InterruptedException, ExecException {
     String[] cmdLine = new String[command.length + 1];
     cmdLine[0] = "git";
@@ -41,7 +44,19 @@ public class Git {
     }
     catch (ExecException ignore) {}
 
+    notifyListener(pull);
     return pull;
+  }
+
+  private static void notifyListener(String pull) {
+    if (pullListener == null) return;
+
+    Scanner lines = new Scanner(pull);
+    while (lines.hasNextLine()) {
+      String line = lines.nextLine();
+      if (line.startsWith(" create mode "))
+        pullListener.created(line.substring(" create mode 100644 ".length()));
+    }
   }
 
   public static class ExecException extends Exception {
@@ -51,5 +66,9 @@ public class Git {
       super(message);
       this.code = code;
     }
+  }
+
+  public static interface PullListener {
+    void created(String path);
   }
 }
