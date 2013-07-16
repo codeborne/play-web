@@ -222,7 +222,7 @@ public class Web extends Controller {
     if (msg.getToAddresses().isEmpty())
       throw new IllegalStateException("Recipient address is not configured");
 
-    msg.setFrom(Play.configuration.getProperty("messages.to"));
+    msg.setFrom(Play.configuration.getProperty("email.from"), Play.configuration.getProperty("email.from.name"));
     try {
       if (isNotEmpty(replyTo)) msg.addReplyTo(replyTo);
     }
