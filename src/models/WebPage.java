@@ -119,7 +119,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
     for (VirtualFile entry : dir.list()) {
       if (entry.isDirectory() && !entry.getName().startsWith(".") && !entry.equals(ROOT_EN.dir)) {
         WebPage child = forPath(entry);
-        if (! child.metadata.isEmpty())
+        if (child instanceof News || !child.metadata.isEmpty())
           children.add(child);
       }
     }
