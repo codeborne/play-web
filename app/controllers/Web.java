@@ -49,6 +49,8 @@ public class Web extends Controller {
 
   @After public static void setHeaders() {
     BaseController.addGlobalHeaders();
+    if ("prod".equals(Play.id) && "GET".equals(request.method))
+      response.cacheFor("1h"); // reasonable default for play-cached content
   }
 
   @CacheFor("5mn")
