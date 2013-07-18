@@ -71,7 +71,7 @@ public class Web extends Controller {
       if (!request.path.endsWith("/")) redirect(request.path + "/");
       WebPage page = WebPage.forPath(request.path);
       String redirectUrl = page.metadata.getProperty("redirect");
-      if (isNotEmpty(redirectUrl)) redirect((redirectUrl.startsWith("/") ? "" : request.path) + safeUrlEncode(redirectUrl));
+      if (isNotEmpty(redirectUrl)) redirect(fixRedirectUrl(redirectUrl));
       if ("prod".equals(Play.id)) response.cacheFor(Long.toString(page.dir.lastModified()), "12h", page.dir.lastModified());
       renderPage(page);
     }
@@ -80,6 +80,15 @@ public class Web extends Controller {
       renderBinary(file.getRealFile());
     }
     else notFound();
+  }
+
+  private static String fixRedirectUrl(String url) {
+    if (url.startsWith("http:") || url.startsWith("https:"))
+      return url;
+    else if (url.startsWith("/"))
+      return safeUrlEncode(url);
+    else
+      return request.path + safeUrlEncode(url);
   }
 
   static boolean isAllowed(VirtualFile file) {
