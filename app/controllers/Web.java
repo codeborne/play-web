@@ -48,9 +48,10 @@ public class Web extends Controller {
   @Inject static WebPageIndexer indexer;
 
   @After public static void setHeaders() {
-    BaseController.addGlobalHeaders();
-    if ("prod".equals(Play.id) && "GET".equals(request.method))
-      response.cacheFor("1h"); // reasonable default for play-cached content
+    response.setHeader("X-XSS-Protection", "1; mode=block");
+    response.setHeader("X-UA-Compatible", "IE=edge,chrome=1"); // force IE to normal mode (not "compatibility") or use Chrome Frame ;-)
+    if ("prod".equals(Play.id) && "Web.serveCachedContent".equals(request.action))
+      response.cacheFor("12h");
   }
 
   @CacheFor("5mn")
