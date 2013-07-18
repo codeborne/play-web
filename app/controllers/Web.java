@@ -89,7 +89,7 @@ public class Web extends Controller {
   }
 
   public static void search(String q) throws ParseException, IOException {
-    Query query = indexer.queryParser.parse("title:\"" + q + "\"^3 text:\"" + q + "\"");
+    Query query = indexer.queryParser.parse("title:\"" + q + "\"^3 text:\"" + q + "\" keywords:\"" + q + "\"^2 path:\"" + q + "\"^2");
     TopDocs topDocs = indexer.searcher.search(query, 50);
     List<WebPage> results = new ArrayList<>();
     for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
