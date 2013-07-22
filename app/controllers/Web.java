@@ -226,6 +226,7 @@ public class Web extends Controller {
     }
 
     SimpleEmail msg = new SimpleEmail();
+    msg.setCharset("UTF-8");
     msg.setSubject(page.title);
     msg.setMsg(body.toString());
 
