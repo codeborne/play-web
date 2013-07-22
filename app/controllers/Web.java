@@ -9,6 +9,7 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import play.Logger;
 import play.Play;
 import play.cache.CacheFor;
 import play.db.jpa.JPAPlugin;
@@ -240,6 +241,7 @@ public class Web extends Controller {
     }
     catch (EmailException ignore) {}
 
+    Logger.info("Sending web form to " + msg.getToAddresses() + ": " + body);
     Mail.send(msg);
     flash.success(play.i18n.Messages.get("web.form.sent"));
     redirect(page.path);
