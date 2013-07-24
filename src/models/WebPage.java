@@ -102,7 +102,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
     else return (P)new WebPage(dir, path);
   }
 
-  static <P extends WebPage> P forPath(VirtualFile dir) {
+  public static <P extends WebPage> P forPath(VirtualFile dir) {
     String path = dir.getRealFile().getPath().replace(ROOT.dir.getRealFile().getPath(), "").replace('\\', '/');
     return forPath(dir, path);
   }
@@ -374,6 +374,10 @@ public class WebPage implements Serializable, Comparable<WebPage> {
 
     public boolean isMonth() {
       return path.matches(".*/\\d{4}/\\d{2}/");
+    }
+
+    public boolean isYear() {
+      return path.matches(".*/\\d{4}/");
     }
 
     public List<WebPage> findNews(final String tag) {

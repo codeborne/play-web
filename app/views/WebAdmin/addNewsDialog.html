@@ -1,0 +1,47 @@
+<div class="modal-header">
+  <button class="close" data-dismiss="modal">×</button>
+  <h3>&{'web.admin.addNews'}</h3>
+</div>
+
+#{form @WebAdmin.addNews(), class:"form-horizontal"}
+  <input type="hidden" name="path">
+  <div class="modal-body">
+    #{formItem label:'web.admin.title'}
+      <input type="text" name="title" style="width: 85%" required>
+    #{/formItem}
+
+    #{formItem label:'web.admin.date'}
+      <input type="text" name="date" class="input-small" value="${today.format()}" required>
+    #{/formItem}
+
+    #{formItem label:'web.admin.tags'}
+      <input type="text" name="tags" style="width: 85%">
+      <select id="tags-prefilled" style="margin-top: 5px">
+        <option value="" disabled>&{'web.admin.tags.select'}</option>
+      </select>
+    #{/formItem}
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn btn-primary">&{'web.admin.addNews'}</button>
+  </div>
+#{/form}
+
+<script type="text/javascript">
+  $(function() {
+    $('input[name=path]').val(location.pathname);
+    $('input[name=date]').datepicker({startDate:-Infinity});
+    $('.tag-cloud a').each(function() {
+      $('#tags-prefilled').append('<option>' + $(this).text() + '</option>');
+    });
+    $('#tags-prefilled').change(function() {
+      var tag = $(this).val();
+      var tags = $('input[name=tags]').val();
+      if (tags.indexOf(tag) < 0) {
+        if (tags) tags += ', ';
+        $('input[name=tags]').val(tags + tag);
+      }
+      $(this).val('');
+    });
+  });
+</script>

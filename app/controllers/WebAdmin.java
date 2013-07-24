@@ -15,6 +15,7 @@ import util.Git;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -210,5 +211,29 @@ public class WebAdmin extends BaseController {
     file.getRealFile().delete();
     if (!request.querystring.contains("path=")) request.querystring += "&path=" + path;
     redirect(Router.reverse("WebAdmin.imageBrowser").url + "?" + request.querystring);
+  }
+
+  public static void addNewsDialog() {
+    render();
+  }
+
+  public static void addNews(String path, String title, Date date, String tags) {
+    checkAuthenticPost();
+    WebPage.News parent = WebPage.forPath(path);
+    if (parent.isStory()) parent = (WebPage.News) parent.parent();
+    if (parent.isMonth()) parent = (WebPage.News) parent.parent();
+    if (parent.isYear()) parent = (WebPage.News) parent.parent();
+
+    String pathSuffix = new SimpleDateFormat("yyyy/MM/dd").format(date);
+    File dir = new File(parent.dir.getRealFile(), pathSuffix);
+    while (dir.exists()) dir = new File(dir.getPath() + "-1");
+    dir.mkdirs();
+
+    VirtualFile vdir = VirtualFile.open(dir);
+    vdir.child("metadata.properties").write("title: " + title + "\ntags: " + tags + "\n");
+    vdir.child("content.html").write("<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet doming id quod mazim placerat facer possim assum. Typi non habent claritatem insitam; est usus legentis in iis qui facit eorum claritatem. Investigationes demonstraverunt lectores legere me lius quod ii legunt saepius. Claritas est etiam processus dynamicus, qui sequitur mutationem consuetudium lectorum. Mirum est notare quam littera gothica, quam nunc putamus parum claram, anteposuerit litterarum formas humanitatis per seacula quarta decima et quinta decima. Eodem modo typi, qui nunc nobis videntur parum clari, fiant sollemnes in futurum.</p>");
+
+    WebPage.News page = WebPage.forPath(vdir);
+    redirect(page.path);
   }
 }
