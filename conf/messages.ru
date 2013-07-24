@@ -21,6 +21,7 @@ web.admin.url=URL
 web.admin.date=Дата
 web.admin.tags=Разделы
 web.admin.tags.select=Добавить раздел
+web.admin.defaultContent=<p>Редактируйте этот текст после нажатия кнопки Менять вверху страницы.<p>
 web.admin.template=Тип страницы
 web.admin.doc=Руководство вебмастера
 web.admin.checkLinks=Проверка ссылок

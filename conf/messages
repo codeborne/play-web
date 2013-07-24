@@ -21,6 +21,7 @@ web.admin.url=URL
 web.admin.date=Date
 web.admin.tags=Tags
 web.admin.tags.select=Add existing tag
+web.admin.defaultContent=<p>You can edit this content after pressing the Edit button above.<p>
 web.admin.template=Template
 web.admin.doc=Webmaster guide
 web.admin.checkLinks=Check site links
