@@ -31,6 +31,7 @@ web.admin.checkLinks=Check site links
 web.admin.problems=Found problems
 web.admin.checkExternalLinks=Check external links
 web.admin.checkExternalLinks.confirm=This can take several minutes, do you really want to continue?
+web.admin.toggleAll=Toggle all
 
 web.admin.delete=Delete
 web.admin.reallyDelete=Really delete
@@ -55,3 +56,10 @@ web.metadata.contentFromNewestChild=<b>true</b> - in order to show content of th
 web.metadata.sitemap=<b>false</b> - in order to hide the page from sitemap
 
 web.form.sent=Message has been sent
+
+git.status.A=Added
+git.status.D=Deleted
+git.status.M=Modified
+git.status.R=Renamed
+git.status.C=Copied
+git.status.U=Unmerged

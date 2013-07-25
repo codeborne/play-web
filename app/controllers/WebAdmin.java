@@ -53,10 +53,14 @@ public class WebAdmin extends BaseController {
     if (!request.action.equals("WebAdmin.status")) status();
   }
 
-  public static void publish(String message) throws IOException, InterruptedException, Git.ExecException {
-    String committed = git("commit", "-a",
+  public static void publish(String message, String[] paths) throws IOException, InterruptedException, Git.ExecException {
+    if (paths == null || paths.length == 0) status();
+
+    List<String> args = new ArrayList<>(asList("commit",
         "-m", defaultIfEmpty(message, "no message specified"),
-        "--author=" + getUser().customer.getFullName() + " <" + getUser().username + ">");
+        "--author=" + getUser().customer.getFullName() + " <" + getUser().username + ">"));
+    args.addAll(asList(paths));
+    String committed = git(args.toArray(new String[args.size()]));
 
     flash.put("success", committed);
     push();

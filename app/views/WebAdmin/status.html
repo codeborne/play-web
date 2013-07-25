@@ -8,9 +8,23 @@
 
 #{if status}
   <h3>&{'web.admin.changes'}</h3>
-  <pre>${status}</pre>
-
   #{form @WebAdmin.publish(), class:'form-horizontal'}
+    <table style="margin-bottom: 10px">
+      #{list status.readLines(), as:'m'}
+        <tr>
+          <td>
+            <label>
+              <input type="checkbox" name="paths" value="${m.substring(3)}"> &nbsp;<b>&{'git.status.' + m.substring(0,1)}</b> &nbsp;
+            </label>
+          </td>
+          <td>
+            <label>${m.substring(3)}</label>
+          </td>
+        </tr>
+      #{/list}
+    </table>
+
+    <input type="checkbox" title="&{'web.admin.toggleAll'}" onclick="$('input[name=paths]').prop('checked', $(this).is(':checked'))">&nbsp;
     <input type="text" name="message" placeholder="&{'web.admin.commitMessage'}" class="span6">
     <button class="btn btn-primary">&{'web.admin.publish'}</button>
   #{/form}

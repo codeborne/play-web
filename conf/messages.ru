@@ -1,6 +1,6 @@
 web.admin.changes=Неопубликованные изменения
 web.admin.publish=Опубликовать
-web.admin.commitMessage=Короткое описание изменений
+web.admin.commitMessage=Краткое описание изменений
 web.admin.unpushed=Незаконченная публикация
 web.admin.noModifications=Нет изменений для публикации
 web.admin.log=История изменений
@@ -8,7 +8,7 @@ web.admin.revision=Изменение
 web.admin.time=Время
 web.admin.author=Автор
 web.admin.message=Описание
-web.admin=Админ сайта
+web.admin=Публикация
 web.admin.save=Сохранить
 web.admin.saved=Изменения переданы на сервер. Когда все изменения готовы, не забудьте их опубликовать.
 web.admin.revert=Отменить
@@ -31,6 +31,7 @@ web.admin.checkLinks=Проверка ссылок
 web.admin.problems=Найдены следующие проблемы
 web.admin.checkExternalLinks=Проверить также внешние ссылки
 web.admin.checkExternalLinks.confirm=Это может занять много времени, действительно запустить проверку?
+web.admin.toggleAll=Отметить всё
 
 web.admin.delete=Удалить
 web.admin.reallyDelete=Действительно удалить
@@ -55,3 +56,10 @@ web.metadata.contentFromNewestChild=<b>true</b>, если у страницы н
 web.metadata.sitemap=<b>false</b>, чтобы страница не показывалась на карте сайта
 
 web.form.sent=Ваше сообщение отправлено
+
+git.status.A=Добавлен
+git.status.D=Удалён
+git.status.M=Изменён
+git.status.R=Переименован
+git.status.C=Скопирован
+git.status.U=Обновлён
