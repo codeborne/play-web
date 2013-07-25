@@ -32,6 +32,7 @@ web.admin.problems=Найдены следующие проблемы
 web.admin.checkExternalLinks=Проверить также внешние ссылки
 web.admin.checkExternalLinks.confirm=Это может занять много времени, действительно запустить проверку?
 
+web.admin.delete=Удалить
 web.admin.reallyDelete=Действительно удалить
 web.admin.uploadedFileAlreadyExists=Файл с таким именем уже существует
 web.admin.overwriteUploadedFile=Переписать?

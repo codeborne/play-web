@@ -32,6 +32,7 @@ web.admin.problems=Found problems
 web.admin.checkExternalLinks=Check external links
 web.admin.checkExternalLinks.confirm=This can take several minutes, do you really want to continue?
 
+web.admin.delete=Delete
 web.admin.reallyDelete=Really delete
 web.admin.uploadedFileAlreadyExists=Uploaded file already exists
 web.admin.overwriteUploadedFile=Overwrite uploaded file?
