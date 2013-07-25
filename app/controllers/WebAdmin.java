@@ -271,7 +271,9 @@ public class WebAdmin extends BaseController {
     if (hidden) page.metadata.setProperty("hidden", "true"); else page.metadata.remove("hidden");
 
     try (Writer out = new OutputStreamWriter(page.dir.child("metadata.properties").outputstream(), "UTF-8")) {
-      page.metadata.store(out, null);
+      for (String key : page.metadata.stringPropertyNames()) {
+        out.write(key + ": " + page.metadata.getProperty(key).replace("\n", "\\n") + "\n");
+      }
     }
 
     redirect(page.path);
