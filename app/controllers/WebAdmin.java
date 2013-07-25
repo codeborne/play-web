@@ -253,4 +253,27 @@ public class WebAdmin extends BaseController {
     page.dir.child(name + ".html").write("<h4>" + title + "</h4>\n\n" + play.i18n.Messages.get("web.admin.defaultContent"));
     redirect(page.path);
   }
+
+  public static void metadataDialog(String path) {
+    WebPage page = WebPage.forPath(path);
+    render(page);
+  }
+
+  public static void saveMetadata(String path, String title, String tags, String description, String keywords, String order, String alias, boolean hidden) throws IOException {
+    checkAuthenticPost();
+    WebPage page = WebPage.forPath(path);
+    page.metadata.setProperty("title", title);
+    if (isNotEmpty(tags)) page.metadata.setProperty("tags", defaultString(tags)); else page.metadata.remove("tags");
+    if (isNotEmpty(description)) page.metadata.setProperty("description", defaultString(description)); else page.metadata.remove("description");
+    if (isNotEmpty(keywords)) page.metadata.setProperty("keywords", defaultString(keywords)); else page.metadata.remove("keywords");
+    if (isNotEmpty(order)) page.metadata.setProperty("order", order); else page.metadata.remove("order");
+    if (isNotEmpty(alias)) page.metadata.setProperty("alias", alias); else page.metadata.remove("alias");
+    if (hidden) page.metadata.setProperty("hidden", "true"); else page.metadata.remove("hidden");
+
+    try (Writer out = new OutputStreamWriter(page.dir.child("metadata.properties").outputstream(), "UTF-8")) {
+      page.metadata.store(out, null);
+    }
+
+    redirect(page.path);
+  }
 }

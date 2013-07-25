@@ -1,4 +1,5 @@
-<button class="btn btn-primary" onclick="enablePageEditing(this)">&{'web.admin.editPage'}</button>
+<button class="btn btn-primary btn-small" onclick="enablePageEditing(this)">&{'web.admin.editContent'}</button>
+<button class="btn btn-primary btn-small" onclick="showAjaxDialog('@{WebAdmin.metadataDialog(page.path)}')">&{'web.admin.editMetadata'}</button>
 
 <style type="text/css">
   .editable[data-from]:hover, .editable:focus {
