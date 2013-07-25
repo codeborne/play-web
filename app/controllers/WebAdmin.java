@@ -231,9 +231,21 @@ public class WebAdmin extends BaseController {
 
     VirtualFile vdir = VirtualFile.open(dir);
     vdir.child("metadata.properties").write("title: " + title + "\ntags: " + tags + "\n");
-    vdir.child("content.html").write(play.i18n.Messages.get("web.admin.news.defaultContent"));
+    vdir.child("content.html").write(play.i18n.Messages.get("web.admin.defaultContent"));
 
     WebPage.News page = WebPage.forPath(vdir);
+    redirect(page.path);
+  }
+
+  public static void addFileDialog() {
+    render();
+  }
+
+  public static void addFile(String path, String name, String title) {
+    checkAuthenticPost();
+    WebPage page = WebPage.forPath(path);
+    name = name.replaceAll("\\W", "");
+    page.dir.child(name + ".html").write("<h4>" + title + "</h4>\n\n" + play.i18n.Messages.get("web.admin.defaultContent"));
     redirect(page.path);
   }
 }

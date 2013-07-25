@@ -1,0 +1,27 @@
+<div class="modal-header">
+  <button class="close" data-dismiss="modal">×</button>
+  <h3>&{'web.admin.addPartner'}</h3>
+</div>
+
+#{form @WebAdmin.addFile(), class:"form-horizontal"}
+  <input type="hidden" name="path">
+  <div class="modal-body">
+    #{formItem label:'web.admin.name'}
+      <input type="text" name="title" style="width: 85%" required>
+    #{/formItem}
+
+    #{formItem label:'web.admin.filename'}
+      <input type="text" name="name" style="width: 85%" required>
+    #{/formItem}
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn btn-primary">&{'web.admin.addPartner'}</button>
+  </div>
+#{/form}
+
+<script type="text/javascript">
+  $(function() {
+    $('input[name=path]').val(location.pathname);
+  });
+</script>
