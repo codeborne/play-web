@@ -204,11 +204,12 @@ public class WebAdmin extends BaseController {
     redirect(Router.reverse("WebAdmin.imageBrowser").url + "?" + request.querystring);
   }
 
-  public static void delete(String path, String name) throws Throwable {
+  public static void delete(String path, String name, boolean redirectToPath) throws Throwable {
     checkAuthenticity();
     WebPage page = WebPage.forPath(path);
     VirtualFile file = page.dir.child(name);
     file.getRealFile().delete();
+    if (redirectToPath) redirect(path);
     if (!request.querystring.contains("path=")) request.querystring += "&path=" + path;
     redirect(Router.reverse("WebAdmin.imageBrowser").url + "?" + request.querystring);
   }
