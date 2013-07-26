@@ -1,5 +1,13 @@
-<button class="btn btn-primary btn-small" onclick="enablePageEditing(this)">&{'web.admin.editContent'}</button>
-<button class="btn btn-primary btn-small" onclick="showAjaxDialog('@{WebAdmin.metadataDialog(page.path)}')">&{'web.admin.editMetadata'}</button>
+<div id="page-editor-button" class="btn-group" style="float: left; margin-right: 5px">
+  <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#">&{'web.admin.page'}<span class="caret"></span></a>
+  <ul class="dropdown-menu">
+    <li><a href="#" onclick="enablePageEditing()">&{'web.admin.editContent'}</a></li>
+    <li><a href="#" onclick="showAjaxDialog('@{WebAdmin.metadataDialog(page.path)}')">&{'web.admin.editMetadata'}</a></li>
+    <li><a href="#" onclick="copyPage()">&{'web.admin.copy'}</a></li>
+  </ul>
+</div>
+<a id="edit-cancel-button" class="btn hidden" href="" title="&{'web.admin.editMode'}">&{'web.admin.revert'}</a>
+
 
 <style type="text/css">
   .editable[data-from]:hover, .editable:focus {
@@ -26,17 +34,20 @@
 
 <script type="text/javascript" src="/public/editor/ckeditor.js"></script>
 <script type="text/javascript">
-  function enablePageEditing(button) {
-    $(button).attr('title', '&{'web.admin.editMode'}').text('&{'web.admin.revert'}').removeClass('btn-primary').click(function() {
-      location.reload();
-      return false;
-    });
+  function copyPage() {
+    var name = prompt('&{'web.admin.copy.newName', page.parent().path}:');
+    if (name)
+      location.href = '@{WebAdmin.copyPage}?path=${page.path}&name=' + name.replace(/\W/, '') + '&authenticityToken=${session.authenticityToken}';
+  }
+
+  function enablePageEditing() {
+    $('#page-editor-button, #edit-cancel-button').toggle();
 
     var saveCmd = {
       modes: { wysiwyg:1,source:1 },
       exec: function(editor) {
         $.ajax({
-          url: '@{WebAdmin.saveContent()}?path=${page.path}&part=' + editor.fileName + '&authenticityToken=${session.authenticityToken}',
+          url: '@{WebAdmin.saveContent()}?path=${page.path}&part=' + editor.fileName.replace(/\W/, '') + '&authenticityToken=${session.authenticityToken}',
           type: 'POST',
           contentType: 'text/html',
           data: editor.getData(),

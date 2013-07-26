@@ -2,6 +2,7 @@ package controllers;
 
 import com.google.common.base.Predicate;
 import models.WebPage;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import play.Logger;
 import play.Play;
@@ -275,7 +276,13 @@ public class WebAdmin extends BaseController {
         out.write(key + ": " + page.metadata.getProperty(key).replace("\n", "\\n") + "\n");
       }
     }
-
     redirect(page.path);
+  }
+
+  public static void copyPage(String path, String name) throws IOException {
+    checkAuthenticity();
+    WebPage page = WebPage.forPath(path);
+    FileUtils.copyDirectory(page.dir.getRealFile(), new File(page.dir.getRealFile().getParentFile(), name));
+    redirect(page.parent().path + name);
   }
 }
