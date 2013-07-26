@@ -28,8 +28,8 @@
     z-index: 1000;
   }
 
-  .cke_button__ajaxsave_icon { display: none; }
-  .cke_button__ajaxsave_label { display: block; }
+  .cke_button__ajaxsave_icon, .cke_button__browse_icon { display: none; }
+  .cke_button__ajaxsave_label, .cke_button__browse_label { display: block; }
 </style>
 
 <script type="text/javascript" src="/public/editor/ckeditor.js"></script>
@@ -60,7 +60,7 @@
     };
 
     CKEDITOR.plugins.add('ajaxsave', {
-      init: function( editor ) {
+      init: function(editor) {
         var command = editor.addCommand('ajaxsave', saveCmd);
 
         editor.ui.addButton && editor.ui.addButton('ajaxsave', {
@@ -69,6 +69,17 @@
         });
       }
     });
+
+//    CKEDITOR.plugins.add('browse', {
+//      init: function(editor) {
+//        var command = editor.addCommand('browse', saveCmd);
+//
+//        editor.ui.addButton && editor.ui.addButton('browse', {
+//          label: '&{'web.admin.browse'}',
+//          command: 'browse'
+//        });
+//      }
+//    });
 
     $('.editable').each(function() {
       var editable = $(this);

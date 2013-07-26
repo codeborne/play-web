@@ -11,6 +11,7 @@ web.admin.message=Описание
 web.admin.page=Страница
 web.admin=Публикация
 web.admin.save=Сохранить
+web.admin.browse=Файлы
 web.admin.copy=Скопировать
 web.admin.copy.newName=Копия будет создана под %s. Введите название новой страницы латинскими буквами
 web.admin.saved=Изменения переданы на сервер. Когда все изменения готовы, не забудьте их опубликовать.
