@@ -243,8 +243,9 @@ public class WebAdmin extends BaseController {
     redirect(page.path);
   }
 
-  public static void addFileDialog() {
-    render();
+  public static void addFileDialog(String path) {
+    WebPage page = WebPage.forPath(path);
+    render(page);
   }
 
   public static void addFile(String path, String name, String title) {
