@@ -28,8 +28,8 @@
     z-index: 1000;
   }
 
-  .cke_button__ajaxsave_icon, .cke_button__browse_icon { display: none; }
-  .cke_button__ajaxsave_label, .cke_button__browse_label { display: block; }
+  .cke_button__ajaxsave_icon, .cke_button__browse_icon2 { display: none; }
+  .cke_button__ajaxsave_label, .cke_button__browse_label2 { display: block; }
 </style>
 
 <script type="text/javascript" src="/public/editor/ckeditor.js"></script>
@@ -61,25 +61,32 @@
 
     CKEDITOR.plugins.add('ajaxsave', {
       init: function(editor) {
-        var command = editor.addCommand('ajaxsave', saveCmd);
-
-        editor.ui.addButton && editor.ui.addButton('ajaxsave', {
+        editor.addCommand('ajaxsave', saveCmd);
+        editor.ui.addButton('ajaxsave', {
           label: '&{'web.admin.save'}',
           command: 'ajaxsave'
         });
       }
     });
 
-//    CKEDITOR.plugins.add('browse', {
-//      init: function(editor) {
-//        var command = editor.addCommand('browse', saveCmd);
-//
-//        editor.ui.addButton && editor.ui.addButton('browse', {
-//          label: '&{'web.admin.browse'}',
-//          command: 'browse'
-//        });
-//      }
-//    });
+    var browseCmd = {
+      modes: { wysiwyg:1,source:1 },
+      exec: function(editor) {
+        console.log(editor);
+        window.open(editor.config.filebrowserImageBrowseUrl, '_blank', 'width=' + editor.config.filebrowserWindowWidth + ',height=' + editor.config.filebrowserWindowHeight);
+      }
+    };
+
+    CKEDITOR.plugins.add('browse', {
+      init: function(editor) {
+        editor.addCommand('browse', browseCmd);
+        editor.ui.addButton('browse', {
+          label: '&{'web.admin.browse'}',
+          icon: 'copy',
+          command: 'browse'
+        });
+      }
+    });
 
     $('.editable').each(function() {
       var editable = $(this);
@@ -91,7 +98,7 @@
         autoParagraph: false,
         fillEmptyBlocks: false,
         allowedContent: true,
-        extraPlugins: 'ajaxsave',
+        extraPlugins: 'browse,ajaxsave',
         filebrowserImageBrowseUrl : '@{WebAdmin.browse()}',
         filebrowserWindowWidth  : 800,
         filebrowserWindowHeight : 515
