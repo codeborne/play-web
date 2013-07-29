@@ -44,6 +44,11 @@ public class Git {
     }
     catch (ExecException ignore) {}
 
+    try {
+      exec("chgrp", "-Rf", Play.configuration.getProperty("web.pull.group", "apache"), ".");
+    }
+    catch (ExecException ignore) {}
+
     notifyListener(pull);
     return pull;
   }

@@ -2,6 +2,7 @@ package controllers;
 
 import com.google.common.base.Predicate;
 import models.WebPage;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import play.Logger;
 import play.Play;
@@ -15,6 +16,7 @@ import util.Git;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,10 +55,14 @@ public class WebAdmin extends BaseController {
     if (!request.action.equals("WebAdmin.status")) status();
   }
 
-  public static void publish(String message) throws IOException, InterruptedException, Git.ExecException {
-    String committed = git("commit", "-a",
+  public static void publish(String message, String[] paths) throws IOException, InterruptedException, Git.ExecException {
+    if (paths == null || paths.length == 0) status();
+
+    List<String> args = new ArrayList<>(asList("commit",
         "-m", defaultIfEmpty(message, "no message specified"),
-        "--author=" + getUser().customer.getFullName() + " <" + getUser().username + ">");
+        "--author=" + getUser().customer.getFullName() + " <" + getUser().username + ">"));
+    args.addAll(asList(paths));
+    String committed = git(args.toArray(new String[args.size()]));
 
     flash.put("success", committed);
     push();
@@ -203,12 +209,81 @@ public class WebAdmin extends BaseController {
     redirect(Router.reverse("WebAdmin.browse").url + "?" + request.querystring);
   }
 
-  public static void delete(String path, String name) throws Throwable {
+  public static void delete(String path, String name, boolean redirectToPath) throws Throwable {
     checkAuthenticity();
     WebPage page = WebPage.forPath(path);
     VirtualFile file = page.dir.child(name);
     file.getRealFile().delete();
+    if (redirectToPath) redirect(path);
     if (!request.querystring.contains("path=")) request.querystring += "&path=" + path;
     redirect(Router.reverse("WebAdmin.browse").url + "?" + request.querystring);
+  }
+
+  public static void addNewsDialog() {
+    render();
+  }
+
+  public static void addNews(String path, String title, Date date, String tags) {
+    checkAuthenticPost();
+    WebPage.News parent = WebPage.forPath(path);
+    if (parent.isStory()) parent = (WebPage.News) parent.parent();
+    if (parent.isMonth()) parent = (WebPage.News) parent.parent();
+    if (parent.isYear()) parent = (WebPage.News) parent.parent();
+
+    String pathSuffix = new SimpleDateFormat("yyyy/MM/dd").format(date);
+    File dir = new File(parent.dir.getRealFile(), pathSuffix);
+    while (dir.exists()) dir = new File(dir.getPath() + "-1");
+    dir.mkdirs();
+
+    VirtualFile vdir = VirtualFile.open(dir);
+    vdir.child("metadata.properties").write("title: " + title + "\ntags: " + tags + "\n");
+    vdir.child("content.html").write(play.i18n.Messages.get("web.admin.defaultContent"));
+
+    WebPage.News page = WebPage.forPath(vdir);
+    redirect(page.path);
+  }
+
+  public static void addFileDialog(String path) {
+    WebPage page = WebPage.forPath(path);
+    render(page);
+  }
+
+  public static void addFile(String path, String name, String title) {
+    checkAuthenticPost();
+    WebPage page = WebPage.forPath(path);
+    name = name.replaceAll("\\W", "");
+    page.dir.child(name + ".html").write("<h4>" + title + "</h4>\n\n" + play.i18n.Messages.get("web.admin.defaultContent"));
+    redirect(page.path);
+  }
+
+  public static void metadataDialog(String path) {
+    WebPage page = WebPage.forPath(path);
+    render(page);
+  }
+
+  public static void saveMetadata(String path, String title, String tags, String description, String keywords, String order, String alias, boolean hidden) throws IOException {
+    checkAuthenticPost();
+    WebPage page = WebPage.forPath(path);
+    page.metadata.setProperty("title", title);
+    if (isNotEmpty(tags)) page.metadata.setProperty("tags", defaultString(tags)); else page.metadata.remove("tags");
+    if (isNotEmpty(description)) page.metadata.setProperty("description", defaultString(description)); else page.metadata.remove("description");
+    if (isNotEmpty(keywords)) page.metadata.setProperty("keywords", defaultString(keywords)); else page.metadata.remove("keywords");
+    if (isNotEmpty(order)) page.metadata.setProperty("order", order); else page.metadata.remove("order");
+    if (isNotEmpty(alias)) page.metadata.setProperty("alias", alias); else page.metadata.remove("alias");
+    if (hidden) page.metadata.setProperty("hidden", "true"); else page.metadata.remove("hidden");
+
+    try (Writer out = new OutputStreamWriter(page.dir.child("metadata.properties").outputstream(), "UTF-8")) {
+      for (String key : page.metadata.stringPropertyNames()) {
+        out.write(key + ": " + page.metadata.getProperty(key).replace("\n", "\\n") + "\n");
+      }
+    }
+    redirect(page.path);
+  }
+
+  public static void copyPage(String path, String name) throws IOException {
+    checkAuthenticity();
+    WebPage page = WebPage.forPath(path);
+    FileUtils.copyDirectory(page.dir.getRealFile(), new File(page.dir.getRealFile().getParentFile(), name));
+    redirect(page.parent().path + name);
   }
 }

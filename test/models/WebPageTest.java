@@ -51,7 +51,7 @@ public class WebPageTest {
     assertEquals(1, page.level);
     assertNotNull(page.parent());
 
-    assertEquals(2, page.children().get(0).level);
+    assertEquals(2, WebPage.forPath("/test/com/").level);
   }
 
   @Test
