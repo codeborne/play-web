@@ -47,7 +47,7 @@
       modes: { wysiwyg:1,source:1 },
       exec: function(editor) {
         $.ajax({
-          url: '@{WebAdmin.saveContent()}?path=${page.path}&part=' + editor.fileName.replace(/\W/, '') + '&authenticityToken=${session.authenticityToken}',
+          url: '@{WebAdmin.saveContent()}?path=${page.path}&part=' + editor.fileName.replace(/[^\w.]/, '') + '&authenticityToken=${session.authenticityToken}',
           type: 'POST',
           contentType: 'text/html',
           data: editor.getData(),
