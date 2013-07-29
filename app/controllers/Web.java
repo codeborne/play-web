@@ -26,18 +26,21 @@ import play.templates.TagContext;
 import play.vfs.VirtualFile;
 import util.WebPageIndexer;
 
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ext.CustomExtensions.safeUrlEncode;
+import static java.awt.RenderingHints.*;
 import static java.lang.Math.min;
 import static java.util.Arrays.asList;
 import static java.util.Collections.sort;
@@ -245,6 +248,24 @@ public class Web extends Controller {
     Mail.send(msg);
     flash.success(play.i18n.Messages.get("web.form.sent"));
     redirect(page.path);
+  }
+
+  public static void thumbnail(String path, String name, int height) throws IOException {
+    File imgFile = WebPage.forPath(path).dir.child(name).getRealFile();
+    BufferedImage img = ImageIO.read(imgFile);
+    BufferedImage resized = new BufferedImage(img.getWidth() * height / img.getHeight(), height, img.getType());
+    Graphics2D g = resized.createGraphics();
+    g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
+    g.setRenderingHint(KEY_RENDERING, VALUE_RENDER_QUALITY);
+    g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+    g.drawImage(img, 0, 0, resized.getWidth(), resized.getHeight(), null);
+    g.dispose();
+    g.setComposite(AlphaComposite.Src);
+
+    ByteArrayOutputStream out = new ByteArrayOutputStream((int) imgFile.length());
+    ImageIO.write(resized, "png", out);
+    response.cacheFor(String.valueOf(imgFile.lastModified()), "30d", imgFile.lastModified());
+    renderBinary(new ByteArrayInputStream(out.toByteArray()), imgFile.getName(), "image/png", true);
   }
 
   private static void addTo(SimpleEmail msg, String addresses) throws EmailException {
