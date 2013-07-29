@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Images</title>
+    <title>Files</title>
     <style type="text/css">
       body {
         margin: 0;
         padding: 0;
         background: transparent;
+        font-family: sans-serif;
       }
       form {
         display: inline-block;
@@ -31,7 +32,7 @@
         height: 120px;
         position: relative;
         overflow: hidden;
-        font-size: 11px;
+        font-size: 14px;
         cursor: pointer;
       }
       #topPane {
@@ -89,9 +90,9 @@
         $('ul').css('height', $(window).height() - 40);
       }
 
-      function deleteFile(img) {
-        if (confirm('&{'web.admin.reallyDelete'} ' + img.attr('alt') + '?')) {
-          $("#delete-form input[name=name]").val(img.attr('alt'));
+      function deleteFile(filename) {
+        if (confirm('&{'web.admin.reallyDelete'} ' + filename + '?')) {
+          $("#delete-form input[name=name]").val(filename);
           $("#delete-form").submit();
         }
       }
@@ -105,13 +106,15 @@
         return true;
       }
 
-      function chooseFile(img) {
-        if (window.opener && window.opener.CKEDITOR) {
-          window.opener.CKEDITOR.tools.callFunction('${request.params['CKEditorFuncNum']}', img.attr('src'));
+      function chooseFile(filename) {
+        var path = '${page.path}' + filename;
+        console.log(window.opener.CKEDITOR);
+        if ('${request.params['CKEditorFuncNum']}') {
+          window.opener.CKEDITOR.tools.callFunction('${request.params['CKEditorFuncNum']}', path);
           window.close();
         }
         else {
-          window.open(img.attr('src'));
+          window.open(path);
         }
       }
 
@@ -154,14 +157,31 @@
         &{'web.admin.noImages'}
       </div>
     #{/ifnot}
+    %{files = files.sort{!it.directory}}%
     <ul>
+      #{if page.level > 1}
+        <li>
+          <a href="?${request.querystring.replaceFirst('path=(.+?)(&|$)', 'path=' + page.parent().path)}">
+            <div class="name">../</div>
+          </a>
+        </li>
+      #{/if}
       #{list files, as:'file'}
         <li>
-          <a href="javascript:deleteFile($('img#${file_index}'))" class="delete">×</a>
-          <a href="javascript:chooseFile($('img#${file_index}'))">
-            <img id="${file_index}" src="${page.path}${file.name}" alt="${file.name}" border="0">
-            <div class="name">${file.name}</div>
-          </a>
+          #{if file.directory}
+            <a href="?${request.querystring.replaceFirst('path=(.+?)(&|$)', 'path=' + page.path + file.name)}">
+              <div class="name">${file.name}/</div>
+            </a>
+          #{/if}
+          #{else}
+            <a href="javascript:deleteFile('${file.name}')" class="delete">×</a>
+            <a href="javascript:chooseFile('${file.name}')">
+              #{if file.name.endsWith('.png') || file.name.endsWith('.jpg') || file.name.endsWith('.gif')}
+                <img id="${file_index}" src="${page.path}${file.name}" alt="${file.name}" border="0">
+              #{/if}
+              <div class="name">${file.name.wrap(16)}</div>
+            </a>
+          #{/else}
         </li>
       #{/list}
     </ul>

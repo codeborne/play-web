@@ -186,11 +186,16 @@ public class WebAdmin extends BaseController {
   }
 
   public static void browse(String path) throws MalformedURLException {
-    if (isEmpty(path)) path = new URL(request.headers.get("referer").value()).getPath();
+    if (isEmpty(path)) {
+      path = new URL(request.headers.get("referer").value()).getPath();
+      request.querystring += "&path=" + path;
+      redirect(Router.reverse("WebAdmin.browse").url + "?" + request.querystring);
+    }
     WebPage page = WebPage.forPath(path);
-    Collection<VirtualFile> files = filter(page.dir.list(), new Predicate<VirtualFile>() {
+    List<VirtualFile> list = page.dir.list();
+    Collection<VirtualFile> files = filter(list, new Predicate<VirtualFile>() {
       @Override public boolean apply(VirtualFile file) {
-        return isAllowed(file);
+        return file.isDirectory() || isAllowed(file);
       }
     });
     render(page, files);
