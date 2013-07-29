@@ -28,7 +28,7 @@ web.admin.reallyDelete=Really delete
 web.admin.uploadedFileAlreadyExists=Uploaded file already exists
 web.admin.overwriteUploadedFile=Overwrite uploaded file?
 web.admin.upload=Upload
-web.admin.noImages=No Images
+web.admin.noImages=No files
 
 web.metadata.title=page title that is visible to the user
 web.metadata.template=page template, see the list below, <b>custom</b> if not specified

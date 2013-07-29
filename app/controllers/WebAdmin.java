@@ -20,6 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Collections2.filter;
+import static controllers.Web.isAllowed;
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang.StringUtils.*;
 import static util.Git.git;
@@ -178,16 +179,15 @@ public class WebAdmin extends BaseController {
       throw new FileNotFoundException(url);
   }
 
-  public static void imageBrowser(String path) throws MalformedURLException {
+  public static void browse(String path) throws MalformedURLException {
     if (isEmpty(path)) path = new URL(request.headers.get("referer").value()).getPath();
     WebPage page = WebPage.forPath(path);
-    Collection<VirtualFile> images = filter(page.dir.list(), new Predicate<VirtualFile>() {
+    Collection<VirtualFile> files = filter(page.dir.list(), new Predicate<VirtualFile>() {
       @Override public boolean apply(VirtualFile file) {
-        String name = file.getName();
-        return name.endsWith(".jpg") || name.endsWith(".png") || name.endsWith(".gif");
+        return isAllowed(file);
       }
     });
-    render(page, images);
+    render(page, files);
   }
 
   public static void upload(String path, File data) throws Throwable {
@@ -200,7 +200,7 @@ public class WebAdmin extends BaseController {
       }
     }
     if (!request.querystring.contains("path=")) request.querystring += "&path=" + path;
-    redirect(Router.reverse("WebAdmin.imageBrowser").url + "?" + request.querystring);
+    redirect(Router.reverse("WebAdmin.browse").url + "?" + request.querystring);
   }
 
   public static void delete(String path, String name) throws Throwable {
@@ -209,6 +209,6 @@ public class WebAdmin extends BaseController {
     VirtualFile file = page.dir.child(name);
     file.getRealFile().delete();
     if (!request.querystring.contains("path=")) request.querystring += "&path=" + path;
-    redirect(Router.reverse("WebAdmin.imageBrowser").url + "?" + request.querystring);
+    redirect(Router.reverse("WebAdmin.browse").url + "?" + request.querystring);
   }
 }

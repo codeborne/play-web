@@ -42,6 +42,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.sort;
 import static models.WebPage.ALLOWED_FILE_TYPES;
 import static org.apache.commons.lang.StringUtils.*;
+import static org.apache.maven.artifact.ant.shaded.FileUtils.extension;
 
 @With(Security.class) @NoTransaction
 public class Web extends Controller {
@@ -92,9 +93,7 @@ public class Web extends Controller {
   }
 
   static boolean isAllowed(VirtualFile file) {
-    String name = file.getName();
-    String ext = name.substring(name.lastIndexOf('.')+1);
-    return ALLOWED_FILE_TYPES.contains(ext);
+    return ALLOWED_FILE_TYPES.contains(extension(file.getName()));
   }
 
   public static void search(String q) throws ParseException, IOException {

@@ -28,7 +28,7 @@ web.admin.reallyDelete=Действительно удалить
 web.admin.uploadedFileAlreadyExists=Файл с таким именем уже существует
 web.admin.overwriteUploadedFile=Переписать?
 web.admin.upload=Загрузить
-web.admin.noImages=Нет изображений
+web.admin.noImages=Нет файлов
 
 web.metadata.title=заголовок страницы, видимый пользователю.
 web.metadata.template=шаблон страницы, список ниже. Если не указан, то будет использоваться <b>custom</b> - страница со свободным контентом.

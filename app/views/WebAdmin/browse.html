@@ -149,18 +149,18 @@
         </form>
       </div>
     </div>
-    #{ifnot images}
+    #{ifnot files}
       <div id="noFiles">
         &{'web.admin.noImages'}
       </div>
     #{/ifnot}
     <ul>
-      #{list images, as:'image'}
+      #{list files, as:'file'}
         <li>
-          <a href="javascript:deleteFile($('img#${image_index}'))" class="delete">×</a>
-          <a href="javascript:chooseFile($('img#${image_index}'))">
-            <img id="${image_index}" src="${page.path}${image.name}" alt="${image.name}" border="0">
-            <div class="name">${image.name}</div>
+          <a href="javascript:deleteFile($('img#${file_index}'))" class="delete">×</a>
+          <a href="javascript:chooseFile($('img#${file_index}'))">
+            <img id="${file_index}" src="${page.path}${file.name}" alt="${file.name}" border="0">
+            <div class="name">${file.name}</div>
           </a>
         </li>
       #{/list}
