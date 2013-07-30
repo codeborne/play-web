@@ -76,6 +76,28 @@ public class WebAdmin extends BaseController {
     status();
   }
 
+  public static void history(String path) throws InterruptedException, IOException, Git.ExecException {
+    WebPage page = WebPage.forPath(path);
+    List<String> args = new ArrayList<>(asList("log", "--pretty=format:%h%x09%ct%x09%an%x09%ae%x09%s%x09%b%x03", "--max-count=50"));
+    if (path.startsWith("/")) path = path.substring(1);
+    for (VirtualFile file : page.dir.list()) {
+      if (!file.isDirectory()) args.add(path + file.getName());
+    }
+    String[] log = git(args.toArray(new String[args.size()])).split("\u0003");
+    render(page, log);
+  }
+
+  public static void diff(String path, String revision) throws InterruptedException, IOException, Git.ExecException {
+    WebPage page = WebPage.forPath(path);
+    List<String> args = new ArrayList<>(asList("diff", revision + "..HEAD", "--"));
+    if (path.startsWith("/")) path = path.substring(1);
+    for (VirtualFile file : page.dir.list()) {
+      if (!file.isDirectory()) args.add(path + file.getName());
+    }
+    String diff = git(args.toArray(new String[args.size()]));
+    render(page, revision, diff);
+  }
+
   public static void doc() throws IOException {
     Collection<WebPage.Template> templates = WebPage.availableTemplates();
     render(templates);

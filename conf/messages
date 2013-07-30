@@ -44,7 +44,8 @@ web.admin.problems=Found problems
 web.admin.checkExternalLinks=Check external links
 web.admin.checkExternalLinks.confirm=This can take several minutes, do you really want to continue?
 web.admin.toggleAll=Toggle all
-
+web.admin.history=History
+web.admin.diff=Diff
 web.admin.delete=Delete
 web.admin.reallyDelete=Really delete
 web.admin.uploadedFileAlreadyExists=Uploaded file already exists

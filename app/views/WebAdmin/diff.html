@@ -1,0 +1,12 @@
+#{extends 'Web/layout-with-menu.html'/}
+
+<h3>&{'web.admin.diff'}: ${page.path} [${revision}..HEAD]</h3>
+
+#{list diff.split('\n?diff --git '), as:'change'}
+  #{if change}
+  %{change = change.readLines()}%
+  <h4>${change[0].replaceFirst('.*? b/', '')}</h4>
+  <pre>${change[1..-1].grep{!it.startsWith('index ') && !it.startsWith('---') && !it.startsWith('+++')}.join('\n')}</pre>
+  #{/if}
+#{/list}
+
