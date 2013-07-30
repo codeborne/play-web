@@ -109,13 +109,15 @@
       function chooseFile(filename) {
         var path = '${page.path}' + filename;
         console.log(window.opener.CKEDITOR);
-        if ('${request.params['CKEditorFuncNum']}') {
+        #{if request.params['CKEditorFuncNum']}
           window.opener.CKEDITOR.tools.callFunction('${request.params['CKEditorFuncNum']}', path);
           window.close();
-        }
-        else {
-          window.open(path);
-        }
+        #{/if}
+        #{else}
+          var html = path.match(/(.png|.jpg|.gif)$/) ? '<img src="' + path + '">' : '<a href="' + path + '">' + path.replace(/.*\//, '') + '</a>';
+          window.opener.CKEDITOR.instances.editor1.insertHtml(html);
+          window.close();
+        #{/else}
       }
 
       function uploadFile(form) {
