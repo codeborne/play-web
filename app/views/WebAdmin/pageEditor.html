@@ -3,7 +3,7 @@
   <ul class="dropdown-menu">
     <li><a href="#" onclick="enablePageEditing()">&{'web.admin.editContent'}</a></li>
     <li><a href="#" onclick="showAjaxDialog('@{WebAdmin.metadataDialog(page.path)}')">&{'web.admin.editMetadata'}</a></li>
-    <li><a href="#" onclick="copyPage()">&{'web.admin.copy'}</a></li>
+    #{if page.level > 1}<li><a href="#" onclick="copyPage()">&{'web.admin.copy'}</a></li>#{/if}
   </ul>
 </div>
 <a id="edit-cancel-button" class="btn hidden" href="" title="&{'web.admin.editMode'}">&{'web.admin.revert'}</a>
