@@ -384,7 +384,8 @@ public class WebPage implements Serializable, Comparable<WebPage> {
       // TODO: need more efficient implementation
       List<WebPage> news = newArrayList(filter(childrenRecursively(), new Predicate<WebPage>() {
         @Override public boolean apply(WebPage page) {
-          return !page.metadata.isEmpty() && (tag == null || page.metadata.getProperty("tags", "").contains(tag));
+          return !page.metadata.isEmpty() && !page.metadata.getProperty("hidden", "false").equals("true")
+              && (tag == null || page.metadata.getProperty("tags", "").contains(tag));
         }
       }));
       reverse(news);
