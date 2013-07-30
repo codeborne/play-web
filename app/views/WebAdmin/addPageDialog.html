@@ -4,22 +4,36 @@
 </div>
 
 #{form @WebAdmin.addPage(), class:"form-horizontal"}
+  <input type="hidden" name="redirectTo" value="${redirectTo}">
   <div class="modal-body">
     #{formItem label:'web.admin.title'}
       <input type="text" name="title">
     #{/formItem}
 
     #{formItem label:'web.admin.url'}
-      <span>${parent?.path}/</span><input type="text" name="name" class="span2">
+      <span>${parent?.path}</span><input type="text" name="name" class="span2">
       <input type="hidden" name="parentPath" value="${parent?.path}">
     #{/formItem}
 
-    #{formItem label:'web.admin.template'}
-      #{select 'template', items:['frontpage', 'productline', 'productline-deposits', 'product', 'product-deposit', 'custom'], value:template/}
-    #{/formItem}
+    #{ifnot template}
+      #{formItem label:'web.admin.template'}
+        #{select 'template', items:['frontpage', 'productline', 'productline-deposits', 'product', 'product-deposit', 'custom'], value:template/}
+      #{/formItem}
+    #{/ifnot}
+    #{else}
+      <input type="hidden" name="template" value="${template}">
+    #{/else}
   </div>
 
   <div class="modal-footer">
     <button class="btn btn-primary">&{'web.admin.addPage'}</button>
   </div>
 #{/form}
+
+<script type="text/javascript">
+  $(function() {
+    $('[name=title]').keyup(function() {
+      $('[name=name]').val(cleanPath($(this).val()));
+    });
+  });
+</script>

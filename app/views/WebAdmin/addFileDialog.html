@@ -4,6 +4,7 @@
 </div>
 
 #{form @WebAdmin.addFile(), class:"form-horizontal"}
+  <input type="hidden" name="redirectTo" value="${redirectTo}">
   <div class="modal-body">
     #{if page.children()}
       #{formItem label:'web.admin.parent'}
@@ -13,6 +14,7 @@
             <option>${child.path}</option>
           #{/list}
         </select>
+        <a href="javascript:showAjaxDialog('@{WebAdmin.addPageDialog(page.path, redirectTo)}')">&{'web.admin.addPage'}</a>
       #{/formItem}
     #{/if}
     #{else}
@@ -32,3 +34,11 @@
     <button class="btn btn-primary">&{'web.admin.add'}</button>
   </div>
 #{/form}
+
+<script type="text/javascript">
+  $(function() {
+    $('[name=title]').keyup(function() {
+      $('[name=name]').val(cleanPath($(this).val()));
+    });
+  });
+</script>

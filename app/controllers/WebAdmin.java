@@ -80,24 +80,6 @@ public class WebAdmin extends BaseController {
     render(templates);
   }
 
-  public static void addPageDialog(String parentPath) {
-    WebPage parent = null;
-    if (parentPath != null) {
-      parent = WebPage.forPath(parentPath);
-      List<WebPage> children = parent.children();
-      if (!children.isEmpty()) renderArgs.put("template", children.get(0).metadata.getProperty("template"));
-    }
-    render(parent);
-  }
-
-  public static void addPage(@Required String parentPath, @Required String name) {
-    checkAuthenticPost();
-    if (validation.hasErrors()) forbidden();
-    WebPage page = WebPage.forPath(parentPath + "/" + name);
-    // TODO: securely implement
-    Web.sitemap();
-  }
-
   public static void saveContent(@Required String path, @Required String part) throws IOException {
     checkAuthenticPost();
     if (validation.hasErrors()) forbidden();
@@ -214,8 +196,9 @@ public class WebAdmin extends BaseController {
     redirect(Router.reverse("WebAdmin.browse").url + "?" + request.querystring);
   }
 
-  public static void delete(String path, String name, boolean redirectToPath) throws Throwable {
+  public static void delete(@Required String path, @Required String name, boolean redirectToPath) throws Throwable {
     checkAuthenticity();
+    if (validation.hasErrors()) forbidden(validation.errorsMap().toString());
     WebPage page = WebPage.forPath(path);
     VirtualFile file = page.dir.child(name);
     file.getRealFile().delete();
@@ -224,12 +207,33 @@ public class WebAdmin extends BaseController {
     redirect(Router.reverse("WebAdmin.browse").url + "?" + request.querystring);
   }
 
+  public static void addPageDialog(String parentPath, String redirectTo) {
+    WebPage parent = null;
+    if (parentPath != null) {
+      parent = WebPage.forPath(parentPath);
+      List<WebPage> children = parent.children();
+      if (!children.isEmpty()) renderArgs.put("template", children.get(0).metadata.getProperty("template"));
+    }
+    render(parent, redirectTo);
+  }
+
+  public static void addPage(@Required String parentPath, @Required String title, @Required String name, @Required String template, String redirectTo) {
+    checkAuthenticPost();
+    if (validation.hasErrors()) forbidden(validation.errorsMap().toString());
+    WebPage page = WebPage.forPath(parentPath + name);
+    if (page.dir.exists()) forbidden();
+    page.dir.getRealFile().mkdirs();
+    page.dir.child("metadata.properties").write("title: " + title + "\ntemplate: " + template + "\n");
+    redirect(defaultIfEmpty(redirectTo, page.path));
+  }
+
   public static void addNewsDialog() {
     render();
   }
 
-  public static void addNews(String path, String title, Date date, String tags) {
+  public static void addNews(@Required String path, @Required String title, @Required Date date, String tags) {
     checkAuthenticPost();
+    if (validation.hasErrors()) forbidden(validation.errorsMap().toString());
     WebPage.News parent = WebPage.forPath(path);
     if (parent.isStory()) parent = (WebPage.News) parent.parent();
     if (parent.isMonth()) parent = (WebPage.News) parent.parent();
@@ -241,24 +245,25 @@ public class WebAdmin extends BaseController {
     dir.mkdirs();
 
     VirtualFile vdir = VirtualFile.open(dir);
-    vdir.child("metadata.properties").write("title: " + title + "\ntags: " + tags + "\n");
+    vdir.child("metadata.properties").write("title: " + title + "\ntags: " + defaultString(tags) + "\n");
     vdir.child("content.html").write(play.i18n.Messages.get("web.admin.defaultContent"));
 
     WebPage.News page = WebPage.forPath(vdir);
     redirect(page.path);
   }
 
-  public static void addFileDialog(String path) {
+  public static void addFileDialog(String path, String redirectTo) {
     WebPage page = WebPage.forPath(path);
-    render(page);
+    render(page, redirectTo);
   }
 
-  public static void addFile(String path, String name, String title) {
+  public static void addFile(@Required String path, @Required String name, @Required String title, String redirectTo) {
     checkAuthenticPost();
+    if (validation.hasErrors()) forbidden(validation.errorsMap().toString());
     WebPage page = WebPage.forPath(path);
     name = name.replaceAll("\\W", "");
     page.dir.child(name + ".html").write("<h4>" + title + "</h4>\n\n" + play.i18n.Messages.get("web.admin.defaultContent"));
-    redirect(page.path);
+    redirect(defaultIfEmpty(redirectTo, page.path));
   }
 
   public static void metadataDialog(String path) {
@@ -266,8 +271,9 @@ public class WebAdmin extends BaseController {
     render(page);
   }
 
-  public static void saveMetadata(String path, String title, String tags, String description, String keywords, String order, String alias, boolean hidden) throws IOException {
+  public static void saveMetadata(@Required String path, @Required String title, String tags, String description, String keywords, String order, String alias, boolean hidden) throws IOException {
     checkAuthenticPost();
+    if (validation.hasErrors()) forbidden(validation.errorsMap().toString());
     WebPage page = WebPage.forPath(path);
     page.metadata.setProperty("title", title);
     if (isNotEmpty(tags)) page.metadata.setProperty("tags", defaultString(tags)); else page.metadata.remove("tags");
