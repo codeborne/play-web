@@ -26,7 +26,7 @@ public class Recursive extends FastTags {
     }
 
     for (WebPage child : children) {
-      if ("false".equals(child.metadata.getProperty("sitemap", "true"))) continue;
+      if ("true".equals(child.metadata.getProperty("hidden", "false"))) continue;
       ((Map)args).put("arg", child);
       ((Map)args).put("child", true);
       _sitemap(args, body, out, template, fromLine);
