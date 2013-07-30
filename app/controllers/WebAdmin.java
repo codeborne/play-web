@@ -262,8 +262,14 @@ public class WebAdmin extends BaseController {
     if (validation.hasErrors()) forbidden(validation.errorsMap().toString());
     WebPage page = WebPage.forPath(path);
     name = name.replaceAll("\\W", "");
-    page.dir.child(name + ".html").write("<h4>" + title + "</h4>\n\n" + play.i18n.Messages.get("web.admin.defaultContent"));
+    String content = defaultContent(defaultString(redirectTo, page.path));
+    page.dir.child(name + ".html").write("<h3>" + title + "</h3>\n\n" + content);
     redirect(defaultIfEmpty(redirectTo, page.path));
+  }
+
+  private static String defaultContent(String path) {
+    WebPage page = WebPage.forPath(path);
+    return page.dir.child("template.html").exists() ? page.dir.child("template.html").contentAsString() : play.i18n.Messages.get("web.admin.defaultContent");
   }
 
   public static void metadataDialog(String path) {
