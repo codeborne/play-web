@@ -4,6 +4,7 @@
     <li><a href="#" onclick="enablePageEditing()">&{'web.admin.editContent'}</a></li>
     <li><a href="#" onclick="showAjaxDialog('@{WebAdmin.metadataDialog(page.path)}')">&{'web.admin.editMetadata'}</a></li>
     #{if page.level > 1}<li><a href="#" onclick="copyPage()">&{'web.admin.copy'}</a></li>#{/if}
+    #{if page.level > 1}<li><a href="#" onclick="deletePage()">&{'web.admin.delete'}</a></li>#{/if}
   </ul>
 </div>
 <a id="edit-cancel-button" class="btn hidden" href="" title="&{'web.admin.editMode'}">&{'web.admin.revert'}</a>
@@ -38,6 +39,11 @@
     var name = prompt('&{'web.admin.copy.newName', page.parent().path}:');
     if (name)
       location.href = '@{WebAdmin.copyPage}?path=${page.path}&name=' + name.replace(/\W/, '') + '&authenticityToken=${session.authenticityToken}';
+  }
+
+  function deletePage() {
+    if (confirm('&{'web.admin.reallyDelete'} ${page.path}?'))
+      location.href = '@{WebAdmin.deletePage(page.path)}&authenticityToken=${session.authenticityToken}';
   }
 
   function enablePageEditing() {

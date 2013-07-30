@@ -2,7 +2,6 @@ package controllers;
 
 import com.google.common.base.Predicate;
 import models.WebPage;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import play.Logger;
 import play.Play;
@@ -24,6 +23,8 @@ import java.util.regex.Pattern;
 import static com.google.common.collect.Collections2.filter;
 import static controllers.Web.isAllowed;
 import static java.util.Arrays.asList;
+import static org.apache.commons.io.FileUtils.copyDirectory;
+import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static org.apache.commons.lang.StringUtils.*;
 import static util.Git.git;
 import static util.Git.safePull;
@@ -300,7 +301,14 @@ public class WebAdmin extends BaseController {
   public static void copyPage(String path, String name) throws IOException {
     checkAuthenticity();
     WebPage page = WebPage.forPath(path);
-    FileUtils.copyDirectory(page.dir.getRealFile(), new File(page.dir.getRealFile().getParentFile(), name));
+    copyDirectory(page.dir.getRealFile(), new File(page.dir.getRealFile().getParentFile(), name));
     redirect(page.parent().path + name);
+  }
+
+  public static void deletePage(String path) throws IOException {
+    checkAuthenticity();
+    WebPage page = WebPage.forPath(path);
+    deleteDirectory(page.dir.getRealFile());
+    redirect(page.parent().path);
   }
 }
