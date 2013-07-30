@@ -47,7 +47,7 @@
       modes: { wysiwyg:1,source:1 },
       exec: function(editor) {
         $.ajax({
-          url: '@{WebAdmin.saveContent()}?path=${page.path}&part=' + editor.fileName.replace(/[^\w.]/, '') + '&authenticityToken=${session.authenticityToken}',
+          url: '@{WebAdmin.saveContent()}?path=' + editor.filePath + '&part=' + editor.fileName + '&authenticityToken=${session.authenticityToken}',
           type: 'POST',
           contentType: 'text/html',
           data: editor.getData(),
@@ -90,6 +90,7 @@
 
     $('.editable').each(function() {
       var editable = $(this);
+      var parentPath = editable.parents('[data-path]');
       editable.attr('data-from', $(this).attr('class').replace(' editable', '.html')).attr('contenteditable', true);
 
       var editor = CKEDITOR.inline(this, {
@@ -103,7 +104,8 @@
         filebrowserWindowWidth  : 800,
         filebrowserWindowHeight : 515
       });
-      editor.fileName = editable.attr('data-from');
+      editor.filePath = parentPath.length ? parentPath.data('path') : '${page.path}';
+      editor.fileName = editable.data('from');
     });
   }
 </script>
