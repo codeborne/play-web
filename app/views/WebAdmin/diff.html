@@ -1,6 +1,7 @@
 #{extends 'Web/layout-with-menu.html'/}
 
-<h3>&{'web.admin.diff'}: ${page.path} [${revision}..HEAD]</h3>
+<h3>&{'web.admin.diff'}: ${page.title} (&{'web.admin.revision'} ${revision})</h3>
+<p class="muted">&{'web.admin.diff.help'}</p>
 
 #{list diff.split('\n?diff --git '), as:'change'}
   #{if change}

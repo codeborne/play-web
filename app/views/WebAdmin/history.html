@@ -1,6 +1,7 @@
 #{extends 'Web/layout-with-menu.html'/}
 
-<h3>&{'web.admin.history'}: ${page.path}</h3>
+<h3>&{'web.admin.history'}</h3>
+<h4>${page.title} - ${page.path}</h4>
 
 <table class="table table-condensed table-striped">
   <thead>
@@ -19,7 +20,10 @@
       <td nowrap>${new java.util.Date(Long.parseLong(data[1]) * 1000).format("dd MMM HH:mm")}</td>
       <td>${data[2]}</td>
       <td>${data[4]}</td>
-      <td><a href="@{WebAdmin.diff(page.path, data[0].trim())}">&{'web.admin.diff'}</a></td>
+      <td class="right">
+        <a class="btn btn-small" href="@{WebAdmin.diff(page.path, data[0].trim())}">&{'web.admin.diff'}</a>
+        <a class="btn btn-primary btn-small" href="@{WebAdmin.restore(page.path, data[0].trim())}" onclick="return confirm('&{'web.admin.reallyRestore'}')">&{'web.admin.restore'}</a>
+      </td>
     </tr>
   #{/list}
 </table>
