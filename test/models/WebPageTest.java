@@ -70,6 +70,12 @@ public class WebPageTest {
     assertEquals("<a class=\"download pdf\" href=\"/page/document.pdf\">Document (PDF, 193 Kb)</a>",
                  page.processContent("<a href=\"document.pdf\">Document</a>"));
 
+    assertEquals("<a class=\"download pdf\" href=\"/page/document.pdf\">16<sup>th</sup> issue structure (PDF, 193 Kb)</a>",
+                 page.processContent("<a href=\"document.pdf\">16<sup>th</sup> issue structure</a>"));
+
+    assertEquals("<a href=\"document.pdf\"><img src=\"something.png\"></a>",
+                 page.processContent("<a href=\"document.pdf\"><img src=\"something.png\"></a>"));
+
     assertEquals("<a class=\"download zip\" href=\"/page/big.zip\">Download (ZIP, 188.2 Mb)</a>",
                  page.processContent("<a href=\"big.zip\">Download</a>"));
 
@@ -81,9 +87,6 @@ public class WebPageTest {
 
     assertEquals("<a class=\"download zip\" href=\"/page/white+space.zip\">Download (ZIP, 188.2 Mb)</a>",
                  page.processContent("<a href=\"white space.zip\">Download</a>"));
-
-    assertEquals("<a href=\"document.pdf\"><img src=\"something.png\"></a>",
-                 page.processContent("<a href=\"document.pdf\"><img src=\"something.png\"></a>"));
 
     assertEquals("<a class=\"download pdf\" href=\"/page/document.pdf\" target=\"_blank\">Document (PDF, 193 Kb)</a>",
                  page.processContent("<a href=\"document.pdf\" target=\"_blank\">Document</a>"));

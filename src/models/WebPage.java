@@ -194,7 +194,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
   }
 
   String processContent(String content) {
-    Pattern linkPattern = Pattern.compile("<a([^>]*?)href=\"([^\"]+?)\"([^>]*?)>([^<>]+?)</a>", Pattern.DOTALL);
+    Pattern linkPattern = Pattern.compile("<a([^>]*?)href=\"([^\"]+?)\"([^>]*?)>(\\s*[^<].+?[^>]\\s*)</a>", Pattern.DOTALL);
     Matcher m = linkPattern.matcher(removeBOM(content));
     StringBuffer result = new StringBuffer();
     while (m.find()) {
