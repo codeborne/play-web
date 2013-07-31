@@ -108,7 +108,6 @@
 
       function chooseFile(filename) {
         var path = '${page.path}' + filename;
-        console.log(window.opener.CKEDITOR);
         #{if request.params['CKEditorFuncNum']}
           window.opener.CKEDITOR.tools.callFunction('${request.params['CKEditorFuncNum']}', path);
           window.close();
@@ -154,12 +153,19 @@
         </form>
       </div>
     </div>
+
+    %{
+      if (request.params['CKEditorFuncNum'])
+        files = files.grep{it.directory || it.name.matches('.*(\\.png|\\.gif|\\.jpg)$')}
+      files = files.sort{!it.directory}
+    }%
+
     #{ifnot files}
       <div id="noFiles">
         &{'web.admin.noImages'}
       </div>
     #{/ifnot}
-    %{files = files.sort{!it.directory}}%
+
     <ul>
       #{if page.level > 1}
         <li>
@@ -178,7 +184,7 @@
           #{else}
             <a href="javascript:deleteFile('${file.name}')" class="delete">×</a>
             <a href="javascript:chooseFile('${file.name}')">
-              #{if file.name.endsWith('.png') || file.name.endsWith('.jpg') || file.name.endsWith('.gif')}
+              #{if file.name.matches('.*(.png|.gif|.jpg)$')}
                 <img id="${file_index}" src="${page.path}${file.name}" alt="${file.name}" border="0">
               #{/if}
               <div class="name">${file.name.wrap(16)}</div>

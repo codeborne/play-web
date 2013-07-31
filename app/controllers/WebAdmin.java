@@ -8,6 +8,7 @@ import play.Play;
 import play.data.validation.Required;
 import play.libs.WS;
 import play.mvc.Catch;
+import play.mvc.Http;
 import play.mvc.Router;
 import play.vfs.VirtualFile;
 import util.Git;
@@ -192,7 +193,8 @@ public class WebAdmin extends BaseController {
 
   public static void browse(String path) throws MalformedURLException {
     if (isEmpty(path)) {
-      path = new URL(request.headers.get("referer").value()).getPath();
+      Http.Header referer = request.headers.get("referer");
+      path = referer != null ? new URL(referer.value()).getPath() : "/";
       request.querystring += "&path=" + path;
       redirect(Router.reverse("WebAdmin.browse").url + "?" + request.querystring);
     }
