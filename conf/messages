@@ -47,6 +47,7 @@ web.admin.toggleAll=Toggle all
 web.admin.history=History
 web.admin.diff=Diff
 web.admin.diff.help=
+web.admin.download=Download old version
 web.admin.restore=Restore
 web.admin.reallyRestore=Really restore all content of the page to this version?
 web.admin.delete=Delete

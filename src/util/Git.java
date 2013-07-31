@@ -5,27 +5,41 @@ import org.apache.commons.io.IOUtils;
 import play.Play;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Scanner;
 
 public class Git {
   public static PullListener pullListener;
 
-  public static synchronized String git(String ... command) throws IOException, InterruptedException, ExecException {
+  public static synchronized String git(String ... cmdLine) throws IOException, InterruptedException, ExecException {
+    return exec(addExecutable(cmdLine));
+  }
+
+  public static synchronized InputStream gitForStream(String ... cmdLine) throws IOException, InterruptedException, ExecException {
+    return execProc(addExecutable(cmdLine)).getInputStream();
+  }
+
+  private static String[] addExecutable(String[] command) {
     String[] cmdLine = new String[command.length + 1];
     cmdLine[0] = "git";
     System.arraycopy(command, 0, cmdLine, 1, command.length);
-    return exec(cmdLine);
+    return cmdLine;
+  }
+
+  static Process execProc(String ... cmdLine) throws IOException, ExecException, InterruptedException {
+    return new ProcessBuilder(cmdLine).directory(WebPage.ROOT.dir.getRealFile()).redirectErrorStream(true).start();
   }
 
   static String exec(String ... cmdLine) throws IOException, ExecException, InterruptedException {
-    Process proc = new ProcessBuilder(cmdLine).directory(WebPage.ROOT.dir.getRealFile()).redirectErrorStream(true).start();
-    String out = IOUtils.toString(new InputStreamReader(proc.getInputStream()));
-    int status = proc.waitFor();
-    if (status != 0) {
-      throw new ExecException(status, out);
+    Process proc = execProc(cmdLine);
+    try (InputStream in = proc.getInputStream()) {
+      String out = IOUtils.toString(new InputStreamReader(in));
+      int status = proc.waitFor();
+      if (status != 0)
+        throw new ExecException(status, out);
+      return out;
     }
-    return out;
   }
 
   public static String safePull() throws InterruptedException, IOException, ExecException {

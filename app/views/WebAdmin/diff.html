@@ -5,9 +5,15 @@
 
 #{list diff.split('\n?diff --git '), as:'change'}
   #{if change}
-  %{change = change.readLines()}%
-  <h4>${change[0].replaceFirst('.*? b/', '')}</h4>
-  <pre>${change[1..-1].grep{!it.startsWith('index ') && !it.startsWith('---') && !it.startsWith('+++')}.join('\n')}</pre>
+  %{lines = change.readLines()}%
+  %{path = lines[0].replaceFirst('.*? b/', '')}%
+  <h4>
+    ${path}
+    #{ifnot lines[1].contains('new file')}
+      <a style="font-size: 70%" href="@{WebAdmin.downloadRevision(path, revision)}" target="_blank">&{'web.admin.downloadRevision'}</a>
+    #{/ifnot}
+  </h4>
+  <pre>${lines[1..-1].grep{!it.startsWith('index ') && !it.startsWith('---') && !it.startsWith('+++')}.join('\n')}</pre>
   #{/if}
 #{/list}
 

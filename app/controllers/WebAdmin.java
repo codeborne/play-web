@@ -2,6 +2,7 @@ package controllers;
 
 import com.google.common.base.Predicate;
 import models.WebPage;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import play.Logger;
 import play.Play;
@@ -27,8 +28,7 @@ import static java.util.Arrays.asList;
 import static org.apache.commons.io.FileUtils.copyDirectory;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static org.apache.commons.lang.StringUtils.*;
-import static util.Git.git;
-import static util.Git.safePull;
+import static util.Git.*;
 
 @Check("cms")
 public class WebAdmin extends BaseController {
@@ -97,6 +97,12 @@ public class WebAdmin extends BaseController {
     }
     String diff = git(args.toArray(new String[args.size()]));
     render(page, revision, diff);
+  }
+
+  public static void downloadRevision(String path, String revision) throws InterruptedException, IOException, Git.ExecException {
+    if (path.startsWith("/")) path = path.substring(1);
+    InputStream stream = gitForStream("show", revision + ":" + path);
+    renderBinary(stream, FilenameUtils.getName(path), true);
   }
 
   public static void restore(String path, String revision) throws InterruptedException, IOException, Git.ExecException {
