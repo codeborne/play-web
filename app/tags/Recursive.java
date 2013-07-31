@@ -1,5 +1,6 @@
 package tags;
 
+import controllers.Security;
 import groovy.lang.Closure;
 import models.WebPage;
 import play.templates.FastTags;
@@ -11,6 +12,7 @@ import java.util.Map;
 
 @SuppressWarnings("UnusedDeclaration")
 public class Recursive extends FastTags {
+  @SuppressWarnings("unchecked")
   public static void _sitemap(Map<?, ?> args, Closure body, PrintWriter out, GroovyTemplate.ExecutableTemplate template, int fromLine) {
     WebPage current = (WebPage) args.get("arg");
     String name = (String) args.get("as");
@@ -25,8 +27,11 @@ public class Recursive extends FastTags {
       out.write("<ul>");
     }
 
+    boolean isAdmin = Security.check("cms");
+
     for (WebPage child : children) {
-      if ("true".equals(child.metadata.getProperty("hidden", "false"))) continue;
+      if ("false".equals(child.metadata.getProperty("sitemap", "true"))) continue;
+      if ("true".equals(child.metadata.getProperty("hidden", "false")) && !isAdmin) continue;
       ((Map)args).put("arg", child);
       ((Map)args).put("child", true);
       _sitemap(args, body, out, template, fromLine);
