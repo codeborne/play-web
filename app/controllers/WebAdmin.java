@@ -238,13 +238,13 @@ public class WebAdmin extends BaseController {
     redirect(Router.reverse("WebAdmin.browse").url + "?" + request.querystring);
   }
 
-  public static void delete(@Required String path, @Required String name, boolean redirectToPath) throws Throwable {
+  public static void delete(@Required String path, @Required String name, String redirectTo) throws Throwable {
     checkAuthenticity();
     if (validation.hasErrors()) forbidden(validation.errorsMap().toString());
     WebPage page = WebPage.forPath(path);
     VirtualFile file = page.dir.child(name);
     file.getRealFile().delete();
-    if (redirectToPath) redirect(path);
+    if (redirectTo != null) redirect(redirectTo);
     if (!request.querystring.contains("path=")) request.querystring += "&path=" + path;
     redirect(Router.reverse("WebAdmin.browse").url + "?" + request.querystring);
   }
