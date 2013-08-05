@@ -27,6 +27,7 @@
     <input type="checkbox" title="&{'web.admin.toggleAll'}" onclick="$('input[name=paths]').prop('checked', $(this).is(':checked'))">&nbsp;
     <input type="text" name="message" placeholder="&{'web.admin.commitMessage'}" class="span6">
     <button class="btn btn-primary">&{'web.admin.publish'}</button>
+    <a class="btn" href="@{WebAdmin.diff("/", "HEAD")}">&{'web.admin.diff'}</a>
   #{/form}
 #{/if}
 
@@ -51,6 +52,7 @@
       <th>&{'web.admin.time'}</th>
       <th>&{'web.admin.author'}</th>
       <th>&{'web.admin.message'}</th>
+      <th></th>
     </tr>
   </thead>
   #{list log, as:'line'}
@@ -60,6 +62,7 @@
       <td nowrap>${new java.util.Date(Long.parseLong(data[1]) * 1000).format("dd MMM HH:mm")}</td>
       <td>${data[2]}</td>
       <td>${data[4]}</td>
+      <td><a class="btn btn-small" href="@{WebAdmin.diff("/", data[0]?.trim())}">&{'web.admin.diff'}</a></td>
     </tr>
   #{/list}
 </table>
