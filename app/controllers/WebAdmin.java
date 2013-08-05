@@ -90,7 +90,7 @@ public class WebAdmin extends BaseController {
 
   public static void diff(String path, String revision) throws InterruptedException, IOException, Git.ExecException {
     WebPage page = WebPage.forPath(path);
-    List<String> args = new ArrayList<>(asList("diff", revision + "..HEAD", "--"));
+    List<String> args = new ArrayList<>(asList("diff", revision, "--"));
     if (path.startsWith("/")) path = path.substring(1);
     for (VirtualFile file : page.dir.list()) {
       if (!file.isDirectory()) args.add(path + file.getName());
