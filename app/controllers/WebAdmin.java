@@ -109,6 +109,7 @@ public class WebAdmin extends BaseController {
   }
 
   public static void restore(String path, String revision) throws InterruptedException, IOException, Git.ExecException {
+    checkAuthenticity();
     WebPage page = WebPage.forPath(path);
     List<String> args = new ArrayList<>(asList("checkout", revision, "--"));
     if (path.startsWith("/")) path = path.substring(1);
@@ -117,6 +118,14 @@ public class WebAdmin extends BaseController {
     }
     Logger.info("Restored " + page.path + " to " + revision);
     redirect(page.path);
+  }
+
+  public static void revert(String status, String filePath) throws InterruptedException, IOException, ExecException {
+    checkAuthenticity();
+    if (!WebPage.ROOT.dir.child(filePath).exists()) forbidden();
+    if (status.startsWith("A")) git("rm", "-f", filePath);
+    else git("checkout", "HEAD", "--", filePath);
+    status();
   }
 
   public static void doc() throws IOException {
