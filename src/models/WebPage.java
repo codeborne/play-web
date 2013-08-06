@@ -200,7 +200,10 @@ public class WebPage implements Serializable, Comparable<WebPage> {
     while (m.find()) {
       String filename = m.group(2);
       String filetype = filename.substring(filename.lastIndexOf('.') + 1);
-      if (filename.startsWith("http")) {
+      if (m.group(1).contains("class=") || m.group(3).contains("class=")) {
+        m.appendReplacement(result, m.group());
+      }
+      else if (filename.startsWith("http")) {
         m.appendReplacement(result, "<a$1class=\"external\" href=\"$2\"$3>$4</a>");
       }
       else if (filename.startsWith("mailto:")) {
