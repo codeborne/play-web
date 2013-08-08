@@ -82,3 +82,5 @@ git.status.M=Изменён
 git.status.R=Переименован
 git.status.C=Скопирован
 git.status.U=Обновлён
+git.status.AD=Добавлен и удалён
+git.status.MD=Изменён и удалён

@@ -82,3 +82,5 @@ git.status.M=Modified
 git.status.R=Renamed
 git.status.C=Copied
 git.status.U=Unmerged
+git.status.AD=Added and deleted
+git.status.MD=Modified and deleted

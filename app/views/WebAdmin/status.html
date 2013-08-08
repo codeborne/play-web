@@ -11,12 +11,13 @@
   #{form @WebAdmin.publish(), class:'form-horizontal'}
     <table style="margin-bottom: 10px">
       #{list status.readLines(), as:'m'}
+        %{fileStatus = m.substring(0,2).trim()}%
         <tr>
           <td>
-            <label><input type="checkbox" name="paths" value="${m.substring(3)}"> &nbsp;<b>&{'git.status.' + m.substring(0,1)}</b> &nbsp;</label>
+            <label><input type="checkbox" name="paths" value="${m.substring(3)}"> &nbsp;<b>&{'git.status.' + fileStatus}</b> &nbsp;</label>
           </td>
           <td><label>${m.substring(3)}</label></td>
-          <td><a href="@{WebAdmin.revert(m.substring(0,1), m.substring(3))}&authenticityToken=${session.authenticityToken}" onclick="return confirm('&{'web.admin.reallyRevert'}')" style="color:darkred; font-size: 120%; position: relative; top: -2px" title="&{'web.admin.revert'}">×</a></td>
+          <td><a href="@{WebAdmin.revert(fileStatus, m.substring(3))}&authenticityToken=${session.authenticityToken}" onclick="return confirm('&{'web.admin.reallyRevert'}')" style="color:darkred; font-size: 120%; position: relative; top: -2px" title="&{'web.admin.revert'}">×</a></td>
         </tr>
       #{/list}
     </table>
