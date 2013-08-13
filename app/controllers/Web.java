@@ -1,6 +1,7 @@
 package controllers;
 
 import models.WebPage;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -31,7 +32,6 @@ import javax.inject.Inject;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
@@ -213,19 +213,28 @@ public class Web extends Controller {
     redirect(path, true);
   }
 
-  public static void postForm() throws MalformedURLException, EmailException {
+  public static void postForm() throws IOException, EmailException {
     checkAuthenticity();
-    Map<String, String[]> data = params.all();
-    data.remove("body"); data.remove("authenticityToken"); data.remove("controller"); data.remove("action");
-    String replyTo = data.containsKey("replyTo") ? data.remove("replyTo")[0] : null;
+
+    String replyTo = null;
+    StringBuilder body = new StringBuilder();
+
+    String orderedParams = URLDecoder.decode(IOUtils.toString(request.body, "UTF-8"), "UTF-8");
+    for (String keyVal : orderedParams.split("&")) {
+      String[] kv = keyVal.split("=", 2);
+      String key = kv[0];
+
+      if ("replyTo".equals(key)) {
+        replyTo = kv[1]; continue;
+      }
+      else if ("authenticityToken".equals(key))
+        continue;
+
+      body.append(key).append(": ").append(kv[1]).append("\n");
+    }
 
     String path = new URL(request.headers.get("referer").value()).getPath();
     WebPage page = WebPage.forPath(path);
-
-    StringBuilder body = new StringBuilder();
-    for (Map.Entry<String, String[]> e : data.entrySet()) {
-      body.append(e.getKey()).append(": ").append(join(e.getValue(), ", ")).append("\n");
-    }
 
     SimpleEmail msg = new SimpleEmail();
     msg.setCharset("UTF-8");
