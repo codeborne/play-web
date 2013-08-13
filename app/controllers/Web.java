@@ -242,8 +242,11 @@ public class Web extends Controller {
     msg.setMsg(body.toString());
 
     String branch = params.get("branch");
-    addTo(msg, page.metadata.getProperty("email", Play.configuration.getProperty("messages.to")));
-    if (isNotEmpty(branch)) addTo(msg, page.metadata.getProperty("email." + branch));
+    addTo(msg, page.metadata.getProperty("email"));
+    if (isNotEmpty(branch))
+      addTo(msg, page.metadata.getProperty("email." + branch));
+    if (msg.getToAddresses().isEmpty())
+      addTo(msg, Play.configuration.getProperty("messages.to"));
     if (msg.getToAddresses().isEmpty())
       throw new IllegalStateException("Recipient address is not configured");
 
