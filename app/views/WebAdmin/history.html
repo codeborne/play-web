@@ -22,7 +22,7 @@
       <td>${data[4]}</td>
       <td class="right">
         <a class="btn btn-small" href="@{WebAdmin.diff(page.path, data[0].trim())}">&{'web.admin.diff'}</a>
-        <a class="btn btn-primary btn-small" href="@{WebAdmin.restore(page.path, data[0].trim())}" onclick="return confirm('&{'web.admin.reallyRestore'}')">&{'web.admin.restore'}</a>
+        <a class="btn btn-primary btn-small" href="@{WebAdmin.restore(page.path, data[0].trim())}&authenticityToken=${session.authenticityToken}" onclick="return confirm('&{'web.admin.reallyRestore'}')">&{'web.admin.restore'}</a>
       </td>
     </tr>
   #{/list}

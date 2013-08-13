@@ -11,15 +11,17 @@
   #{form @WebAdmin.publish(), class:'form-horizontal'}
     <table style="margin-bottom: 10px">
       #{list status.readLines(), as:'m'}
+        %{
+        fileStatus = m.substring(0,2).trim()
+        filePath = m.substring(3).trim()
+        if (fileStatus == 'R') filePath = filePath.substring(filePath.indexOf(' -> ') + 4)
+        }%
         <tr>
           <td>
-            <label>
-              <input type="checkbox" name="paths" value="${m.substring(3)}"> &nbsp;<b>&{'git.status.' + m.substring(0,1)}</b> &nbsp;
-            </label>
+            <label><input type="checkbox" name="paths" value="${filePath}"> &nbsp;<b>&{'git.status.' + fileStatus}</b> &nbsp;</label>
           </td>
-          <td>
-            <label>${m.substring(3)}</label>
-          </td>
+          <td><label>${m.substring(3)}</label></td>
+          <td><a href="@{WebAdmin.revert(fileStatus, filePath)}&authenticityToken=${session.authenticityToken}" onclick="return confirm('&{'web.admin.reallyRevert'}')" style="color:darkred; font-size: 120%; position: relative; top: -2px" title="&{'web.admin.revert'}">×</a></td>
         </tr>
       #{/list}
     </table>
@@ -27,6 +29,7 @@
     <input type="checkbox" title="&{'web.admin.toggleAll'}" onclick="$('input[name=paths]').prop('checked', $(this).is(':checked'))">&nbsp;
     <input type="text" name="message" placeholder="&{'web.admin.commitMessage'}" class="span6">
     <button class="btn btn-primary">&{'web.admin.publish'}</button>
+    <a class="btn" href="@{WebAdmin.diff("/", "HEAD")}">&{'web.admin.diff'}</a>
   #{/form}
 #{/if}
 
@@ -51,6 +54,7 @@
       <th>&{'web.admin.time'}</th>
       <th>&{'web.admin.author'}</th>
       <th>&{'web.admin.message'}</th>
+      <th></th>
     </tr>
   </thead>
   #{list log, as:'line'}
@@ -60,6 +64,7 @@
       <td nowrap>${new java.util.Date(Long.parseLong(data[1]) * 1000).format("dd MMM HH:mm")}</td>
       <td>${data[2]}</td>
       <td>${data[4]}</td>
+      <td><a class="btn btn-small" href="@{WebAdmin.diff("/", data[0]?.trim())}">&{'web.admin.diff'}</a></td>
     </tr>
   #{/list}
 </table>

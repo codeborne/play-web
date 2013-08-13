@@ -108,6 +108,16 @@ public class WebPageTest {
   }
 
   @Test
+  public void alreadyProcessedLinksAreNotProcessedAgain() throws Exception {
+    VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
+    when(dir.child("document.pdf").length()).thenReturn(197133L);
+    when(dir.child("document.pdf").exists()).thenReturn(true);
+    WebPage page = new WebPage(dir, "/page");
+    assertEquals("<a class=\"download pdf\" href=\"/page/document.pdf\">Document (PDF, 193 Kb)</a>",
+        page.processContent("<a class=\"download pdf\" href=\"/page/document.pdf\">Document (PDF, 193 Kb)</a>"));
+  }
+
+  @Test
   public void cyrillicsInLinksAreFixedForIE() throws Exception {
     VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
     WebPage page = new WebPage(dir, "/page");
