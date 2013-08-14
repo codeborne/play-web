@@ -216,7 +216,14 @@ public class Web extends Controller {
   public static void postForm() throws IOException, EmailException {
     checkAuthenticity();
 
-    String replyTo = null;
+    String path = new URL(request.headers.get("referer").value()).getPath();
+    WebPage page = WebPage.forPath(path);
+
+    SimpleEmail msg = new SimpleEmail();
+    msg.setCharset("UTF-8");
+    msg.setSubject(page.title);
+    addTo(msg, page.metadata.getProperty("email"));
+
     StringBuilder body = new StringBuilder();
 
     String orderedParams = URLDecoder.decode(IOUtils.toString(request.body, "UTF-8"), "UTF-8");
@@ -224,37 +231,30 @@ public class Web extends Controller {
       String[] kv = keyVal.split("=", 2);
       String key = kv[0];
 
-      if ("replyTo".equals(key)) {
-        replyTo = kv[1]; continue;
+      switch (key) {
+        case "replyTo":
+          try {
+            if (isNotEmpty(kv[1])) msg.addReplyTo(kv[1]);
+          }
+          catch (EmailException ignore) {}
+          continue;
+        case "branch":
+          addTo(msg, page.metadata.getProperty("email." + kv[1]));
+          break;
+        case "authenticityToken":
+          continue;
       }
-      else if ("authenticityToken".equals(key))
-        continue;
 
       body.append(key).append(": ").append(kv[1]).append("\n");
     }
-
-    String path = new URL(request.headers.get("referer").value()).getPath();
-    WebPage page = WebPage.forPath(path);
-
-    SimpleEmail msg = new SimpleEmail();
-    msg.setCharset("UTF-8");
-    msg.setSubject(page.title);
     msg.setMsg(body.toString());
 
-    String branch = params.get("branch");
-    addTo(msg, page.metadata.getProperty("email"));
-    if (isNotEmpty(branch))
-      addTo(msg, page.metadata.getProperty("email." + branch));
     if (msg.getToAddresses().isEmpty())
       addTo(msg, Play.configuration.getProperty("messages.to"));
     if (msg.getToAddresses().isEmpty())
       throw new IllegalStateException("Recipient address is not configured");
 
     msg.setFrom(Play.configuration.getProperty("email.from"), Play.configuration.getProperty("email.from.name"));
-    try {
-      if (isNotEmpty(replyTo)) msg.addReplyTo(replyTo);
-    }
-    catch (EmailException ignore) {}
 
     Logger.info("Sending web form to " + msg.getToAddresses() + ": " + body);
     Mail.send(msg);
