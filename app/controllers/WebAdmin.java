@@ -122,7 +122,7 @@ public class WebAdmin extends BaseController {
 
   public static void revert(String status, String filePath) throws InterruptedException, IOException, ExecException {
     checkAuthenticity();
-    if (!WebPage.ROOT.dir.child(filePath).exists()) forbidden();
+    if (filePath.contains("..")) forbidden();
     if (status.startsWith("A")) git("rm", "-f", filePath);
     else git("checkout", "HEAD", "--", filePath);
     status();
