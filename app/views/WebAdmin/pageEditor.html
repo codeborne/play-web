@@ -79,7 +79,7 @@
     var browseCmd = {
       modes: { wysiwyg:1,source:1 },
       exec: function(editor) {
-        window.open(editor.config.filebrowserImageBrowseUrl, '_blank', 'width=' + editor.config.filebrowserWindowWidth + ',height=' + editor.config.filebrowserWindowHeight + ',resizable=1,scrollbars=1');
+        window.open(editor.config.filebrowserImageBrowseUrl + '?editor=' + editor.name, '_blank', 'width=' + editor.config.filebrowserWindowWidth + ',height=' + editor.config.filebrowserWindowHeight + ',resizable=1,scrollbars=1');
       }
     };
 

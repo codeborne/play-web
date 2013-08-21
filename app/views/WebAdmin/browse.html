@@ -114,7 +114,8 @@
         #{/if}
         #{else}
           var html = path.match(/(.png|.jpg|.gif)$/) ? '<img src="' + path + '">' : '<a href="' + path + '">' + path.replace(/.*\//, '') + '</a>';
-          window.opener.CKEDITOR.instances.editor1.insertHtml(html);
+          var editor = '${request.params['editor'] ?: 'editor1'}';
+          window.opener.CKEDITOR.instances[editor].insertHtml(html);
           window.close();
         #{/else}
       }
