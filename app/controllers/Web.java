@@ -163,7 +163,7 @@ public class Web extends Controller {
     return result;
   }
 
-  private static String fixEncodingForIE(String value) throws UnsupportedEncodingException {
+  static String fixEncodingForIE(String value) throws UnsupportedEncodingException {
     if (isEmpty(value) || value.charAt(0) < 32000) return value;
     // TODO: this is a workaround for double-bug in IE + Netty
     // IE doesn't URL-encode strings in hrefs by default and Netty assumes bytes are chars in HttpMessageDecoder.readLine()
