@@ -163,7 +163,7 @@ public class Web extends Controller {
     return result;
   }
 
-  private static String fixEncodingForIE(String value) throws UnsupportedEncodingException {
+  static String fixEncodingForIE(String value) throws UnsupportedEncodingException {
     if (isEmpty(value) || value.charAt(0) < 32000) return value;
     // TODO: this is a workaround for double-bug in IE + Netty
     // IE doesn't URL-encode strings in hrefs by default and Netty assumes bytes are chars in HttpMessageDecoder.readLine()
@@ -214,7 +214,7 @@ public class Web extends Controller {
     redirect(path, true);
   }
 
-  public static void postForm() throws IOException, EmailException {
+  public static void postForm() throws Exception {
     checkAuthenticity();
 
     String path = new URL(request.headers.get("referer").value()).getPath();
@@ -258,9 +258,13 @@ public class Web extends Controller {
     msg.setFrom(Play.configuration.getProperty("email.from"), Play.configuration.getProperty("email.from.name"));
 
     Logger.info("Sending web form to " + msg.getToAddresses() + ": " + body);
-    Mail.send(msg);
-    flash.success(play.i18n.Messages.get("web.form.sent"));
-    redirect(page.path);
+    if (await(Mail.send(msg))) {
+      flash.success(play.i18n.Messages.get("web.form.sent"));
+      redirect(page.path);
+    }
+    else {
+      error("Sending email failed");
+    }
   }
 
   public static void thumbnail(String path, String name, int height) throws IOException {
