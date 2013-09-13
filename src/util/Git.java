@@ -43,7 +43,7 @@ public class Git {
   }
 
   public static String safePull() throws InterruptedException, IOException, ExecException {
-    String mergeStrategy = Play.id.equals("itest") ? "-Xours" : "--ff-only";
+    String mergeStrategy = "cms".equals(Play.id) ? "-Xours" : "--ff-only";
 
     try {
       exec("find", "-name", ".DAV", "-exec", "rm", "-fr", "{}", ";");
