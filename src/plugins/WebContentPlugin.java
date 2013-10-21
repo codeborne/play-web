@@ -23,7 +23,7 @@ public class WebContentPlugin extends PlayPlugin {
     genericRouteIndex = Router.routes.size();
     for (int i = 0; i < Router.routes.size(); i++) {
       Router.Route route = Router.routes.get(i);
-      if (route.action.equals("{controller}.{action}")) {
+      if (route.action.startsWith("{controller}")) {
         genericRouteIndex = i; break;
       }
     }
