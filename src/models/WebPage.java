@@ -6,6 +6,7 @@ import play.Play;
 import play.i18n.Lang;
 import play.templates.JavaExtensions;
 import play.vfs.VirtualFile;
+import util.UrlEncoder;
 
 import java.io.*;
 import java.text.ParseException;
@@ -24,6 +25,7 @@ import static java.util.Collections.reverse;
 import static java.util.Collections.sort;
 import static org.apache.commons.lang.StringUtils.*;
 import static play.libs.Codec.byteToHexString;
+import static util.UrlEncoder.safeUrlEncode;
 
 public class WebPage implements Serializable, Comparable<WebPage> {
   public static final Set<String> ALLOWED_FILE_TYPES = new HashSet<>(asList(Play.configuration.getProperty("web.downloadable.files", "png,jpg,gif,pdf,rtf,swf,mp3,flv,zip").split("\\s*,\\s*")));
@@ -175,22 +177,6 @@ public class WebPage implements Serializable, Comparable<WebPage> {
       parts.put(key, parts.get(key).replaceAll("(src|href)=\"([^/:]+?)\"", "$1=\"" + page.path + "$2\""));
     }
     return parts;
-  }
-
-  private static String safeUrlEncode(String url) {
-    try {
-      byte[] bytes = url.getBytes("UTF-8");
-      StringBuilder sb = new StringBuilder(url.length() * 2);
-      for (byte b : bytes) {
-        if (b == ' ') sb.append('+');
-        else if ((b & 0xFF) < 0x7F) sb.append((char) b);
-        else sb.append(String.format("%%%02X", b));
-      }
-      return sb.toString();
-    }
-    catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   String processContent(String content) {

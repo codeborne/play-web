@@ -47,6 +47,7 @@ import static models.WebPage.ALLOWED_FILE_TYPES;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 import static org.apache.commons.lang.StringUtils.*;
 import static play.Play.Mode.DEV;
+import static util.UrlEncoder.safeUrlEncode;
 
 @With(Security.class) @NoTransaction
 public class Web extends Controller {
