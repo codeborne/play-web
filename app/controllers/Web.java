@@ -39,15 +39,14 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static ext.CustomExtensions.safeUrlEncode;
 import static java.awt.RenderingHints.*;
 import static java.lang.Math.min;
 import static java.util.Arrays.asList;
 import static java.util.Collections.sort;
-import static models.Config.isProdEnv;
 import static models.WebPage.ALLOWED_FILE_TYPES;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 import static org.apache.commons.lang.StringUtils.*;
+import static play.Play.Mode.DEV;
 
 @With(Security.class) @NoTransaction
 public class Web extends Controller {
@@ -300,12 +299,12 @@ public class Web extends Controller {
     renderArgs.put("metaKeywords", page.metadata.getProperty("keywords"));
 
     try {
-      if (!isProdEnv()) JPAPlugin.startTx(true);
+      if (Play.mode == DEV) JPAPlugin.startTx(true);
 
       renderTemplate("Web/templates/" + page.template + ".html", page);
     }
     finally {
-      if (!isProdEnv()) JPAPlugin.closeTx(true);
+      if (Play.mode == DEV) JPAPlugin.closeTx(true);
     }
   }
 }
