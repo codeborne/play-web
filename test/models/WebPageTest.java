@@ -1,15 +1,18 @@
 package models;
 
 import ext.CustomExtensions;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import play.Play;
 import play.vfs.VirtualFile;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Properties;
 
 import static junit.framework.Assert.assertNotNull;
@@ -21,8 +24,13 @@ import static org.mockito.Mockito.*;
 public class WebPageTest {
   private static String currentDirName;
 
+  @Before
+  public void makeSureWeAreInEuropeWhereSundayIsTheEndOfWeek() {
+    Locale.setDefault(new Locale("ru"));
+  }
+
   @BeforeClass
-  public static void setUp() throws Exception {
+  public static void setUp() throws IOException {
     Play.configuration = new Properties();
     currentDirName = new File(".").getCanonicalFile().getName();
     Play.configuration.setProperty("web.content", "../" + currentDirName);
@@ -76,16 +84,16 @@ public class WebPageTest {
     assertEquals("<a href=\"document.pdf\"><img src=\"something.png\"></a>",
                  page.processContent("<a href=\"document.pdf\"><img src=\"something.png\"></a>"));
 
-    assertEquals("<a class=\"download zip\" href=\"/page/big.zip\">Download (ZIP, 188.2 Mb)</a>",
+    assertEquals("<a class=\"download zip\" href=\"/page/big.zip\">Download (ZIP, 188,2 Mb)</a>",
                  page.processContent("<a href=\"big.zip\">Download</a>"));
 
     assertEquals("<a class=\"download zip unavailable\" href=\"/page/absolute.zip\">Download (ZIP, 0 Kb)</a>",
                  page.processContent("<a href=\"/page/absolute.zip\">Download</a>"));
 
-    assertEquals("<a class=\"download zip\" href=\"/page/%D0%BF%D1%80%D0%B8%D0%B2%D0%B5%D1%82.zip\">Download (ZIP, 188.2 Mb)</a>",
+    assertEquals("<a class=\"download zip\" href=\"/page/%D0%BF%D1%80%D0%B8%D0%B2%D0%B5%D1%82.zip\">Download (ZIP, 188,2 Mb)</a>",
                  page.processContent("<a href=\"привет.zip\">Download</a>"));
 
-    assertEquals("<a class=\"download zip\" href=\"/page/white+space.zip\">Download (ZIP, 188.2 Mb)</a>",
+    assertEquals("<a class=\"download zip\" href=\"/page/white+space.zip\">Download (ZIP, 188,2 Mb)</a>",
                  page.processContent("<a href=\"white space.zip\">Download</a>"));
 
     assertEquals("<a class=\"download pdf\" href=\"/page/document.pdf\" target=\"_blank\">Document (PDF, 193 Kb)</a>",
