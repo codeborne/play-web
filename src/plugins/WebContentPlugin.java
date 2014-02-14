@@ -57,7 +57,8 @@ public class WebContentPlugin extends PlayPlugin {
 
   private void fixLocale() {
     String locale = Lang.get();
-    String expectedLocale = Http.Request.current().path.startsWith("/en") ? "en" : "ru";
+    String path = Http.Request.current().path;
+    String expectedLocale = path.matches("/[a-z]{2}/.*") ? path.substring(1,3) : Play.langs.get(0);
     if (!expectedLocale.equals(locale)) {
       Lang.change(expectedLocale);
       // play puts only session cookie, let's have a longer one
