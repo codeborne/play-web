@@ -281,12 +281,13 @@ public class WebPage implements Serializable, Comparable<WebPage> {
   }
 
   public List<WebPage> parents() {
-    List<WebPage> structure = new ArrayList<>();
     WebPage root = rootForLocale();
+    List<WebPage> structure = new ArrayList<>();
     WebPage current = this;
-    while (current.level > 1 && !current.equals(root)) {
+    while (current.level > 1) {
       current = current.parent();
-      structure.add(current);
+      if (!current.equals(root))
+        structure.add(current);
     }
     reverse(structure);
     return structure;
