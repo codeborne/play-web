@@ -148,6 +148,10 @@ public class WebPage implements Serializable, Comparable<WebPage> {
     }
   }
 
+  public boolean isDirectlyEditable() {
+    return level > 0;
+  }
+
   public Map<String, String> contentParts() {
     if ("true".equals(metadata.getProperty("contentFromNewestChild")))
       return contentPartsFromAnotherPage(getLast(children()));
@@ -366,6 +370,10 @@ public class WebPage implements Serializable, Comparable<WebPage> {
 
     public boolean isYear() {
       return path.matches(".*/\\d{4}/");
+    }
+
+    @Override public boolean isDirectlyEditable() {
+      return isStory();
     }
 
     public List<WebPage> findNews(final String tag) {
