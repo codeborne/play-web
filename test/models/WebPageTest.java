@@ -27,7 +27,7 @@ public class WebPageTest {
 
   @BeforeClass
   public static void setUp() throws IOException {
-    Play.configuration = new Properties();
+    if (Play.configuration == null) Play.configuration = new Properties();
     currentDirName = new File(".").getCanonicalFile().getName();
     Play.configuration.setProperty("web.content", "../" + currentDirName);
     WebPage.ROOT = new WebPage();
