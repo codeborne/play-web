@@ -10,7 +10,7 @@ import javax.inject.Inject;
 
 @OnApplicationStart(async = true) @Every("6h") @NoTransaction
 public class WebPageIndexerJob extends Job {
-  @Inject static WebPageIndexer indexer;
+  WebPageIndexer indexer = new WebPageIndexer();
 
   @Override public void doJob() throws Exception {
     if (indexer.shouldIndex())
