@@ -1,0 +1,17 @@
+#{extends 'main.html'/}
+#{set title:page?.title/}
+
+<div id="menubar">
+  <ul>
+    #{list rootPage.children(), as:'p'}
+      #{if p.metadata.mainMenu}
+        <li class="${request.url.startsWith(p.path)?'active':''}"><div><a href="${p.path}">&{p.title}</a><span class="triangle"></span></div></li>
+      #{/if}
+    #{/list}
+    <li class="search ${request.action == 'Web.search' ?'active':''}"><div><a class="icon-search-object" href="@{Web.search()}" title="&{'web.search'}"></a></div></li>
+  </ul>
+</div>
+
+<div class="container">
+  #{doLayout /}
+</div>
