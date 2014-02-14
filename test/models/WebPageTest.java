@@ -1,6 +1,5 @@
 package models;
 
-import ext.CustomExtensions;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -15,10 +14,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Properties;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class WebPageTest {
@@ -154,13 +150,13 @@ public class WebPageTest {
   @Test
   public void removeBOM() {
     assertEquals(
-        new WebPage().removeBOM(new String(new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF, (byte) 0x2B})),
-        new String(new byte[] {(byte) 0x2B}));
+        new String(new byte[] {(byte) 0x2B}),
+        WebPage.removeBOM(new String(new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF, (byte) 0x2B})));
   }
 
   @Test
   public void removeTags() throws Exception {
-    assertEquals("test link", CustomExtensions.removeTags("test <a>link</a>"));
+    assertEquals("test link", WebPage.removeTags("test <a>link</a>"));
   }
 
   @Test

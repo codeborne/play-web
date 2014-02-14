@@ -1,6 +1,5 @@
 package controllers;
 
-import com.google.common.base.Predicate;
 import models.WebPage;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -9,6 +8,7 @@ import play.Play;
 import play.data.validation.Required;
 import play.libs.WS;
 import play.mvc.Catch;
+import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Router;
 import play.vfs.VirtualFile;
@@ -22,7 +22,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.google.common.collect.Collections2.filter;
 import static controllers.Web.isAllowed;
 import static java.util.Arrays.asList;
 import static org.apache.commons.io.FileUtils.copyDirectory;
@@ -31,7 +30,7 @@ import static org.apache.commons.lang.StringUtils.*;
 import static util.Git.*;
 
 @Check("cms")
-public class WebAdmin extends BaseController {
+public class WebAdmin extends Controller {
   public static void status() throws IOException, InterruptedException, Git.ExecException {
     git("add", ".");
     String status = git("status", "-s");
@@ -62,7 +61,7 @@ public class WebAdmin extends BaseController {
 
     List<String> args = new ArrayList<>(asList("commit",
         "-m", defaultIfEmpty(message, "no message specified"),
-        "--author=" + getUser().customer.getFullName() + " <" + getUser().username + ">"));
+        "--author=" + Security.connected()));
     args.addAll(asList(paths));
     String committed = git(args.toArray(new String[args.size()]));
 
@@ -134,7 +133,7 @@ public class WebAdmin extends BaseController {
   }
 
   public static void saveContent(@Required String path, @Required String part) throws IOException {
-    checkAuthenticPost();
+    checkAuthenticity();
     if (validation.hasErrors()) forbidden();
     WebPage page = WebPage.forPath(path);
     try (OutputStream out = page.dir.child(part).outputstream()) {
@@ -228,12 +227,11 @@ public class WebAdmin extends BaseController {
       redirect(Router.reverse("WebAdmin.browse").url + "?" + request.querystring);
     }
     WebPage page = WebPage.forPath(path);
-    List<VirtualFile> list = page.dir.list();
-    Collection<VirtualFile> files = filter(list, new Predicate<VirtualFile>() {
-      @Override public boolean apply(VirtualFile file) {
-        return file.isDirectory() || isAllowed(file);
-      }
-    });
+    List<VirtualFile> files = page.dir.list();
+    for (Iterator<VirtualFile> i = files.iterator(); i.hasNext(); ) {
+      VirtualFile file =  i.next();
+      if (!file.isDirectory() && !isAllowed(file)) i.remove();
+    }
     render(page, files);
   }
 
@@ -272,7 +270,7 @@ public class WebAdmin extends BaseController {
   }
 
   public static void addPage(@Required String parentPath, @Required String title, @Required String name, @Required String template, String redirectTo) {
-    checkAuthenticPost();
+    checkAuthenticity();
     if (validation.hasErrors()) forbidden(validation.errorsMap().toString());
     WebPage page = WebPage.forPath(parentPath + name);
     if (page.dir.exists()) forbidden();
@@ -286,7 +284,7 @@ public class WebAdmin extends BaseController {
   }
 
   public static void addNews(@Required String path, @Required String title, @Required Date date, String tags) {
-    checkAuthenticPost();
+    checkAuthenticity();
     if (validation.hasErrors()) forbidden(validation.errorsMap().toString());
     WebPage.News parent = WebPage.forPath(path);
     if (parent.isStory()) parent = (WebPage.News) parent.parent();
@@ -312,7 +310,7 @@ public class WebAdmin extends BaseController {
   }
 
   public static void addFile(@Required String path, @Required String name, @Required String title, String redirectTo) {
-    checkAuthenticPost();
+    checkAuthenticity();
     if (validation.hasErrors()) forbidden(validation.errorsMap().toString());
     WebPage page = WebPage.forPath(path);
     name = name.replaceAll("\\W", "");
@@ -332,7 +330,7 @@ public class WebAdmin extends BaseController {
   }
 
   public static void saveMetadata(@Required String path, @Required String title, String tags, String description, String keywords, String order, String alias, boolean hidden) throws IOException {
-    checkAuthenticPost();
+    checkAuthenticity();
     if (validation.hasErrors()) forbidden(validation.errorsMap().toString());
     WebPage page = WebPage.forPath(path);
     page.metadata.setProperty("title", title);
