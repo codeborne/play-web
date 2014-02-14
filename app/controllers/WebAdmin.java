@@ -61,7 +61,7 @@ public class WebAdmin extends Controller {
 
     List<String> args = new ArrayList<>(asList("commit",
         "-m", defaultIfEmpty(message, "no message specified"),
-        "--author=" + Security.connected()));
+        "--author=" + Security.connected() + " <" + Security.connected() + ">"));
     args.addAll(asList(paths));
     String committed = git(args.toArray(new String[args.size()]));
 
