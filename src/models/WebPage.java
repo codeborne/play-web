@@ -1,12 +1,10 @@
 package models;
 
-import com.google.common.base.Predicate;
 import play.Logger;
 import play.Play;
 import play.i18n.Lang;
 import play.templates.JavaExtensions;
 import play.vfs.VirtualFile;
-import util.UrlEncoder;
 
 import java.io.*;
 import java.text.ParseException;
@@ -15,9 +13,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.google.common.collect.Collections2.filter;
-import static com.google.common.collect.Iterables.getLast;
-import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -167,6 +162,10 @@ public class WebPage implements Serializable, Comparable<WebPage> {
       }
     }
     return parts;
+  }
+
+  private WebPage getLast(List<WebPage> children) {
+    return children.get(children.size()-1);
   }
 
   private Map<String, String> contentPartsFromAnotherPage(WebPage page) {
@@ -371,12 +370,12 @@ public class WebPage implements Serializable, Comparable<WebPage> {
 
     public List<WebPage> findNews(final String tag) {
       // TODO: need more efficient implementation
-      List<WebPage> news = newArrayList(filter(childrenRecursively(), new Predicate<WebPage>() {
-        @Override public boolean apply(WebPage page) {
-          return !page.metadata.isEmpty() && !page.metadata.getProperty("hidden", "false").equals("true")
-              && (tag == null || page.metadata.getProperty("tags", "").contains(tag));
-        }
-      }));
+      List<WebPage> news = new ArrayList<>();
+      for (WebPage page : childrenRecursively()) {
+        if (!page.metadata.isEmpty() && !page.metadata.getProperty("hidden", "false").equals("true")
+            && (tag == null || page.metadata.getProperty("tags", "").contains(tag)))
+          news.add(page);
+      }
       reverse(news);
       return news;
     }
