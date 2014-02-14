@@ -44,6 +44,7 @@ import static java.lang.Math.min;
 import static java.util.Arrays.asList;
 import static java.util.Collections.sort;
 import static models.WebPage.ALLOWED_FILE_TYPES;
+import static models.WebPage.rootForLocale;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 import static org.apache.commons.lang.StringUtils.*;
 import static play.Play.Mode.DEV;
@@ -178,7 +179,7 @@ public class Web extends Controller {
   }
 
   public static void sitemap() {
-    WebPage root = Lang.get().equals("en") ? WebPage.ROOT_EN : WebPage.ROOT;
+    WebPage root = rootForLocale();
     render(root);
   }
 
@@ -189,7 +190,6 @@ public class Web extends Controller {
   public static void sitemapXml() {
     Document sitemap = XML.getDocument("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"/>");
     appendToSitemapRecursively(sitemap, WebPage.ROOT);
-    appendToSitemapRecursively(sitemap, WebPage.ROOT_EN);
     appendEntryToSitemap(sitemap, Router.reverse("Application.home").url, new File(".").lastModified(), "weekly");
     appendEntryToSitemap(sitemap, Router.reverse("Application.wallet").url, new File(".").lastModified(), "weekly");
     renderXml(sitemap);

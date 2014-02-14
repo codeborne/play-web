@@ -27,7 +27,6 @@ public class WebPage implements Serializable, Comparable<WebPage> {
   public static final String BOM = new String(new byte[]{(byte)0xEF, (byte)0xBB, (byte)0xBF});
 
   public static WebPage ROOT = new WebPage();
-  public static WebPage ROOT_EN = forPath("/en/");
 
   public String path;
   public VirtualFile dir;
@@ -66,7 +65,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
   }
 
   public static WebPage rootForLocale() {
-    return Lang.get().equals("ru") ? ROOT : ROOT_EN;
+    return ROOT.dir.child(Lang.get()).exists() ? forPath("/" + Lang.get()) : ROOT;
   }
 
   public static VirtualFile toVirtualFile(String path) {
@@ -114,7 +113,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
     }
 
     for (VirtualFile entry : dir.list()) {
-      if (entry.isDirectory() && !entry.getName().startsWith(".") && !entry.equals(ROOT_EN.dir)) {
+      if (entry.isDirectory() && !entry.getName().startsWith(".")) {
         WebPage child = forPath(entry);
         if (child instanceof News || !child.metadata.isEmpty())
           children.add(child);
@@ -283,10 +282,10 @@ public class WebPage implements Serializable, Comparable<WebPage> {
 
   public List<WebPage> parents() {
     List<WebPage> structure = new ArrayList<>();
+    WebPage root = rootForLocale();
     WebPage current = this;
-    while (current.level > 1) {
+    while (current.level > 1 && !current.equals(root)) {
       current = current.parent();
-      if (current.equals(WebPage.ROOT_EN)) continue;
       structure.add(current);
     }
     reverse(structure);
@@ -294,9 +293,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
   }
 
   public static List<WebPage> all() {
-    List<WebPage> pages = WebPage.ROOT.childrenRecursively();
-    addChildrenRecursively(pages, WebPage.ROOT_EN);
-    return pages;
+    return ROOT.childrenRecursively();
   }
 
   public List<WebPage> childrenRecursively() {

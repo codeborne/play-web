@@ -29,7 +29,6 @@ public class WebContentPlugin extends PlayPlugin {
     }
 
     addWebRoutes(WebPage.ROOT.children());
-    Router.addRoute(genericRouteIndex, "GET", WebPage.ROOT_EN.path + "?.*", "Web.serveContent", null);
 
     for (WebPage page : WebPage.all()) {
       String alias = page.metadata.getProperty("alias");
