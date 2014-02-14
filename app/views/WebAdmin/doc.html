@@ -1,5 +1,5 @@
-#{extends 'Web/layout-with-menu.html'/}
-%{title = 'web.admin.doc'.i18n()}%
+#{extends 'Web/layout.html'/}
+#{set 'title'}&{'web.admin.doc'}#{/set}
 %{demoPage = models.WebPage.ROOT.children()[0]}%
 
 <h1>${title}</h1>
@@ -28,7 +28,6 @@
 </p>
 
 <a name="basic"></a>
-<h2>Работа через веб-интерфейс</h2>
 #{include 'WebAdmin/doc-basic.html'/}
 
 <a name="advanced"></a>
@@ -139,12 +138,6 @@
 
 <a href="${demoPage.path}">Обычная ссылка</a><br>
 <a class="chevron" href="${demoPage.path}">Ссылка со стрелкой</a><br>
-
-*{TODO: links, chevron
-
-TODO: files
-
-TODO: images}*
 
 <hr>
 
