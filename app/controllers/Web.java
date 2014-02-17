@@ -15,13 +15,9 @@ import play.Play;
 import play.cache.CacheFor;
 import play.db.jpa.JPAPlugin;
 import play.db.jpa.NoTransaction;
-import play.i18n.Lang;
 import play.libs.Mail;
 import play.libs.XML;
-import play.mvc.After;
-import play.mvc.Controller;
-import play.mvc.Router;
-import play.mvc.With;
+import play.mvc.*;
 import play.templates.BaseTemplate;
 import play.templates.TagContext;
 import play.vfs.VirtualFile;
@@ -47,7 +43,6 @@ import static models.WebPage.ALLOWED_FILE_TYPES;
 import static models.WebPage.rootForLocale;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 import static org.apache.commons.lang.StringUtils.*;
-import static play.Play.Mode.DEV;
 import static util.UrlEncoder.safeUrlEncode;
 
 @With(Security.class) @NoTransaction
@@ -59,6 +54,16 @@ public class Web extends Controller {
     response.setHeader("X-UA-Compatible", "IE=edge,chrome=1"); // force IE to normal mode (not "compatibility") or use Chrome Frame ;-)
     if ("prod".equals(Play.id) && "Web.serveCachedContent".equals(request.action))
       response.cacheFor("12h");
+  }
+
+  @Before
+  public static void startTxForLoggedInUser() {
+    if (Security.isConnected()) JPAPlugin.startTx(true);
+  }
+
+  @After
+  public static void closeTxForLoggedInUser() {
+    JPAPlugin.closeTx(true);
   }
 
   @CacheFor("5mn")
@@ -179,19 +184,25 @@ public class Web extends Controller {
   }
 
   public static void sitemap() {
-    WebPage root = rootForLocale();
-    render(root);
+    try {
+      JPAPlugin.startTx(true);
+      WebPage root = rootForLocale();
+      render(root);
+    }
+    finally {
+      JPAPlugin.closeTx(true);
+    }
   }
 
   public static void robotsTxt() throws IOException {
-    renderText(WebPage.ROOT.loadFile("robots.txt"));
+    renderText(WebPage.ROOT.dir.child("robots.txt").exists() ? WebPage.ROOT.loadFile("robots.txt") :
+        "Sitemap: " + request.getBase() + Router.reverse("Web.sitemapXml") + "\n" +
+        "User-Agent: *\n");
   }
 
   public static void sitemapXml() {
     Document sitemap = XML.getDocument("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"/>");
     appendToSitemapRecursively(sitemap, WebPage.ROOT);
-    appendEntryToSitemap(sitemap, Router.reverse("Application.home").url, new File(".").lastModified(), "weekly");
-    appendEntryToSitemap(sitemap, Router.reverse("Application.wallet").url, new File(".").lastModified(), "weekly");
     renderXml(sitemap);
   }
 
@@ -204,7 +215,7 @@ public class Web extends Controller {
 
   private static void appendEntryToSitemap(Document sitemap, String path, long lastModified, String frequency) {
     Node url = sitemap.getDocumentElement().appendChild(sitemap.createElement("url"));
-    url.appendChild(sitemap.createElement("loc")).setTextContent(Play.configuration.getProperty("application.baseUrl") + path);
+    url.appendChild(sitemap.createElement("loc")).setTextContent(request.getBase() + path);
     url.appendChild(sitemap.createElement("lastmod")).setTextContent(new SimpleDateFormat("yyyy-MM-dd").format(lastModified));
     url.appendChild(sitemap.createElement("changefreq")).setTextContent(frequency);
     url.appendChild(sitemap.createElement("priority")).setTextContent(Double.toString(1.0 / Math.max(countMatches(path, "/"), 0.1)));
@@ -299,13 +310,6 @@ public class Web extends Controller {
     renderArgs.put("metaDescription", page.metadata.getProperty("description"));
     renderArgs.put("metaKeywords", page.metadata.getProperty("keywords"));
 
-    try {
-      if (Play.mode == DEV) JPAPlugin.startTx(true);
-
-      renderTemplate("Web/templates/" + page.template + ".html", page);
-    }
-    finally {
-      if (Play.mode == DEV) JPAPlugin.closeTx(true);
-    }
+    renderTemplate("Web/templates/" + page.template + ".html", page);
   }
 }
