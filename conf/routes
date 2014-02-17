@@ -1,0 +1,6 @@
+GET     /robots.txt               Web.robotsTxt
+GET     /sitemap.xml              Web.sitemapXml
+GET     /sitemap/?                Web.sitemap
+*       /search/?                 Web.search
+
+*       /webadmin/{action}        WebAdmin.{action}

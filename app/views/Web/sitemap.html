@@ -1,0 +1,10 @@
+#{extends 'Web/layout.html'/}
+%{title = play.i18n.Messages.get('web.sitemap')}%
+
+<h1>${title}</h1>
+
+<div id="sitemap">
+  #{sitemap root, as:'p'}
+    <li><a href="${p.path}" #{if p.metadata.hidden}style="text-decoration: line-through" title="&{'web.admin.hidden'}"#{/if}>${p.title}</a></li>
+  #{/sitemap}
+</div>

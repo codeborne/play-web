@@ -59,6 +59,12 @@ web.admin.overwriteUploadedFile=Overwrite uploaded file?
 web.admin.upload=Upload
 web.admin.noImages=No files
 
+web.sitemap=Sitemap
+web.search=Search
+web.search.total=Found total {1} results for query
+web.tags=Tags
+web.tag=Tag
+
 web.metadata.title=page title that is visible to the user
 web.metadata.template=page template, see the list below, <b>custom</b> if not specified
 web.metadata.order=the order in the menu and in the sitemap, an integer. Pages with defined order will always be in front of the others, which will be sorted in the alphabetical order of folder names.
