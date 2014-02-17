@@ -2,10 +2,10 @@
 <div id="page-editor-button" class="btn-group">
   <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#">&{'web.admin.page'}<span class="caret"></span></a>
   <ul class="dropdown-menu">
-    <li><a href="#" onclick="enablePageEditing()">&{'web.admin.editContent'}</a></li>
-    <li><a href="#" onclick="showAjaxDialog('@{WebAdmin.metadataDialog(page.path)}')">&{'web.admin.editMetadata'}</a></li>
-    #{if page.level > 1}<li><a href="#" onclick="copyPage()">&{'web.admin.copy'}</a></li>#{/if}
-    #{if page.level > 1}<li><a href="#" onclick="deletePage()">&{'web.admin.delete'}</a></li>#{/if}
+    <li><a href="#" onclick="pageEditor.enablePageEditing()">&{'web.admin.editContent'}</a></li>
+    <li><a href="#" onclick="pageEditor.showModalDialog('@{WebAdmin.metadataDialog(page.path)}')">&{'web.admin.editMetadata'}</a></li>
+    #{if page.level > 1}<li><a href="#" onclick="pageEditor.copyPage()">&{'web.admin.copy'}</a></li>#{/if}
+    #{if page.level > 1}<li><a href="#" onclick="pageEditor.deletePage()">&{'web.admin.delete'}</a></li>#{/if}
     <li><a href="@{WebAdmin.history(page.path)}">&{'web.admin.history'}</a></li>
   </ul>
 </div>
@@ -37,83 +37,95 @@
 
 <script type="text/javascript" src="/public/editor/ckeditor.js"></script>
 <script type="text/javascript">
-  function copyPage() {
-    var name = prompt('&{'web.admin.copy.newName', page.parent().path}:');
-    if (name)
-      location.href = '@{WebAdmin.copyPage}?path=${page.path}&name=' + name.replace(/\W/, '') + '&authenticityToken=${session.authenticityToken}';
-  }
-
-  function deletePage() {
-    if (confirm('&{'web.admin.reallyDelete'} ${page.path}?'))
-      location.href = '@{WebAdmin.deletePage(page.path)}&authenticityToken=${session.authenticityToken}';
-  }
-
-  function enablePageEditing() {
-    $('#page-editor-button, #edit-cancel-button').toggle();
-
-    var saveCmd = {
-      modes: { wysiwyg:1,source:1 },
-      exec: function(editor) {
-        $.ajax({
-          url: '@{WebAdmin.saveContent()}?path=' + editor.filePath + '&part=' + editor.fileName + '&authenticityToken=${session.authenticityToken}',
-          type: 'POST',
-          contentType: 'text/html',
-          data: editor.getData(),
-          success: function(data) {
-            $(editor.element.$).trigger('blur');
-            alert(data);
-          }
-        });
-      }
-    };
-
-    CKEDITOR.plugins.add('ajaxsave', {
-      init: function(editor) {
-        editor.addCommand('ajaxsave', saveCmd);
-        editor.ui.addButton('ajaxsave', {
-          label: '&{'web.admin.save'}',
-          command: 'ajaxsave'
-        });
-      }
-    });
-
-    var browseCmd = {
-      modes: { wysiwyg:1,source:1 },
-      exec: function(editor) {
-        window.open(editor.config.filebrowserImageBrowseUrl + '?editor=' + editor.name, '_blank', 'width=' + editor.config.filebrowserWindowWidth + ',height=' + editor.config.filebrowserWindowHeight + ',resizable=1,scrollbars=1');
-      }
-    };
-
-    CKEDITOR.plugins.add('browse', {
-      init: function(editor) {
-        editor.addCommand('browse', browseCmd);
-        editor.ui.addButton('browse', {
-          label: '&{'web.admin.browse'}',
-          icon: 'copy',
-          command: 'browse'
-        });
-      }
-    });
-
-    $('.editable').each(function() {
-      var editable = $(this);
-      var parentPath = editable.parents('[data-path]');
-      editable.attr('data-from', $(this).attr('class').replace(' editable', '.html')).attr('contenteditable', true);
-
-      var editor = CKEDITOR.inline(this, {
-        language: '${lang}',
-        ignoreEmptyParagraph: true,
-        autoParagraph: false,
-        fillEmptyBlocks: false,
-        allowedContent: true,
-        extraPlugins: 'browse,ajaxsave',
-        filebrowserImageBrowseUrl : '@{WebAdmin.browse()}',
-        filebrowserWindowWidth  : 800,
-        filebrowserWindowHeight : 515
+  var pageEditor = {
+    showModalDialog: function(url, selector, callback) {
+      var dialog = $(selector ? selector : '#default-dialog');
+      dialog.empty();
+      dialog.load(url, null, function(text, status) {
+        if (status=='error') return;
+        else dialog.closest('.modal').modal();
+        if (callback) callback();
       });
-      editor.filePath = parentPath.length ? parentPath.data('path') : '${page.path}';
-      editor.fileName = editable.data('from');
-    });
-  }
+    },
+
+    copyPage: function() {
+      var name = prompt('&{'web.admin.copy.newName', page.parent().path}:');
+      if (name)
+        location.href = '@{WebAdmin.copyPage}?path=${page.path}&name=' + name.replace(/\W/, '') + '&authenticityToken=${session.authenticityToken}';
+    },
+
+    deletePage: function() {
+      if (confirm('&{'web.admin.reallyDelete'} ${page.path}?'))
+        location.href = '@{WebAdmin.deletePage(page.path)}&authenticityToken=${session.authenticityToken}';
+    },
+
+    enablePageEditing: function() {
+      $('#page-editor-button, #edit-cancel-button').toggle();
+
+      var saveCmd = {
+        modes: { wysiwyg:1,source:1 },
+        exec: function(editor) {
+          $.ajax({
+            url: '@{WebAdmin.saveContent()}?path=' + editor.filePath + '&part=' + editor.fileName + '&authenticityToken=${session.authenticityToken}',
+            type: 'POST',
+            contentType: 'text/html',
+            data: editor.getData(),
+            success: function(data) {
+              $(editor.element.$).trigger('blur');
+              alert(data);
+            }
+          });
+        }
+      };
+
+      CKEDITOR.plugins.add('ajaxsave', {
+        init: function(editor) {
+          editor.addCommand('ajaxsave', saveCmd);
+          editor.ui.addButton('ajaxsave', {
+            label: '&{'web.admin.save'}',
+            command: 'ajaxsave'
+          });
+        }
+      });
+
+      var browseCmd = {
+        modes: { wysiwyg:1,source:1 },
+        exec: function(editor) {
+          window.open(editor.config.filebrowserImageBrowseUrl + '?editor=' + editor.name, '_blank', 'width=' + editor.config.filebrowserWindowWidth + ',height=' + editor.config.filebrowserWindowHeight + ',resizable=1,scrollbars=1');
+        }
+      };
+
+      CKEDITOR.plugins.add('browse', {
+        init: function(editor) {
+          editor.addCommand('browse', browseCmd);
+          editor.ui.addButton('browse', {
+            label: '&{'web.admin.browse'}',
+            icon: 'copy',
+            command: 'browse'
+          });
+        }
+      });
+
+      $('.editable').each(function() {
+        var editable = $(this);
+        var parentPath = editable.parents('[data-path]');
+        editable.attr('data-from', $(this).attr('class').replace(' editable', '.html')).attr('contenteditable', true);
+
+        var editor = CKEDITOR.inline(this, {
+          language: '${lang}',
+          ignoreEmptyParagraph: true,
+          autoParagraph: false,
+          fillEmptyBlocks: false,
+          allowedContent: true,
+          extraPlugins: 'browse,ajaxsave',
+          filebrowserImageBrowseUrl : '@{WebAdmin.browse()}',
+          filebrowserWindowWidth  : 800,
+          filebrowserWindowHeight : 515
+        });
+        editor.filePath = parentPath.length ? parentPath.data('path') : '${page.path}';
+        editor.fileName = editable.data('from');
+      });
+    }
+  };
 </script>
 #{/if}
