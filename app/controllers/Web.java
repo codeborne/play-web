@@ -24,7 +24,6 @@ import play.vfs.VirtualFile;
 import util.WebPageIndexer;
 
 import javax.imageio.ImageIO;
-import javax.inject.Inject;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -47,7 +46,7 @@ import static util.UrlEncoder.safeUrlEncode;
 
 @With(Security.class) @NoTransaction
 public class Web extends Controller {
-  @Inject static WebPageIndexer indexer;
+  static WebPageIndexer indexer = WebPageIndexer.getInstance();
 
   @After public static void setHeaders() {
     response.setHeader("X-XSS-Protection", "1; mode=block");

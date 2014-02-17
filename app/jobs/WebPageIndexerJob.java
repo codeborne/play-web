@@ -6,11 +6,9 @@ import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import util.WebPageIndexer;
 
-import javax.inject.Inject;
-
 @OnApplicationStart(async = true) @Every("6h") @NoTransaction
 public class WebPageIndexerJob extends Job {
-  WebPageIndexer indexer = new WebPageIndexer();
+  static WebPageIndexer indexer = WebPageIndexer.getInstance();
 
   @Override public void doJob() throws Exception {
     if (indexer.shouldIndex())

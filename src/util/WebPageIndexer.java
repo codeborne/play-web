@@ -15,7 +15,6 @@ import org.apache.lucene.util.Version;
 import play.Logger;
 import play.Play;
 
-import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -27,7 +26,6 @@ import static models.WebPage.removeTags;
 import static org.apache.commons.lang.StringUtils.join;
 import static org.apache.commons.lang.StringUtils.split;
 
-@Singleton
 public class WebPageIndexer {
   static Version version = Version.LUCENE_43;
   Directory dir;
@@ -37,7 +35,12 @@ public class WebPageIndexer {
   Analyzer analyzer;
   public Map<String, Map<String, AtomicInteger>> tagsFreqByTopPage = new HashMap<>();
 
-  public WebPageIndexer() {
+  private static final WebPageIndexer instance = new WebPageIndexer();
+  public static WebPageIndexer getInstance() {
+    return instance;
+  }
+
+  WebPageIndexer() {
     if (!shouldIndex()) return;
     try {
       dir = FSDirectory.open(new File("tmp/web-index"));
