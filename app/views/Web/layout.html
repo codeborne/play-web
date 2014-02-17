@@ -1,6 +1,8 @@
 #{extends 'main.html'/}
 #{set title: title ?: page?.title/}
 
+#{script 'play-web.js'/}
+
 <div id="menubar">
   <ul>
     #{list rootPage.children(), as:'p'}
