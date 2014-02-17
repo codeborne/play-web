@@ -3,14 +3,13 @@
     <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#">&{'web.admin.page'}<span class="caret"></span></a>
     <ul class="dropdown-menu">
       <li><a href="#" onclick="pageEditor.enablePageEditing()">&{'web.admin.editContent'}</a></li>
-      <li><a href="#" onclick="pageEditor.showModalDialog('@{WebAdmin.metadataDialog(page.path)}')">&{'web.admin.editMetadata'}</a></li>
+      <li><a href="#" onclick="playWeb.showModalDialog('@{WebAdmin.metadataDialog(page.path)}')">&{'web.admin.editMetadata'}</a></li>
       #{if page.level > 1}<li><a href="#" onclick="pageEditor.copyPage()">&{'web.admin.copy'}</a></li>#{/if}
       #{if page.level > 1}<li><a href="#" onclick="pageEditor.deletePage()">&{'web.admin.delete'}</a></li>#{/if}
       <li><a href="@{WebAdmin.history(page.path)}">&{'web.admin.history'}</a></li>
     </ul>
   </div>
   <a id="edit-cancel-button" class="btn hidden" href="" title="&{'web.admin.editMode'}">&{'web.admin.editingOff'}</a>
-#{/if}
 
 <style type="text/css">
   .editable[data-from]:hover, .editable:focus {
@@ -38,16 +37,6 @@
 <script type="text/javascript" src="/public/editor/ckeditor.js"></script>
 <script type="text/javascript">
   var pageEditor = {
-    showModalDialog: function(url, selector, callback) {
-      var dialog = $(selector ? selector : '#default-dialog');
-      dialog.empty();
-      dialog.load(url, null, function(text, status) {
-        if (status=='error') return;
-        else dialog.closest('.modal').modal();
-        if (callback) callback();
-      });
-    },
-
     copyPage: function() {
       var name = prompt('&{'web.admin.copy.newName', page.parent().path}:');
       if (name)
@@ -128,3 +117,4 @@
     }
   };
 </script>
+#{/if}

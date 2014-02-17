@@ -1,3 +1,15 @@
+var playWeb = {
+  showModalDialog: function(url, selector, callback) {
+    var dialog = $(selector ? selector : '#default-dialog');
+    dialog.empty();
+    dialog.load(url, null, function(text, status) {
+      if (status=='error') return;
+      else dialog.closest('.modal').modal();
+      if (callback) callback();
+    });
+  }
+};
+
 $(function() {
   $('a.email').each(function() {
     var href = $(this).attr('href');
