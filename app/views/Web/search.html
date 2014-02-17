@@ -1,0 +1,18 @@
+#{extends 'Web/layout.html'/}
+
+<div class="search content">
+  <h2>#{if params.q}${java.text.MessageFormat.format(play.i18n.Messages.get('web.search.total'), numResults%10, numResults)} '<span class="highlighted">${params.q}</span>'#{/if}</h2>
+
+  <ul class="results">
+  #{list results, as:'p'}
+    <li class="chevron">
+    <span class="muted">
+      #{list p.parents(), as:'parent'}
+      ${parent.title} /
+      #{/list}
+    </span>
+      <a href="${p.path}">${p.title}</a>
+    </li>
+  #{/list}
+  </ul>
+</div>

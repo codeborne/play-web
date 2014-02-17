@@ -13,7 +13,7 @@ web.admin.browse=Files
 web.admin.save=Save
 web.admin.copy=Copy
 web.admin.copy.newName=The page will be copied under %s. Please enter the name of the new page
-web.admin.saved=Changed saved. Do not forget to publish when all required changes are ready.
+web.admin.saved=Changes saved. Do not forget to publish everything when all required changes are ready.
 web.admin.editingOff=Revert
 web.admin.revert=Revert
 web.admin.reallyRevert=Really revert the change?
@@ -61,7 +61,7 @@ web.admin.noImages=No files
 
 web.sitemap=Sitemap
 web.search=Search
-web.search.total=Found total {1} results for query
+web.search.total={0,choice,0#No results found|1#Found 1 result|1<Found total {1} results} for query
 web.tags=Tags
 web.tag=Tag
 
