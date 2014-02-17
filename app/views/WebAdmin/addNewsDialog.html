@@ -11,7 +11,7 @@
     #{/formItem}
 
     #{formItem label:'web.admin.date'}
-      <input type="text" name="date" class="input-small" value="${today.format()}" required>
+      <input type="text" name="date" class="input-small" value="${new java.util.Date().format()}" required>
     #{/formItem}
 
     #{formItem label:'web.admin.tags'}
@@ -30,7 +30,7 @@
 <script type="text/javascript">
   $(function() {
     $('input[name=path]').val(location.pathname);
-    $('input[name=date]').datepicker({startDate:-Infinity});
+    if ($().datepicker) $('input[name=date]').datepicker({startDate:-Infinity});
     $('.tag-cloud a').each(function() {
       $('#tags-prefilled').append('<option>' + $(this).text() + '</option>');
     });

@@ -1,0 +1,57 @@
+#{extends 'Web/layout.html'/}
+
+<div class="content news">
+  <div class="row-fluid">
+    <div class="span8">
+      #{if tag}<h3 class="highlighted">&{'web.tag'}: ${tag}</h3>#{/if}
+
+      #{list news.take(1), as:'p'}
+        <div>
+          <span class="badge badge-info">${p.date().format()}</span>
+          #{if p.path == page.path}<h2 class="news-title">${p.title}</h2>#{/if}
+          #{else}<h2><a href="${p.path}" title="Permalink">${p.title}</a></h2>#{/else}
+          ${p.contentParts().content.raw()}
+          #{if p.metadata.tags}
+            <div class="tags">
+              &{'web.tags'}:
+              #{list p.metadata.tags.split(',\\s*'), as:'t'}
+                <a href="#{if page.story}${page.parents()[0].path}#{/if}?tag=${t.urlEncode()}">${t}</a>
+              #{/list}
+            </div>
+          #{/if}
+        </div>
+        <hr>
+      #{/list}
+
+      #{list news.drop(1), as:'p'}
+        <div>
+          <h4><a href="${p.path}"><span class="badge badge-info">${p.date().format()}</span>${p.title}</a></h4>
+        </div>
+      #{/list}
+
+      #{ifnot news}
+        &{'web.news.notFound'}
+      #{/ifnot}
+
+      #{if total > news.size()}
+        <br>
+        &{'web.news.notShown', total - news.size()}
+      #{/if}
+    </div>
+    <div class="span4" style="text-align: center">
+      #{if tagFreq}
+        <h3>&{'web.tags'}</h3>
+        <div class="tag-cloud">
+          #{list tagFreq, as:'e'}
+            <a href="?tag=${e.key.urlEncode()}" style="font-size: ${16 + Math.min(Math.round(30 * e.value), 10)}px">${e.key}</a>
+          #{/list}
+        </div>
+        <br>
+      #{/if}
+      #{secure.check 'cms'}
+        <br><br><a class="btn btn-primary" href="javascript:pageEditor.showModalDialog('@{WebAdmin.addNewsDialog()}')">&{'web.admin.addNews'}</a>
+      #{/secure.check}
+    </div>
+  </div>
+</div>
+
