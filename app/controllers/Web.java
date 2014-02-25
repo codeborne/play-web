@@ -51,7 +51,7 @@ public class Web extends Controller {
   @After public static void setHeaders() {
     response.setHeader("X-XSS-Protection", "1; mode=block");
     response.setHeader("X-UA-Compatible", "IE=edge,chrome=1"); // force IE to normal mode (not "compatibility") or use Chrome Frame ;-)
-    if ("prod".equals(Play.id) && "Web.serveCachedContent".equals(request.action))
+    if (Play.mode.isProd() && "Web.serveCachedContent".equals(request.action))
       response.cacheFor("12h");
   }
 
@@ -66,7 +66,7 @@ public class Web extends Controller {
   }
 
   @CacheFor("5mn")
-  public static void serveCachedContent() throws UnsupportedEncodingException {
+  public static void serveContentCached() throws UnsupportedEncodingException {
     serveContentInternal();
   }
 
