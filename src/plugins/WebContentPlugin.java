@@ -68,7 +68,7 @@ public class WebContentPlugin extends PlayPlugin {
     }
   }
 
-  private void addWebRoutes(List<WebPage> pages) {
+  void addWebRoutes(List<WebPage> pages) {
     for (WebPage page : pages) {
       String path = page.path;
       if (path.endsWith("/")) path = substring(path, 0, -1);
