@@ -12,6 +12,7 @@ import play.mvc.Scope;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import static controllers.Web.*;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.apache.commons.lang.StringUtils.substring;
 
@@ -49,8 +50,10 @@ public class WebContentPlugin extends PlayPlugin {
   }
 
   @Override public void beforeActionInvocation(Method actionMethod) {
-    if (actionMethod.getDeclaringClass().getSimpleName().equals("Web") && actionMethod.getName().startsWith("serveContent"))
+    if (actionMethod.getDeclaringClass().getSimpleName().equals("Web") &&
+        actionMethod.getName().startsWith(SERVE_CONTENT_METHOD)) {
       fixLocale();
+    }
     Scope.RenderArgs.current().put("rootPage", WebPage.rootForLocale());
   }
 
@@ -69,9 +72,9 @@ public class WebContentPlugin extends PlayPlugin {
     for (WebPage page : pages) {
       String path = page.path;
       if (path.endsWith("/")) path = substring(path, 0, -1);
-      Router.addRoute(genericRouteIndex, "GET", path + "/?.*", "Web.serveContent", null);
+      Router.addRoute(genericRouteIndex, "GET", path + "/?.*", SERVE_CONTENT_ACTION, null);
       if (Play.mode.isProd())  // cache top-level pages on production
-        Router.addRoute(genericRouteIndex, "GET", path + "/", "Web.serveContentCached", null);
+        Router.addRoute(genericRouteIndex, "GET", path + "/", SERVE_CACHED_CONTENT_ACTION, null);
     }
   }
 }

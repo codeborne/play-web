@@ -39,12 +39,12 @@ public class WebPageTest {
   }
 
   @Test(expected = SecurityException.class)
-  public void cantGoOutsideOfRoot() throws Exception {
+  public void cantGoOutsideOfRoot() {
     WebPage.forPath("../../");
   }
 
   @Test
-  public void allPathsEndWithSlash() throws Exception {
+  public void allPathsEndWithSlash() {
     WebPage root = WebPage.ROOT;
     assertEquals("/", root.path);
     assertEquals(0, root.level);
@@ -112,7 +112,7 @@ public class WebPageTest {
   }
 
   @Test
-  public void alreadyProcessedLinksAreNotProcessedAgain() throws Exception {
+  public void alreadyProcessedLinksAreNotProcessedAgain() {
     VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
     when(dir.child("document.pdf").length()).thenReturn(197133L);
     when(dir.child("document.pdf").exists()).thenReturn(true);
@@ -122,7 +122,7 @@ public class WebPageTest {
   }
 
   @Test
-  public void cyrillicsInLinksAreFixedForIE() throws Exception {
+  public void cyrillicsInLinksAreFixedForIE() {
     VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
     WebPage page = new WebPage(dir, "/page");
     assertEquals("<a href=\"/map?branch=%D0%A6%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9\">Центральный</a>",
@@ -130,7 +130,7 @@ public class WebPageTest {
   }
 
   @Test
-  public void mailLinksAreProtectedFromSpamBots() throws Exception {
+  public void mailLinksAreProtectedFromSpamBots() {
     VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
     WebPage page = new WebPage(dir, "/page");
 
@@ -155,7 +155,7 @@ public class WebPageTest {
   }
 
   @Test
-  public void removeTags() throws Exception {
+  public void removeTags() {
     assertEquals("test link", WebPage.removeTags("test <a>link</a>"));
   }
 

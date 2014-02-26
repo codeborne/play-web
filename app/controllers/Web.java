@@ -46,12 +46,17 @@ import static util.UrlEncoder.safeUrlEncode;
 
 @With(Security.class) @NoTransaction
 public class Web extends Controller {
+  public static final String SERVE_CONTENT_METHOD = "serveContent";
+  public static final String SERVE_CACHED_CONTENT_METHOD = "serveContentCached";
+  public static final String SERVE_CONTENT_ACTION = "Web." + SERVE_CONTENT_METHOD;
+  public static final String SERVE_CACHED_CONTENT_ACTION = "Web." + SERVE_CACHED_CONTENT_METHOD;
+
   static WebPageIndexer indexer = WebPageIndexer.getInstance();
 
   @After public static void setHeaders() {
     response.setHeader("X-XSS-Protection", "1; mode=block");
     response.setHeader("X-UA-Compatible", "IE=edge,chrome=1"); // force IE to normal mode (not "compatibility") or use Chrome Frame ;-)
-    if (Play.mode.isProd() && "Web.serveCachedContent".equals(request.action))
+    if (Play.mode.isProd() && SERVE_CACHED_CONTENT_ACTION.equals(request.action))
       response.cacheFor("12h");
   }
 
