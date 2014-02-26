@@ -21,6 +21,7 @@ import play.mvc.*;
 import play.templates.BaseTemplate;
 import play.templates.TagContext;
 import play.vfs.VirtualFile;
+import plugins.SetLangByURL;
 import util.WebPageIndexer;
 
 import javax.imageio.ImageIO;
@@ -46,18 +47,11 @@ import static util.UrlEncoder.safeUrlEncode;
 
 @With(Security.class) @NoTransaction
 public class Web extends Controller {
-  public static final String SERVE_CONTENT_METHOD = "serveContent";
-  public static final String SERVE_CACHED_CONTENT_METHOD = "serveContentCached";
-  public static final String SERVE_CONTENT_ACTION = "Web." + SERVE_CONTENT_METHOD;
-  public static final String SERVE_CACHED_CONTENT_ACTION = "Web." + SERVE_CACHED_CONTENT_METHOD;
-
   static WebPageIndexer indexer = WebPageIndexer.getInstance();
 
   @After public static void setHeaders() {
     response.setHeader("X-XSS-Protection", "1; mode=block");
     response.setHeader("X-UA-Compatible", "IE=edge,chrome=1"); // force IE to normal mode (not "compatibility") or use Chrome Frame ;-)
-    if (Play.mode.isProd() && SERVE_CACHED_CONTENT_ACTION.equals(request.action))
-      response.cacheFor("12h");
   }
 
   @Before
@@ -70,11 +64,12 @@ public class Web extends Controller {
     JPAPlugin.closeTx(true);
   }
 
-  @CacheFor("5mn")
+  @SetLangByURL @CacheFor("5mn")
   public static void serveContentCached() throws UnsupportedEncodingException {
     serveContentInternal();
   }
 
+  @SetLangByURL
   public static void serveContent() throws UnsupportedEncodingException {
     serveContentInternal();
   }
@@ -136,6 +131,7 @@ public class Web extends Controller {
     redirect(Play.configuration.getProperty("web." + locale + ".home"));
   }
 
+  @SetLangByURL
   public static void news(String tag) throws Exception {
     tag = fixEncodingForIE(tag);
     WebPage.News page = WebPage.forPath(request.path);

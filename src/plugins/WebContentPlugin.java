@@ -4,6 +4,7 @@ import models.WebPage;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
+import play.cache.CacheFor;
 import play.i18n.Lang;
 import play.mvc.Http;
 import play.mvc.Router;
@@ -12,11 +13,14 @@ import play.mvc.Scope;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import static controllers.Web.*;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.apache.commons.lang.StringUtils.substring;
 
 public class WebContentPlugin extends PlayPlugin {
+  public static final String WEB_CONTENT_METHOD = "serveContent";
+  public static final String WEB_CACHED_CONTENT_METHOD = "serveContentCached";
+  public static final String WEB_REDIRECT_ALIAS_METHOD = "redirectAlias";
+
   private long lastModified;
   private int genericRouteIndex;
 
@@ -35,11 +39,17 @@ public class WebContentPlugin extends PlayPlugin {
       String alias = page.metadata.getProperty("alias");
       if (isNotEmpty(alias)) {
         if (!alias.startsWith("/")) alias = "/" + alias;
-        Router.appendRoute("GET", alias + "/?", "Web.redirectAlias", "{path:'" + page.path + "'}", null, null, 0);
+        Router.appendRoute("GET", alias + "/?", "Web." + WEB_REDIRECT_ALIAS_METHOD, "{path:'" + page.path + "'}", null, null, 0);
       }
     }
 
     lastModified = WebPage.ROOT.dir.lastModified();
+  }
+
+  @Override public void afterApplicationStart() {
+    checkWebMethod(WEB_CONTENT_METHOD);
+    checkWebMethod(WEB_CACHED_CONTENT_METHOD);
+    checkWebMethod(WEB_REDIRECT_ALIAS_METHOD, String.class);
   }
 
   @Override public void detectChange() {
@@ -50,14 +60,14 @@ public class WebContentPlugin extends PlayPlugin {
   }
 
   @Override public void beforeActionInvocation(Method actionMethod) {
-    if (actionMethod.getDeclaringClass().getSimpleName().equals("Web") &&
-        actionMethod.getName().startsWith(SERVE_CONTENT_METHOD)) {
-      fixLocale();
-    }
+    if (actionMethod.isAnnotationPresent(SetLangByURL.class))
+      setLangByURL();
+    if (Play.mode.isProd() && actionMethod.isAnnotationPresent(CacheFor.class))
+      Http.Response.current().cacheFor("12h");
     Scope.RenderArgs.current().put("rootPage", WebPage.rootForLocale());
   }
 
-  private void fixLocale() {
+  private void setLangByURL() {
     String locale = Lang.get();
     String path = Http.Request.current().path;
     String expectedLocale = path.matches("/[a-z]{2}/.*") ? path.substring(1,3) : Play.langs.get(0);
@@ -72,9 +82,18 @@ public class WebContentPlugin extends PlayPlugin {
     for (WebPage page : pages) {
       String path = page.path;
       if (path.endsWith("/")) path = substring(path, 0, -1);
-      Router.addRoute(genericRouteIndex, "GET", path + "/?.*", SERVE_CONTENT_ACTION, null);
+      Router.addRoute(genericRouteIndex, "GET", path + "/?.*", "Web." + WEB_CONTENT_METHOD, null);
       if (Play.mode.isProd())  // cache top-level pages on production
-        Router.addRoute(genericRouteIndex, "GET", path + "/", SERVE_CACHED_CONTENT_ACTION, null);
+        Router.addRoute(genericRouteIndex, "GET", path + "/", "Web." + WEB_CACHED_CONTENT_METHOD, null);
+    }
+  }
+
+  private static void checkWebMethod(String methodName, Class... argTypes) {
+    try {
+      Play.classloader.loadClass("controllers.Web").getMethod(methodName, argTypes);
+    }
+    catch (Exception e) {
+      throw new RuntimeException("Invalid method name: " + methodName, e);
     }
   }
 }
