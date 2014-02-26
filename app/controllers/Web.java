@@ -88,7 +88,7 @@ public class Web extends Controller {
       WebPage page = WebPage.forPath(request.path);
       String redirectUrl = page.metadata.getProperty("redirect");
       if (isNotEmpty(redirectUrl)) redirect(fixRedirectUrl(redirectUrl));
-      if ("prod".equals(Play.id)) response.cacheFor(Long.toString(page.dir.lastModified()), "12h", page.dir.lastModified());
+      if (Play.mode.isProd()) response.cacheFor(Long.toString(page.dir.lastModified()), "12h", page.dir.lastModified());
       renderPage(page);
     }
     else if (isAllowed(file)) {
