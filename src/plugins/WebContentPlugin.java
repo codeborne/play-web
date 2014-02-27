@@ -44,7 +44,7 @@ public class WebContentPlugin extends PlayPlugin {
       }
 
       if ("news".equals(page.metadata.getProperty("template"))) {
-        WebPage.News.pathPrefixes.add(page.path);
+        WebPage.News.pathPrefixes.add(page.path.replaceFirst("/$", ""));
         Router.addRoute(genericRouteIndex, "GET", page.path + ".*", "Web." + WEB_NEWS_METHOD, null);
       }
     }
