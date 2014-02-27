@@ -127,6 +127,13 @@ public class WebPage implements Serializable, Comparable<WebPage> {
     return path.equals(ROOT.path) ? null : forPath(path.substring(0, path.lastIndexOf('/', path.length() - 2)));
   }
 
+  public WebPage parentOfLevel(int level) {
+    if (this.level == level) return this;
+    int pos = 0;
+    for (int i = 0; i < level; i++) pos = path.indexOf('/', pos+1);
+    return pos < 0 ? null : forPath(path.substring(0, pos));
+  }
+
   public String topParentName() {
     return path.substring(1, path.indexOf("/", 1));
   }

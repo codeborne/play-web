@@ -59,6 +59,16 @@ public class WebPageTest {
   }
 
   @Test
+  public void parentOfLevel() {
+    WebPage page = WebPage.forPath("/level1/level2/level3/level4/");
+    assertEquals("/level1/", page.parentOfLevel(1).path);
+    assertEquals("/level1/level2/", page.parentOfLevel(2).path);
+    assertEquals("/level1/level2/level3/", page.parentOfLevel(3).path);
+    assertEquals("/level1/level2/level3/level4/", page.parentOfLevel(4).path);
+    assertNull(page.parentOfLevel(5));
+  }
+
+  @Test
   public void preprocessDownloadableFileLinks() throws Exception {
     VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
     when(dir.child("document.pdf").length()).thenReturn(197133L);
