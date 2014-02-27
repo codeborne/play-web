@@ -19,6 +19,7 @@ import static org.apache.commons.lang.StringUtils.substring;
 public class WebContentPlugin extends PlayPlugin {
   public static final String WEB_CONTENT_METHOD = "serveContent";
   public static final String WEB_CACHED_CONTENT_METHOD = "serveContentCached";
+  public static final String WEB_NEWS_METHOD = "news";
   public static final String WEB_REDIRECT_ALIAS_METHOD = "redirectAlias";
 
   private long lastModified;
@@ -41,6 +42,11 @@ public class WebContentPlugin extends PlayPlugin {
         if (!alias.startsWith("/")) alias = "/" + alias;
         Router.appendRoute("GET", alias + "/?", "Web." + WEB_REDIRECT_ALIAS_METHOD, "{path:'" + page.path + "'}", null, null, 0);
       }
+
+      if ("news".equals(page.metadata.getProperty("template"))) {
+        WebPage.News.pathPrefixes.add(page.path);
+        Router.addRoute(genericRouteIndex, "GET", page.path + ".*", "Web." + WEB_NEWS_METHOD, null);
+      }
     }
 
     lastModified = WebPage.ROOT.dir.lastModified();
@@ -49,6 +55,7 @@ public class WebContentPlugin extends PlayPlugin {
   @Override public void afterApplicationStart() {
     checkWebMethod(WEB_CONTENT_METHOD);
     checkWebMethod(WEB_CACHED_CONTENT_METHOD);
+    checkWebMethod(WEB_NEWS_METHOD, String.class);
     checkWebMethod(WEB_REDIRECT_ALIAS_METHOD, String.class);
   }
 

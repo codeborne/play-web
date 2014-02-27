@@ -94,7 +94,7 @@ public class WebPage implements Serializable, Comparable<WebPage> {
 
   @SuppressWarnings("unchecked")
   static <P extends WebPage> P forPath(VirtualFile dir, String path) {
-    if (path.contains("/news") || path.startsWith("/analytics")) return (P)new News(dir, path);
+    if (News.isNews(path)) return (P)new News(dir, path);
     else return (P)new WebPage(dir, path);
   }
 
@@ -339,6 +339,8 @@ public class WebPage implements Serializable, Comparable<WebPage> {
   }
 
   public static class News extends WebPage {
+    public static List<String> pathPrefixes = new ArrayList<>();
+
     public News(VirtualFile dir, String path) {
       super(dir, path);
     }
@@ -391,6 +393,13 @@ public class WebPage implements Serializable, Comparable<WebPage> {
       }
       reverse(news);
       return news;
+    }
+
+    public static boolean isNews(String path) {
+      for (String prefix : pathPrefixes) {
+        if (path.startsWith(prefix)) return true;
+      }
+      return false;
     }
   }
 }

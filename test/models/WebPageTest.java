@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Properties;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -171,6 +172,7 @@ public class WebPageTest {
 
   @Test
   public void dateForNews() throws Exception {
+    WebPage.News.pathPrefixes = asList("/news");
     WebPage.News news = WebPage.forPath("/news");
 
     news.path = "/hello/news/2013/05/13/";

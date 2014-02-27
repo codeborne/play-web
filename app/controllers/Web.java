@@ -138,9 +138,9 @@ public class Web extends Controller {
     List<WebPage> allNews = page.findNews(tag);
     if (isNotEmpty(tag) && allNews.isEmpty() && page.level >= 2) redirect(page.parent().path + "?" + request.querystring);
     List<WebPage> news = page.isStory() ? asList((WebPage)page) : limit(allNews, 30);
-    renderArgs.put("tagFreq", tagFreq(page));
+    List<Entry<String, Float>> tagFreq = tagFreq(page);
     int total = allNews.size();
-    render(page, news, tag, total);
+    renderTemplate("Web/templates/news.html", page, news, tag, tagFreq, total);
   }
 
   private static List<Map.Entry<String, Float>> tagFreq(WebPage page) {
