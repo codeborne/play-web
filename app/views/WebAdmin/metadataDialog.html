@@ -3,7 +3,7 @@
   <h3>&{'web.admin.editMetadata'}</h3>
 </div>
 
-#{form @WebAdmin.saveMetadata(), class:"form-horizontal"}
+#{form @WebAdmin.saveMetadata(), class:"form-horizontal", id:'metadata-editor-form'}
   <div class="modal-body">
     <input type="hidden" name="path" value="${page.path}">
 
@@ -41,6 +41,8 @@
     #{formItem label:'web.admin.hidden'}
       <input type="checkbox" name="hidden" ${page.metadata.hidden ? 'checked' : ''} value="true">
     #{/formItem}
+
+    #{include 'WebAdmin/_metadataAdditionalFields.html'/}
   </div>
 
   <div class="modal-footer">
