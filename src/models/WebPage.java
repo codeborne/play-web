@@ -285,6 +285,11 @@ public class WebPage implements Serializable, Comparable<WebPage> {
     @Override public int compareTo(Template that) {
       return name.compareTo(that.name);
     }
+
+    @Override
+    public String toString() {
+      return name;
+    }
   }
 
   public List<WebPage> parents() {

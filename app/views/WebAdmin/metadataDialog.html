@@ -18,7 +18,7 @@
     #{/if}
     #{else}
       #{formItem label:'web.admin.template'}
-        <input type="text" value="${page.metadata.template}" disabled>
+        #{select 'template', items:templates, value:page.metadata.template/}
       #{/formItem}
 
       #{formItem label:'web.admin.description'}
@@ -39,7 +39,7 @@
     #{/else}
 
     #{formItem label:'web.admin.hidden'}
-      <input type="checkbox" name="hidden" ${page.metadata.hidden ? 'checked' : ''}>
+      <input type="checkbox" name="hidden" ${page.metadata.hidden ? 'checked' : ''} value="true">
     #{/formItem}
   </div>
 

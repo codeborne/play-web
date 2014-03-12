@@ -324,22 +324,25 @@ public class WebAdmin extends Controller {
     return page.dir.child("template.html").exists() ? page.dir.child("template.html").contentAsString() : play.i18n.Messages.get("web.admin.defaultContent");
   }
 
-  public static void metadataDialog(String path) {
+  public static void metadataDialog(String path) throws IOException {
     WebPage page = WebPage.forPath(path);
-    render(page);
+    List<WebPage.Template> templates = WebPage.availableTemplates();
+    render(page, templates);
   }
 
-  public static void saveMetadata(@Required String path, @Required String title, String tags, String description, String keywords, String order, String alias, boolean hidden) throws IOException {
+  public static void saveMetadata(@Required String path) throws IOException {
     checkAuthenticity();
     if (validation.hasErrors()) forbidden(validation.errorsMap().toString());
     WebPage page = WebPage.forPath(path);
-    page.metadata.setProperty("title", title);
-    if (isNotEmpty(tags)) page.metadata.setProperty("tags", defaultString(tags)); else page.metadata.remove("tags");
-    if (isNotEmpty(description)) page.metadata.setProperty("description", defaultString(description)); else page.metadata.remove("description");
-    if (isNotEmpty(keywords)) page.metadata.setProperty("keywords", defaultString(keywords)); else page.metadata.remove("keywords");
-    if (isNotEmpty(order)) page.metadata.setProperty("order", order); else page.metadata.remove("order");
-    if (isNotEmpty(alias)) page.metadata.setProperty("alias", alias); else page.metadata.remove("alias");
-    if (hidden) page.metadata.setProperty("hidden", "true"); else page.metadata.remove("hidden");
+
+    Map<String, String> allParams = params.allSimple();
+    allParams.keySet().removeAll(asList("path", "body", "authenticityToken", "action"));
+    page.metadata.putAll(allParams);
+
+    if (!allParams.containsKey("hidden")) page.metadata.remove("hidden");
+    for (String key : page.metadata.stringPropertyNames()) {
+      if (isEmpty(page.metadata.getProperty(key))) page.metadata.remove(key);
+    }
 
     try (Writer out = new OutputStreamWriter(page.dir.child("metadata.properties").outputstream(), "UTF-8")) {
       for (String key : page.metadata.stringPropertyNames()) {
