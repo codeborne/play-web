@@ -31,4 +31,8 @@ public class WebJavaExtensions extends JavaExtensions {
     String zeroWidthSpace = "\u200B";
     return wrap(s, maxLineLength, zeroWidthSpace, "-");
   }
+
+  public static String wrap(String s) {
+    return wrap(s, 24);
+  }
 }
