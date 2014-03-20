@@ -54,13 +54,17 @@ public class Web extends Controller {
     response.setHeader("X-UA-Compatible", "IE=edge,chrome=1"); // force IE to normal mode (not "compatibility") or use Chrome Frame ;-)
   }
 
+  private static boolean shouldStartTx() {
+    return "always".equals(Play.configuration.getProperty("web.tx", "logged-in")) || Security.isConnected();
+  }
+
   @Before
-  public static void startTxForLoggedInUser() {
-    if (Security.isConnected()) JPAPlugin.startTx(true);
+  public static void startTxIfNeeded() {
+    if (shouldStartTx()) JPAPlugin.startTx(true);
   }
 
   @After
-  public static void closeTxForLoggedInUser() {
+  public static void closeTxIfStarted() {
     JPAPlugin.closeTx(true);
   }
 
