@@ -7,40 +7,40 @@
   <div class="modal-body">
     <input type="hidden" name="path" value="${page.path}">
 
-    #{formItem label:'web.admin.title'}
+    #{webFormItem label:'web.admin.title'}
       <input type="text" name="title" value="${page.metadata.title}" required style="width:85%">
-    #{/formItem}
+    #{/webFormItem}
 
     #{if page instanceof models.WebPage.News}
-      #{formItem label:'web.admin.tags'}
+      #{webFormItem label:'web.admin.tags'}
         <input type="text" name="tags" value="${page.metadata.tags}" style="width:85%">
-      #{/formItem}
+      #{/webFormItem}
     #{/if}
     #{else}
-      #{formItem label:'web.admin.template'}
+      #{webFormItem label:'web.admin.template'}
         #{select 'template', items:templates, value:page.metadata.template/}
-      #{/formItem}
+      #{/webFormItem}
 
-      #{formItem label:'web.admin.description'}
+      #{webFormItem label:'web.admin.description'}
         <input type="text" name="description" value="${page.metadata.description}" style="width:85%">
-      #{/formItem}
+      #{/webFormItem}
 
-      #{formItem label:'web.admin.keywords'}
+      #{webFormItem label:'web.admin.keywords'}
         <input type="text" name="keywords" value="${page.metadata.keywords}" style="width:85%">
-      #{/formItem}
+      #{/webFormItem}
 
-      #{formItem label:'web.admin.order'}
+      #{webFormItem label:'web.admin.order'}
         <input type="text" name="order" class="input-small" value="${page.metadata.order}">
-      #{/formItem}
+      #{/webFormItem}
 
-      #{formItem label:'web.admin.alias'}
+      #{webFormItem label:'web.admin.alias'}
         <input type="text" name="alias" class="input-small" value="${page.metadata.alias}">
-      #{/formItem}
+      #{/webFormItem}
     #{/else}
 
-    #{formItem label:'web.admin.hidden'}
+    #{webFormItem label:'web.admin.hidden'}
       <input type="checkbox" name="hidden" ${page.metadata.hidden ? 'checked' : ''} value="true">
-    #{/formItem}
+    #{/webFormItem}
 
     #{include 'WebAdmin/_metadataAdditionalFields.html'/}
   </div>

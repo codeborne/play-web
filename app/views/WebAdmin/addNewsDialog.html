@@ -6,20 +6,20 @@
 #{form @WebAdmin.addNews(), class:"form-horizontal"}
   <input type="hidden" name="path">
   <div class="modal-body">
-    #{formItem label:'web.admin.title'}
+    #{webFormItem label:'web.admin.title'}
       <input type="text" name="title" style="width: 85%" required>
-    #{/formItem}
+    #{/webFormItem}
 
-    #{formItem label:'web.admin.date'}
+    #{webFormItem label:'web.admin.date'}
       <input type="text" name="date" class="input-small" value="${new java.util.Date().format()}" required>
-    #{/formItem}
+    #{/webFormItem}
 
-    #{formItem label:'web.admin.tags'}
+    #{webFormItem label:'web.admin.tags'}
       <input type="text" name="tags" style="width: 85%">
       <select id="tags-prefilled" style="margin-top: 5px">
         <option value="" disabled>&{'web.admin.tags.select'}</option>
       </select>
-    #{/formItem}
+    #{/webFormItem}
   </div>
 
   <div class="modal-footer">
