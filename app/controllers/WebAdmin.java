@@ -33,7 +33,7 @@ import static util.Git.*;
 public class WebAdmin extends Controller {
   public static void status() throws IOException, InterruptedException, Git.ExecException {
     git("add", ".");
-    String status = git("status", "-s");
+    String status = git("status", "--porcelain");
 
     // remove added and later deleted uncommitted files
     for (String line : status.split("\r?\n")) {
@@ -41,7 +41,7 @@ public class WebAdmin extends Controller {
       if ("AD".equals(parts[0])) // Added/Deleted
         git("rm", "--cached", parts[1]);
     }
-    status = git("status", "-s");
+    status = git("status", "--porcelain");
 
     Set<String> unpushed = new HashSet<>(asList(split(git("log", "origin/master..master", "--pretty=format:%h"), "\n")));
 
