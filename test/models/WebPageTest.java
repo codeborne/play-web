@@ -31,6 +31,7 @@ public class WebPageTest {
     if (Play.configuration == null) Play.configuration = new Properties();
     currentDirName = new File(".").getCanonicalFile().getName();
     Play.configuration.setProperty("web.content", "../" + currentDirName);
+    Play.applicationPath = null;
     WebPage.ROOT = new WebPage();
   }
 
