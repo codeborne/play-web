@@ -35,7 +35,7 @@ public class WebPageTest {
   }
 
   @Test
-  public void rootHasCanonicalPath() throws Exception {
+  public void rootHasCanonicalPath() throws IOException {
     assertEquals(new File("../" + currentDirName).getCanonicalPath(), new WebPage().dir.getRealFile().getPath());
   }
 
@@ -70,7 +70,7 @@ public class WebPageTest {
   }
 
   @Test
-  public void preprocessDownloadableFileLinks() throws Exception {
+  public void preprocessDownloadableFileLinks() {
     VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
     when(dir.child("document.pdf").length()).thenReturn(197133L);
     when(dir.child("document.pdf").exists()).thenReturn(true);
@@ -171,7 +171,7 @@ public class WebPageTest {
   }
 
   @Test
-  public void dateForNews() throws Exception {
+  public void dateForNews() throws ParseException {
     WebPage.News.pathPrefixes = asList("/news");
     WebPage.News news = WebPage.forPath("/news");
 
