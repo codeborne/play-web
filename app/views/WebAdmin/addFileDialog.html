@@ -7,7 +7,7 @@
   <input type="hidden" name="redirectTo" value="${redirectTo}">
   <div class="modal-body">
     #{if page.children()}
-      #{formItem label:'web.admin.parent'}
+      #{webFormItem label:'web.admin.parent'}
         <select name="path" style="width: 85%" required>
           <option></option>
           #{list page.childrenRecursively(), as:'child'}
@@ -15,19 +15,19 @@
           #{/list}
         </select>
         <a href="javascript:showAjaxDialog('@{WebAdmin.addPageDialog(page.path, redirectTo)}')">&{'web.admin.addPage'}</a>
-      #{/formItem}
+      #{/webFormItem}
     #{/if}
     #{else}
       <input type="hidden" name="path" value="${page.path}">
     #{/else}
 
-    #{formItem label:'web.admin.title'}
+    #{webFormItem label:'web.admin.title'}
       <input type="text" name="title" style="width: 85%" required>
-    #{/formItem}
+    #{/webFormItem}
 
-    #{formItem label:'web.admin.filename'}
+    #{webFormItem label:'web.admin.filename'}
       <input type="text" name="name" style="width: 85%" required>
-    #{/formItem}
+    #{/webFormItem}
   </div>
 
   <div class="modal-footer">

@@ -14,6 +14,7 @@ web.admin.save=Сохранить
 web.admin.browse=Файлы
 web.admin.copy=Скопировать
 web.admin.copy.newName=Копия будет создана под %s. Введите название новой страницы латинскими буквами
+web.admin.copy.normalizedName=Название страницы содержит недопустимые символы и будет изменено на
 web.admin.saved=Изменения переданы на сервер. Когда все изменения готовы, не забудьте их опубликовать.
 web.admin.editingOff=Отключить
 web.admin.revert=Отменить изменения

@@ -22,7 +22,7 @@ import static org.apache.commons.lang.StringUtils.*;
 import static play.libs.Codec.byteToHexString;
 import static util.UrlEncoder.safeUrlEncode;
 
-public class WebPage implements Serializable, Comparable<WebPage> {
+public class WebPage implements Comparable<WebPage> {
   public static final Set<String> ALLOWED_FILE_TYPES = new HashSet<>(asList(Play.configuration.getProperty("web.downloadable.files", "png,jpg,gif,pdf,rtf,swf,mp3,flv,zip").split("\\s*,\\s*")));
   public static final String BOM = new String(new byte[]{(byte)0xEF, (byte)0xBB, (byte)0xBF});
 
@@ -31,23 +31,24 @@ public class WebPage implements Serializable, Comparable<WebPage> {
   public String path;
   public VirtualFile dir;
   public int level;
-  public Properties metadata = new Properties();
+  public final Properties metadata;
   public String title;
   public String template;
   public int order;
 
   /** ROOT */
   WebPage() {
-    this.dir = VirtualFile.open(canonicalPath(Play.getFile(Play.configuration.getProperty("web.content", "web-content"))));
-    this.path = "/";
+    dir = VirtualFile.open(canonicalPath(Play.getFile(Play.configuration.getProperty("web.content", "web-content"))));
+    path = "/";
+    metadata = new Properties();
   }
 
   WebPage(VirtualFile dir, String path) {
     this.dir = dir;
     this.path = path.endsWith("/") ? path : path + "/";
-    this.level = countMatches(this.path, "/") - 1;
+    level = countMatches(this.path, "/") - 1;
 
-    loadMetadata();
+    metadata = loadMetadata(dir);
     title = metadata.getProperty("title");
     if (isEmpty(title)) title = generateTitle();
     template = metadata.getProperty("template", "custom");
@@ -142,16 +143,19 @@ public class WebPage implements Serializable, Comparable<WebPage> {
     return dir.child(filename).contentAsString();
   }
 
-  private void loadMetadata() {
+  private static Properties loadMetadata(VirtualFile dir) {
     VirtualFile metaFile = dir.child("metadata.properties");
     if (metaFile.exists()) {
       try (Reader reader = new InputStreamReader(metaFile.inputstream(), "UTF-8")) {
+        Properties metadata = new Properties();
         metadata.load(reader);
+        return metadata;
       }
       catch (IOException e) {
         Logger.error("Cannot load " + metaFile, e);
       }
     }
+    return new Properties();
   }
 
   public boolean isDirectlyEditable() {
@@ -223,8 +227,8 @@ public class WebPage implements Serializable, Comparable<WebPage> {
   }
 
   @Override public int compareTo(WebPage that) {
-    int result = this.order - that.order;
-    if (result == 0) result = this.path.compareTo(that.path);
+    int result = order - that.order;
+    if (result == 0) result = path.compareTo(that.path);
     return result;
   }
 
@@ -280,6 +284,10 @@ public class WebPage implements Serializable, Comparable<WebPage> {
       while (m.find()) {
         parts.add(m.group(1));
       }
+    }
+
+    @Override public boolean equals(Object object) {
+      return (object instanceof Template) && name.equals(((Template)object).name);
     }
 
     @Override public int compareTo(Template that) {

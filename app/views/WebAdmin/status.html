@@ -13,14 +13,14 @@
       #{list status.readLines(), as:'m'}
         %{
         fileStatus = m.substring(0,2).trim()
-        filePath = m.substring(3).trim()
+        filePath = m.substring(3).trim().replaceFirst('^"(.*)"$', '$1')
         if (fileStatus == 'R') filePath = filePath.substring(filePath.indexOf(' -> ') + 4)
         }%
         <tr>
           <td>
             <label><input type="checkbox" name="paths" value="${filePath}"> &nbsp;<b>&{'git.status.' + fileStatus}</b> &nbsp;</label>
           </td>
-          <td><label>${m.substring(3)}</label></td>
+          <td><label>${filePath}</label></td>
           <td><a href="@{WebAdmin.revert(fileStatus, filePath)}&authenticityToken=${session.authenticityToken}" onclick="return confirm('&{'web.admin.reallyRevert'}')" style="color:darkred; font-size: 120%; position: relative; top: -2px" title="&{'web.admin.revert'}">×</a></td>
         </tr>
       #{/list}

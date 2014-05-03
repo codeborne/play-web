@@ -79,22 +79,23 @@ public class Web extends Controller {
   }
 
   private static void serveContentInternal() throws UnsupportedEncodingException {
-    VirtualFile file = WebPage.toVirtualFile(URLDecoder.decode(request.path, "UTF-8"));
-    if (!file.exists()) notFound();
+    VirtualFile dir = serveFileOrGetDirectory();
+    if (!request.path.endsWith("/")) redirect(request.path + "/");
+    WebPage page = WebPage.forPath(dir);
+    String redirectUrl = page.metadata.getProperty("redirect");
+    if (isNotEmpty(redirectUrl)) redirect(fixRedirectUrl(redirectUrl));
+    if (Play.mode.isProd()) response.cacheFor(Long.toString(page.dir.lastModified()), "12h", page.dir.lastModified());
+    renderPage(page);
+  }
 
-    if (file.isDirectory()) {
-      if (!request.path.endsWith("/")) redirect(request.path + "/");
-      WebPage page = WebPage.forPath(request.path);
-      String redirectUrl = page.metadata.getProperty("redirect");
-      if (isNotEmpty(redirectUrl)) redirect(fixRedirectUrl(redirectUrl));
-      if (Play.mode.isProd()) response.cacheFor(Long.toString(page.dir.lastModified()), "12h", page.dir.lastModified());
-      renderPage(page);
-    }
-    else if (isAllowed(file)) {
+  private static VirtualFile serveFileOrGetDirectory() throws UnsupportedEncodingException {
+    VirtualFile file = WebPage.toVirtualFile(URLDecoder.decode(request.path, "UTF-8"));
+    if (file.exists() && isAllowed(file)) {
       response.cacheFor("30d");
       renderBinary(file.getRealFile());
     }
-    else notFound();
+    else if (!file.isDirectory()) notFound();
+    return file;
   }
 
   private static String fixRedirectUrl(String url) {
@@ -137,8 +138,9 @@ public class Web extends Controller {
 
   @SetLangByURL
   public static void news(String tag) throws Exception {
+    VirtualFile dir = serveFileOrGetDirectory();
     tag = fixEncodingForIE(tag);
-    WebPage.News page = WebPage.forPath(request.path);
+    WebPage.News page = WebPage.forPath(dir);
     List<WebPage> allNews = page.findNews(tag);
     if (isNotEmpty(tag) && allNews.isEmpty() && page.level >= 2) redirect(page.parent().path + "?" + request.querystring);
     List<WebPage> news = page.isStory() ? asList((WebPage)page) : limit(allNews, 30);

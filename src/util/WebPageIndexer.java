@@ -71,6 +71,7 @@ public class WebPageIndexer {
     Map<String, Map<String, AtomicInteger>> tagsFreqByTopPage = new HashMap<>();
     for (WebPage page : WebPage.ROOT.childrenRecursively()) {
       if (page instanceof WebPage.News && !((WebPage.News)page).isStory()) continue;
+      if ("true".equals(page.metadata.getProperty("hidden", "false"))) continue;
 
       float boost = 3600 * 24 * 1000f / (System.currentTimeMillis() - page.date().getTime());
 
