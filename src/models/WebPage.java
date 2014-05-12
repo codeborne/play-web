@@ -351,7 +351,7 @@ public class WebPage implements Comparable<WebPage> {
   }
 
   private static void addChildrenRecursively(List<WebPage> pages, WebPage page) {
-    for (WebPage child : page.children()) {
+    for (WebPage child : page.allChildren()) {
       pages.add(child);
       addChildrenRecursively(pages, child);
     }
