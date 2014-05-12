@@ -1,5 +1,6 @@
 package models;
 
+import controllers.Security;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -205,19 +207,47 @@ public class WebPageTest {
     VirtualFile childFile = mock(VirtualFile.class, "someFile");
     when(dir.list()).thenReturn(asList(childDir1, childDir2, childFile));
 
-    WebPage page = new WebPage(dir, "/page");
+    List<WebPage> children = new WebPage(dir, "/page").children();
 
-    assertEquals(2, page.children().size());
+    assertEquals(2, children.size());
   }
 
-  private VirtualFile mockChildDir(String name) {
+  @Test
+  public void hiddenChildrenAreNotReturnedByDefault() throws Exception {
+    VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
+    VirtualFile childDir1 = mockChildDir("childA");
+    VirtualFile childDir2 = mockChildDir("childB", "hidden=true");
+    when(dir.list()).thenReturn(asList(childDir1, childDir2));
+
+    List<WebPage> children = new WebPage(dir, "/page").children();
+
+    assertEquals(1, children.size());
+    assertEquals("childA", children.get(0).title);
+  }
+
+  @Test
+  public void hiddenChildrenAreReturnedForCMSProfile() throws Exception {
+    Security.currentRole = "cms";
+
+    VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
+    VirtualFile childDir1 = mockChildDir("childA");
+    VirtualFile childDir2 = mockChildDir("childB", "hidden=true");
+    when(dir.list()).thenReturn(asList(childDir1, childDir2));
+
+    List<WebPage> children = new WebPage(dir, "/page").children();
+
+    assertEquals(2, children.size());
+  }
+
+  private VirtualFile mockChildDir(String name, String ... metadata) {
     VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
     when(dir.isDirectory()).thenReturn(true);
     when(dir.getName()).thenReturn(name);
     when(dir.getRealFile().getPath()).thenReturn("/" + name);
     VirtualFile metadataFile = dir.child("metadata.properties");
     when(metadataFile.exists()).thenReturn(true);
-    when(metadataFile.inputstream()).thenReturn(new ByteArrayInputStream("a=b".getBytes()));
+    String m = (metadata.length == 0) ? "a=b" : metadata[0];
+    when(metadataFile.inputstream()).thenReturn(new ByteArrayInputStream(m.getBytes()));
     return dir;
   }
 

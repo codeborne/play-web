@@ -1,5 +1,6 @@
 package models;
 
+import controllers.Security;
 import play.Logger;
 import play.Play;
 import play.i18n.Lang;
@@ -113,15 +114,28 @@ public class WebPage implements Comparable<WebPage> {
       }
     }
 
+    boolean hasCMSProfile = Security.check("cms");
     for (VirtualFile entry : dir.list()) {
       if (entry.isDirectory() && !entry.getName().startsWith(".")) {
         WebPage child = forPath(entry);
-        if (child instanceof News || !child.metadata.isEmpty())
+        if (child instanceof News || (child.hasMetadata() && (child.isVisible() || hasCMSProfile)))
           children.add(child);
       }
     }
     sort(children);
     return children;
+  }
+
+  public boolean isHidden() {
+    return "true".equalsIgnoreCase(metadata.getProperty("hidden"));
+  }
+
+  public boolean isVisible() {
+    return !isHidden();
+  }
+
+  public boolean hasMetadata() {
+    return !metadata.isEmpty();
   }
 
   public WebPage parent() {
@@ -400,7 +414,7 @@ public class WebPage implements Comparable<WebPage> {
       // TODO: need more efficient implementation
       List<WebPage> news = new ArrayList<>();
       for (WebPage page : childrenRecursively()) {
-        if (!page.metadata.isEmpty() && !page.metadata.getProperty("hidden", "false").equals("true")
+        if (page.hasMetadata() && page.isVisible()
             && (tag == null || page.metadata.getProperty("tags", "").contains(tag)))
           news.add(page);
       }
