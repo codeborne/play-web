@@ -34,7 +34,7 @@ public class WebContentPlugin extends PlayPlugin {
       }
     }
 
-    addWebRoutes(WebPage.ROOT.children());
+    addWebRoutes(WebPage.ROOT.allChildren());
 
     for (WebPage page : WebPage.all()) {
       String alias = page.metadata.getProperty("alias");

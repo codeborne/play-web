@@ -106,6 +106,16 @@ public class WebPage implements Comparable<WebPage> {
   }
 
   public List<WebPage> children() {
+    List<WebPage> children = allChildren();
+    if (Security.check("cms")) return children;
+    for (Iterator<WebPage> iterator = children.iterator(); iterator.hasNext(); ) {
+      WebPage page = iterator.next();
+      if (page.isHidden()) iterator.remove();
+    }
+    return children;
+  }
+
+  public List<WebPage> allChildren() {
     List<WebPage> children = new ArrayList<>();
     if (metadata.getProperty("contentFrom") != null) {
       for (WebPage child : forPath(metadata.getProperty("contentFrom")).children()) {
@@ -114,11 +124,10 @@ public class WebPage implements Comparable<WebPage> {
       }
     }
 
-    boolean hasCMSProfile = Security.check("cms");
     for (VirtualFile entry : dir.list()) {
       if (entry.isDirectory() && !entry.getName().startsWith(".")) {
         WebPage child = forPath(entry);
-        if (child instanceof News || (child.hasMetadata() && (child.isVisible() || hasCMSProfile)))
+        if (child instanceof News || child.hasMetadata())
           children.add(child);
       }
     }
