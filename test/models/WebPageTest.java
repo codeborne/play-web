@@ -1,6 +1,5 @@
 package models;
 
-import controllers.Security;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -213,28 +212,26 @@ public class WebPageTest {
   }
 
   @Test
-  public void hiddenChildrenAreNotReturnedByDefault() throws Exception {
+  public void onlyVisibleChildren() throws Exception {
     VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
     VirtualFile childDir1 = mockChildDir("childA");
     VirtualFile childDir2 = mockChildDir("childB", "hidden=true");
     when(dir.list()).thenReturn(asList(childDir1, childDir2));
 
-    List<WebPage> children = new WebPage(dir, "/page").visibleChildren();
+    List<WebPage> children = new WebPage(dir, "/page").children(false);
 
     assertEquals(1, children.size());
     assertEquals("childA", children.get(0).title);
   }
 
   @Test
-  public void hiddenChildrenAreReturnedForCMSProfile() throws Exception {
-    Security.currentRole = "cms";
-
+  public void includingHiddenChildren() throws Exception {
     VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
     VirtualFile childDir1 = mockChildDir("childA");
     VirtualFile childDir2 = mockChildDir("childB", "hidden=true");
     when(dir.list()).thenReturn(asList(childDir1, childDir2));
 
-    List<WebPage> children = new WebPage(dir, "/page").visibleChildren();
+    List<WebPage> children = new WebPage(dir, "/page").children(true);
 
     assertEquals(2, children.size());
   }

@@ -61,6 +61,7 @@ public class Web extends Controller {
   @Before
   public static void startTxIfNeeded() {
     if (shouldStartTx()) JPAPlugin.startTx(true);
+    renderArgs.put("includeHiddenPages", Security.check("cms"));
   }
 
   @After
@@ -202,7 +203,7 @@ public class Web extends Controller {
 
   public static void robotsTxt() throws IOException {
     renderText(WebPage.ROOT.dir.child("robots.txt").exists() ? WebPage.ROOT.loadFile("robots.txt") :
-        "Sitemap: " + request.getBase() + Router.reverse("Web.sitemapXml") + "\n" +
+      "Sitemap: " + request.getBase() + Router.reverse("Web.sitemapXml") + "\n" +
         "User-Agent: *\n");
   }
 

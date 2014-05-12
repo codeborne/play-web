@@ -1,6 +1,5 @@
 package models;
 
-import controllers.Security;
 import play.Logger;
 import play.Play;
 import play.i18n.Lang;
@@ -108,18 +107,14 @@ public class WebPage implements Comparable<WebPage> {
     return forPath(dir, path);
   }
 
-  public List<WebPage> visibleChildren() {
+  public List<WebPage> children(boolean includeHidden) {
     List<WebPage> children = children();
-    if (hasCMSProfile()) return children;
+    if (includeHidden) return children;
     for (Iterator<WebPage> iterator = children.iterator(); iterator.hasNext(); ) {
       WebPage page = iterator.next();
       if (page.isHidden()) iterator.remove();
     }
     return children;
-  }
-
-  private boolean hasCMSProfile() {
-    return Security.check("cms");
   }
 
   public List<WebPage> children() {
@@ -249,7 +244,7 @@ public class WebPage implements Comparable<WebPage> {
         double lengthKb = file.length() / 1024.0;
         String size = lengthKb > 1024 ? format("%.1f Mb", lengthKb / 1024) : format("%.0f Kb", lengthKb);
         m.appendReplacement(result, "<a$1class=\"download " + filetype + (file.exists() ? "" : " unavailable") + "\" href=\"" + (filename.startsWith("/") ? "" : path) + safeUrlEncode(m.group(2)) + "\"$3>" +
-            "$4 (" + filetype.toUpperCase() + ", " + size + ")</a>");
+          "$4 (" + filetype.toUpperCase() + ", " + size + ")</a>");
       }
     }
     m.appendTail(result);
@@ -431,7 +426,7 @@ public class WebPage implements Comparable<WebPage> {
       List<WebPage> news = new ArrayList<>();
       for (WebPage page : childrenRecursively()) {
         if (page.hasMetadata() && page.isVisible()
-            && (tag == null || page.metadata.getProperty("tags", "").contains(tag)))
+          && (tag == null || page.metadata.getProperty("tags", "").contains(tag)))
           news.add(page);
       }
       reverse(news);
