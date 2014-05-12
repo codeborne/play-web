@@ -219,7 +219,7 @@ public class WebPageTest {
     VirtualFile childDir2 = mockChildDir("childB", "hidden=true");
     when(dir.list()).thenReturn(asList(childDir1, childDir2));
 
-    List<WebPage> children = new WebPage(dir, "/page").children();
+    List<WebPage> children = new WebPage(dir, "/page").visibleChildren();
 
     assertEquals(1, children.size());
     assertEquals("childA", children.get(0).title);
@@ -234,7 +234,7 @@ public class WebPageTest {
     VirtualFile childDir2 = mockChildDir("childB", "hidden=true");
     when(dir.list()).thenReturn(asList(childDir1, childDir2));
 
-    List<WebPage> children = new WebPage(dir, "/page").children();
+    List<WebPage> children = new WebPage(dir, "/page").visibleChildren();
 
     assertEquals(2, children.size());
   }

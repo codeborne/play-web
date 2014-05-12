@@ -7,7 +7,10 @@ import play.i18n.Lang;
 import play.templates.JavaExtensions;
 import play.vfs.VirtualFile;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -105,9 +108,9 @@ public class WebPage implements Comparable<WebPage> {
     return forPath(dir, path);
   }
 
-  public List<WebPage> children() {
-    List<WebPage> children = allChildren();
-    if (Security.check("cms")) return children;
+  public List<WebPage> visibleChildren() {
+    List<WebPage> children = children();
+    if (hasCMSProfile()) return children;
     for (Iterator<WebPage> iterator = children.iterator(); iterator.hasNext(); ) {
       WebPage page = iterator.next();
       if (page.isHidden()) iterator.remove();
@@ -115,7 +118,11 @@ public class WebPage implements Comparable<WebPage> {
     return children;
   }
 
-  public List<WebPage> allChildren() {
+  private boolean hasCMSProfile() {
+    return Security.check("cms");
+  }
+
+  public List<WebPage> children() {
     List<WebPage> children = new ArrayList<>();
     if (metadata.getProperty("contentFrom") != null) {
       for (WebPage child : forPath(metadata.getProperty("contentFrom")).children()) {
@@ -351,7 +358,7 @@ public class WebPage implements Comparable<WebPage> {
   }
 
   private static void addChildrenRecursively(List<WebPage> pages, WebPage page) {
-    for (WebPage child : page.allChildren()) {
+    for (WebPage child : page.children()) {
       pages.add(child);
       addChildrenRecursively(pages, child);
     }
