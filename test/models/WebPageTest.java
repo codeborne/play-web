@@ -6,6 +6,7 @@ import org.junit.Test;
 import play.Play;
 import play.vfs.VirtualFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
@@ -187,6 +188,37 @@ public class WebPageTest {
 
     news.path = "/analytics/2012/05/";
     assertEquals(date("1.05.2012"), news.date());
+  }
+
+  @Test
+  public void simplePageWithoutChildren() throws Exception {
+    VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
+    WebPage page = new WebPage(dir, "/page");
+    assertEquals(true, page.children().isEmpty());
+  }
+
+  @Test
+  public void simplePageWithChildren() throws Exception {
+    VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
+    VirtualFile childDir1 = mockChildDir("childA");
+    VirtualFile childDir2 = mockChildDir("childB");
+    VirtualFile childFile = mock(VirtualFile.class, "someFile");
+    when(dir.list()).thenReturn(asList(childDir1, childDir2, childFile));
+
+    WebPage page = new WebPage(dir, "/page");
+
+    assertEquals(2, page.children().size());
+  }
+
+  private VirtualFile mockChildDir(String name) {
+    VirtualFile dir = mock(VirtualFile.class, RETURNS_DEEP_STUBS);
+    when(dir.isDirectory()).thenReturn(true);
+    when(dir.getName()).thenReturn(name);
+    when(dir.getRealFile().getPath()).thenReturn("/" + name);
+    VirtualFile metadataFile = dir.child("metadata.properties");
+    when(metadataFile.exists()).thenReturn(true);
+    when(metadataFile.inputstream()).thenReturn(new ByteArrayInputStream("a=b".getBytes()));
+    return dir;
   }
 
   private Date date(String ddMMyyyy) throws ParseException {
