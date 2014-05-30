@@ -389,20 +389,26 @@ public class WebPage implements Comparable<WebPage> {
     }
 
     @Override public Date date() {
-      String path = this.path.replaceFirst("^.*/(news|analytics)/", "");
+      String path = this.path;
       if (path.endsWith("/")) path = path.substring(0, path.length()-1);
-      if (path.lastIndexOf('-') > path.length() - 3) path = path.substring(0, path.lastIndexOf('-')); // remove trailing '-' from dates, eg 2013/05/03-2
+
+      int lastSlashIndex = path.lastIndexOf('/');
+      int lastDashIndex = path.lastIndexOf('-');
+      if (lastDashIndex > lastSlashIndex) path = path.substring(0, lastDashIndex);
+
+      path = path.substring(path.length() - 10);
       try {
         return new SimpleDateFormat("yyyy/MM/dd").parse(path);
       }
       catch (ParseException e) {
+        path = path.substring(3);
         try {
           return new SimpleDateFormat("yyyy/MM").parse(path);
         }
         catch (ParseException ignore) {
+          return super.date();
         }
       }
-      return super.date();
     }
 
     public boolean isStory() {

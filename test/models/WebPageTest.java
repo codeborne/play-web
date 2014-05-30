@@ -187,8 +187,17 @@ public class WebPageTest {
     news.path = "/analytics/2012/05/10-2/";
     assertEquals(date("10.05.2012"), news.date());
 
+    news.path = "/analytics/2012/05/10-24/";
+    assertEquals(date("10.05.2012"), news.date());
+
+    news.path = "/analytics/2012/05/10-240/";
+    assertEquals(date("10.05.2012"), news.date());
+
     news.path = "/analytics/2012/05/";
     assertEquals(date("1.05.2012"), news.date());
+
+    news.path = "/et/uudised/2013/03/";
+    assertEquals(date("1.03.2013"), news.date());
   }
 
   @Test
