@@ -21,6 +21,7 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.reverse;
 import static java.util.Collections.sort;
+import static java.util.regex.Pattern.DOTALL;
 import static org.apache.commons.lang.StringUtils.*;
 import static play.libs.Codec.byteToHexString;
 import static util.UrlEncoder.safeUrlEncode;
@@ -28,6 +29,7 @@ import static util.UrlEncoder.safeUrlEncode;
 public class WebPage implements Comparable<WebPage> {
   public static final Set<String> ALLOWED_FILE_TYPES = new HashSet<>(asList(Play.configuration.getProperty("web.downloadable.files", "png,jpg,gif,pdf,rtf,swf,mp3,flv,zip").split("\\s*,\\s*")));
   public static final String BOM = new String(new byte[]{(byte)0xEF, (byte)0xBB, (byte)0xBF});
+  static final Pattern LINK_PATTERN = Pattern.compile("<a([^>]*?)href=\"([^\"]+?)\"([^>]*?)>(\\s*[^<].+?[^>]\\s*)</a>", DOTALL);
 
   public static WebPage ROOT = new WebPage();
 
@@ -218,8 +220,8 @@ public class WebPage implements Comparable<WebPage> {
   }
 
   String processContent(String content) {
-    Pattern linkPattern = Pattern.compile("<a([^>]*?)href=\"([^\"]+?)\"([^>]*?)>(\\s*[^<].+?[^>]\\s*)</a>", Pattern.DOTALL);
-    Matcher m = linkPattern.matcher(removeBOM(content));
+    content = removeBOM(content);
+    Matcher m = LINK_PATTERN.matcher(content);
     StringBuffer result = new StringBuffer();
     while (m.find()) {
       String filename = m.group(2);
@@ -257,7 +259,7 @@ public class WebPage implements Comparable<WebPage> {
     return result;
   }
 
-  public static List<Template> availableTemplates() throws IOException {
+  public static List<Template> availableTemplates() {
     List<Template> templates = new ArrayList<>();
     for (VirtualFile file : Play.templatesPath.get(0).child("Web/templates").list()) {
       templates.add(new Template(file));
