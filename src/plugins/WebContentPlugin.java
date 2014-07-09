@@ -25,6 +25,10 @@ public class WebContentPlugin extends PlayPlugin {
   private long lastModified;
   private int genericRouteIndex;
 
+  public static boolean cacheEnabled() {
+    return "true".equals(Play.configuration.getProperty("web.cacheEnabled", String.valueOf(Play.mode.isProd())));
+  }
+
   @Override public void onApplicationStart() {
     genericRouteIndex = Router.routes.size();
     for (int i = 0; i < Router.routes.size(); i++) {
@@ -69,7 +73,7 @@ public class WebContentPlugin extends PlayPlugin {
   @Override public void beforeActionInvocation(Method actionMethod) {
     if (actionMethod.isAnnotationPresent(SetLangByURL.class))
       setLangByURL();
-    if (Play.mode.isProd() && actionMethod.isAnnotationPresent(CacheFor.class))
+    if (cacheEnabled() && actionMethod.isAnnotationPresent(CacheFor.class))
       Http.Response.current().cacheFor("12h");
     Scope.RenderArgs.current().put("rootPage", WebPage.rootForLocale());
   }
@@ -90,7 +94,7 @@ public class WebContentPlugin extends PlayPlugin {
       String path = page.path;
       if (path.endsWith("/")) path = substring(path, 0, -1);
       Router.addRoute(genericRouteIndex, "GET", path + "/?.*", "Web." + WEB_CONTENT_METHOD, null);
-      if (Play.mode.isProd())  // cache top-level pages on production
+      if (cacheEnabled())  // cache top-level pages on production
         Router.addRoute(genericRouteIndex, "GET", path + "/", "Web." + WEB_CACHED_CONTENT_METHOD, null);
     }
   }
