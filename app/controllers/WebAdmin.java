@@ -7,10 +7,7 @@ import play.Logger;
 import play.Play;
 import play.data.validation.Required;
 import play.libs.WS;
-import play.mvc.Catch;
-import play.mvc.Controller;
-import play.mvc.Http;
-import play.mvc.Router;
+import play.mvc.*;
 import play.vfs.VirtualFile;
 import util.Git;
 
@@ -30,6 +27,7 @@ import static org.apache.commons.lang.StringUtils.*;
 import static util.Git.*;
 
 @Check("cms")
+@With(Security.class)
 public class WebAdmin extends Controller {
   public static void status() throws IOException, InterruptedException, Git.ExecException {
     git("add", ".");
