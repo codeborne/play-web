@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-self: play -> web 1.5.4
-=======
-self: play -> web 1.5.5
->>>>>>> 77bc2cd415eb1545174b11aad79a37d4f1cec202
+self: play -> web 1.5.6
 
 require:
     - play 1.2+
