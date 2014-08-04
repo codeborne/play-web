@@ -361,7 +361,7 @@ public class WebPage implements Comparable<WebPage> {
     }
   }
 
-  static String canonicalPath(File file) {
+  public static String canonicalPath(File file) {
     try {
       return file.getCanonicalPath();
     }

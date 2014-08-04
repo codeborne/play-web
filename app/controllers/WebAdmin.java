@@ -21,6 +21,8 @@ import java.util.regex.Pattern;
 
 import static controllers.Web.isAllowed;
 import static java.util.Arrays.asList;
+import static models.WebPage.ROOT;
+import static models.WebPage.canonicalPath;
 import static org.apache.commons.io.FileUtils.copyDirectory;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static org.apache.commons.lang.StringUtils.*;
@@ -208,7 +210,7 @@ public class WebAdmin extends Controller {
   }
 
   private static void checkAbsolute(String url) throws FileNotFoundException {
-    checkRelative(WebPage.ROOT, url);
+    checkRelative(ROOT, url);
   }
 
   private static void checkRelative(WebPage page, String url) throws FileNotFoundException {
@@ -237,6 +239,7 @@ public class WebAdmin extends Controller {
     checkAuthenticity();
     WebPage page = WebPage.forPath(path);
     VirtualFile file = page.dir.child(data.getName());
+    checkFileBelongsToCmsContentRoot(file);
     try (InputStream in = new FileInputStream(data)) {
       try (OutputStream out = file.outputstream()) {
         IOUtils.copy(in, out);
@@ -251,10 +254,15 @@ public class WebAdmin extends Controller {
     if (validation.hasErrors()) forbidden(validation.errorsMap().toString());
     WebPage page = WebPage.forPath(path);
     VirtualFile file = page.dir.child(name);
+    checkFileBelongsToCmsContentRoot(file);
     file.getRealFile().delete();
     if (redirectTo != null) redirect(redirectTo);
     if (!request.querystring.contains("path=")) request.querystring += "&path=" + path;
     redirect(Router.reverse("WebAdmin.browse").url + "?" + request.querystring);
+  }
+
+  private static void checkFileBelongsToCmsContentRoot(VirtualFile file) {
+    if (!canonicalPath(file.getRealFile()).startsWith(canonicalPath(ROOT.dir.getRealFile()))) forbidden("Access denied");
   }
 
   public static void addPageDialog(String parentPath, String redirectTo) {
