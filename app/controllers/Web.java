@@ -230,6 +230,7 @@ public class Web extends Controller {
   }
 
   public static void redirectAlias(String path) {
+    if (!path.startsWith("/")) forbidden();
     redirect(path, true);
   }
 
