@@ -6,7 +6,6 @@ import play.i18n.Lang;
 import play.templates.JavaExtensions;
 import play.vfs.VirtualFile;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -254,7 +253,7 @@ public class WebPage implements Comparable<WebPage> {
     return result.toString();
   }
 
-  @Override public int compareTo(@Nonnull WebPage that) {
+  @Override public int compareTo(WebPage that) {
     if (order == that.order) return path.compareTo(that.path);
     return order < that.order ? -1 : 1;
   }
@@ -317,7 +316,7 @@ public class WebPage implements Comparable<WebPage> {
       return (object instanceof Template) && name.equals(((Template)object).name);
     }
 
-    @Override public int compareTo(@Nonnull Template that) {
+    @Override public int compareTo(Template that) {
       return name.compareTo(that.name);
     }
 
