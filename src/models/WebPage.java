@@ -13,6 +13,7 @@ import java.io.Reader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -163,7 +164,7 @@ public class WebPage implements Comparable<WebPage> {
   }
 
   public String topParentName() {
-    return path.substring(1, path.indexOf("/", 1));
+    return path.substring(1, path.indexOf('/', 1));
   }
 
   public String loadFile(String filename) {
@@ -212,9 +213,9 @@ public class WebPage implements Comparable<WebPage> {
   private Map<String, String> contentPartsFromAnotherPage(WebPage page) {
     template = page.template;
     Map<String, String> parts = page.contentParts();
-    for (String key : parts.keySet()) {
+    for (Entry<String, String> entry : parts.entrySet()) {
       // fix images and links
-      parts.put(key, parts.get(key).replaceAll("(src|href)=\"([^/:]+?)\"", "$1=\"" + page.path + "$2\""));
+      parts.put(entry.getKey(), entry.getValue().replaceAll("(src|href)=\"([^/:]+?)\"", "$1=\"" + page.path + "$2\""));
     }
     return parts;
   }
