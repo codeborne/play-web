@@ -57,7 +57,7 @@ public class WebPageIndexer {
   }
 
   public final boolean shouldIndex() {
-    return WebPage.ROOT.dir.exists() && !Play.runingInTestMode();
+    return WebPage.ROOT.dir.exists() && "true".equals(Play.configuration.getProperty("web.enabled", "true"));
   }
 
   public synchronized void indexWebPages() throws IOException {

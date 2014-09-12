@@ -43,6 +43,7 @@ import static models.WebPage.ALLOWED_FILE_TYPES;
 import static models.WebPage.rootForLocale;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 import static org.apache.commons.lang.StringUtils.*;
+import static plugins.WebContentPlugin.cacheEnabled;
 import static util.UrlEncoder.safeUrlEncode;
 
 @With(Security.class) @NoTransaction
@@ -85,7 +86,7 @@ public class Web extends Controller {
     WebPage page = WebPage.forPath(dir);
     String redirectUrl = page.metadata.getProperty("redirect");
     if (isNotEmpty(redirectUrl)) redirect(fixRedirectUrl(redirectUrl));
-    if (Play.mode.isProd()) response.cacheFor(Long.toString(page.dir.lastModified()), "12h", page.dir.lastModified());
+    if (cacheEnabled()) response.cacheFor(Long.toString(page.dir.lastModified()), "12h", page.dir.lastModified());
     renderPage(page);
   }
 
@@ -229,6 +230,7 @@ public class Web extends Controller {
   }
 
   public static void redirectAlias(String path) {
+    if (!path.startsWith("/")) forbidden();
     redirect(path, true);
   }
 

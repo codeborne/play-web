@@ -1,7 +1,8 @@
-self: play -> web 1.5.4
+self: play -> web 1.5.8
 
 require:
     - play 1.2+
+    - play -> secure
 
     - org.apache.lucene -> lucene-core 4.3.0
     - org.apache.lucene -> lucene-analyzers-common 4.3.0
