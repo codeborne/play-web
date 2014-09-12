@@ -10,12 +10,12 @@ import play.Logger;
 import play.Play;
 import play.data.validation.Required;
 import play.i18n.Messages;
-import play.libs.WS;
 import play.mvc.*;
 import play.vfs.VirtualFile;
 import util.Git.*;
 
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -235,13 +235,21 @@ public class WebAdmin extends Controller {
   }
 
   private static void verifyExternalURL(String url) throws IOException {
-    WS.HttpResponse response = WS.url(url).timeout("5s").get();
-    int status = response.getStatus();
-    if (status != 200 && status != 301 && status != 302)
-      throw new IOException(status + ": " + response.getStatusText());
+    HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+    try {
+      connection.setConnectTimeout(5000);
+      connection.setReadTimeout(5000);
+      connection.setRequestMethod("HEAD");
+      int status = connection.getResponseCode();
+      if (status < 200 || status > 399)
+        throw new IOException("status: " + status);
+    }
+    finally {
+      connection.disconnect();
+    }
   }
 
-  static boolean isSafeToScan(String url) {
+  @Util static boolean isSafeToScan(String url) {
     try {
       URI uri = URI.create(url);
       if ("localhost".equals(uri.getHost())) return false;
