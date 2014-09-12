@@ -5,6 +5,7 @@
   <ul>
     #{list problems}<li>${_}</li>#{/list}
   </ul>
+  <br>
 #{/if}
 
 #{if warnings}
@@ -14,12 +15,14 @@
   <ul>
     #{list warnings}<li>${_}</li>#{/list}
   </ul>
+  <br>
 #{/if}
 
 #{if !problems && !warnings}
   <h1>No problems found</h1>
+  <br>
 #{/if}
 
-#{if params.verifyExternal}
-  <a class="btn btn-danger" href="@{WebAdmin.checkLinks(true)}" onclick="return confirm('&{'web.admin.checkExternalLinks.confirm'}')">&{'web.admin.checkExternalLinks'} ${externals.size()}</a>
+#{if externals && !params.verifyExternal}
+  <a class="btn btn-danger" href="@{WebAdmin.checkLinks(true)}" onclick="return confirm('&{'web.admin.checkExternalLinks.confirm'}')">&{'web.admin.checkExternalLinks'} (${externals.size()})</a>
 #{/if}

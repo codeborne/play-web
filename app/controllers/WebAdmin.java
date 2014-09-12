@@ -1,5 +1,7 @@
 package controllers;
 
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.net.InetAddresses;
 import models.WebPage;
 import org.apache.commons.io.FilenameUtils;
@@ -7,6 +9,7 @@ import org.apache.commons.io.IOUtils;
 import play.Logger;
 import play.Play;
 import play.data.validation.Required;
+import play.i18n.Messages;
 import play.libs.WS;
 import play.mvc.Catch;
 import play.mvc.Controller;
@@ -58,7 +61,7 @@ public class WebAdmin extends Controller {
   public static void gitFailure(Git.ExecException e) throws InterruptedException, IOException, Git.ExecException {
     Logger.error("git failed: " + e.code + ": " + e.getMessage());
     flash.error(e.getMessage());
-    if (!request.action.equals("WebAdmin.status")) status();
+    if (!"WebAdmin.status".equals(request.action)) status();
   }
 
   public static void publish(String message, String[] paths) throws IOException, InterruptedException, Git.ExecException {
@@ -144,16 +147,14 @@ public class WebAdmin extends Controller {
     try (OutputStream out = page.dir.child(part).outputstream()) {
       IOUtils.copy(request.body, out);
     }
-    renderText(play.i18n.Messages.get("web.admin.saved"));
+    renderText(Messages.get("web.admin.saved"));
   }
 
   public static void checkLinks(boolean verifyExternal) {
-    verifiedUrls.clear();
-
     List<String> problems = new ArrayList<>();
     List<String> warnings = new ArrayList<>();
-    Set<String> externals = new LinkedHashSet<>();
 
+    Multimap<String, String> externals = LinkedListMultimap.create();
 
     for (WebPage page : WebPage.all()) {
       for (Map.Entry<String, String> part : page.contentParts().entrySet()) {
@@ -168,13 +169,8 @@ public class WebAdmin extends Controller {
           if (isEmpty(url)) continue;
 
           try {
-            if (url.startsWith("http:") || url.startsWith("https:")) {
-              if (verifyExternal) {
-                if (isSafeToScan(url)) verifyExternalURL(url);
-                else warnings.add(page.path + name + ".html - " + url);
-              }
-              else externals.add(url);
-            }
+            if (url.startsWith("http:") || url.startsWith("https:"))
+              externals.put(url, page.path + name + ".html");
             else if (url.startsWith("javascript:"))
               warnings.add(page.path + name + ".html - " + url);
             else if (url.startsWith("/public"))
@@ -202,6 +198,22 @@ public class WebAdmin extends Controller {
       }
     }
 
+    if (verifyExternal) {
+      for (String url : externals.keySet()) {
+        if (isSafeToScan(url)) {
+          try {
+            verifyExternalURL(url);
+          }
+          catch (Exception e) {
+            for (String page : externals.get(url)) problems.add(page + " - " + url + " [" + e.getMessage() + "]");
+          }
+        }
+        else {
+          for (String page : externals.get(url)) warnings.add(page + " - " + url);
+        }
+      }
+    }
+
     render(problems, warnings, externals);
   }
 
@@ -222,23 +234,11 @@ public class WebAdmin extends Controller {
     throw new IOException("Fixed link " + url + " to " + route.get("path"));
   }
 
-  private static Map<String, Boolean> verifiedUrls = new HashMap<>();
-
   private static void verifyExternalURL(String url) throws IOException {
-    Boolean verificationResult = verifiedUrls.get(url);
-    if (verificationResult != null) {
-      if (!verificationResult)
-        throw new IOException(url + " - error");
-    }
-    else {
-      WS.HttpResponse response = WS.url(url).timeout("5s").get();
-      int status = response.getStatus();
-      boolean isValidUrl = status == 200 || status == 301 || status == 302;
-
-      verifiedUrls.put(url, isValidUrl);
-      if (!isValidUrl)
-        throw new IOException(url + " - " + status + ": " + response.getStatusText());
-    }
+    WS.HttpResponse response = WS.url(url).timeout("5s").get();
+    int status = response.getStatus();
+    if (status != 200 && status != 301 && status != 302)
+      throw new IOException(status + ": " + response.getStatusText());
   }
 
   static boolean isSafeToScan(String url) {
@@ -333,7 +333,7 @@ public class WebAdmin extends Controller {
 
     VirtualFile vdir = VirtualFile.open(dir);
     vdir.child("metadata.properties").write("title: " + title + "\ntags: " + defaultString(tags) + "\n");
-    vdir.child("content.html").write(play.i18n.Messages.get("web.admin.defaultContent"));
+    vdir.child("content.html").write(Messages.get("web.admin.defaultContent"));
 
     WebPage.News page = WebPage.forPath(vdir);
     redirect(page.path);
@@ -356,7 +356,7 @@ public class WebAdmin extends Controller {
 
   private static String defaultContent(String path) {
     WebPage page = WebPage.forPath(path);
-    return page.dir.child("template.html").exists() ? page.dir.child("template.html").contentAsString() : play.i18n.Messages.get("web.admin.defaultContent");
+    return page.dir.child("template.html").exists() ? page.dir.child("template.html").contentAsString() : Messages.get("web.admin.defaultContent");
   }
 
   public static void metadataDialog(String path) throws IOException {
