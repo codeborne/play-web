@@ -31,6 +31,7 @@ public class WebContentPluginTest {
   public void setUp() {
     if (Play.configuration == null) Play.configuration = new Properties();
     if (Play.id == null) Play.id = "dev";
+    //noinspection deprecation
     Http.Request.current.set(request = new Http.Request());
     Http.Response.current.set(response = new Http.Response());
     Scope.RenderArgs.current.set(new Scope.RenderArgs());
