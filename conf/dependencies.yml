@@ -8,4 +8,6 @@ require:
     - org.apache.lucene -> lucene-queries 4.3.0
     - org.apache.lucene -> lucene-queryparser 4.3.0
 
+    - com.google.guava -> guava 18.0
+
     - org.mockito -> mockito-all 1.9.5

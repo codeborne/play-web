@@ -1,11 +1,13 @@
 package controllers;
 
+import com.google.common.net.InetAddresses;
 import models.WebPage;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import play.Logger;
 import play.Play;
 import play.data.validation.Required;
+import play.libs.WS;
 import play.mvc.Catch;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -15,6 +17,7 @@ import util.Git;
 
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -144,9 +147,13 @@ public class WebAdmin extends Controller {
     renderText(play.i18n.Messages.get("web.admin.saved"));
   }
 
-  public static void checkLinks() {
+  public static void checkLinks(boolean verifyExternal) {
+    verifiedUrls.clear();
+
     List<String> problems = new ArrayList<>();
     List<String> warnings = new ArrayList<>();
+    Set<String> externals = new LinkedHashSet<>();
+
 
     for (WebPage page : WebPage.all()) {
       for (Map.Entry<String, String> part : page.contentParts().entrySet()) {
@@ -161,7 +168,14 @@ public class WebAdmin extends Controller {
           if (isEmpty(url)) continue;
 
           try {
-            if (url.startsWith("http:") || url.startsWith("https:") || url.startsWith("javascript:"))
+            if (url.startsWith("http:") || url.startsWith("https:")) {
+              if (verifyExternal) {
+                if (isSafeToScan(url)) verifyExternalURL(url);
+                else warnings.add(page.path + name + ".html - " + url);
+              }
+              else externals.add(url);
+            }
+            else if (url.startsWith("javascript:"))
               warnings.add(page.path + name + ".html - " + url);
             else if (url.startsWith("/public"))
               verifyPublicURL(url);
@@ -188,7 +202,7 @@ public class WebAdmin extends Controller {
       }
     }
 
-    render(problems, warnings);
+    render(problems, warnings, externals);
   }
 
   private static void verifyPublicURL(String url) throws IOException {
@@ -206,6 +220,38 @@ public class WebAdmin extends Controller {
     html = html.replace("\"" + url + "\"", "\"" + route.get("path") + "\"");
     file.write(html);
     throw new IOException("Fixed link " + url + " to " + route.get("path"));
+  }
+
+  private static Map<String, Boolean> verifiedUrls = new HashMap<>();
+
+  private static void verifyExternalURL(String url) throws IOException {
+    Boolean verificationResult = verifiedUrls.get(url);
+    if (verificationResult != null) {
+      if (!verificationResult)
+        throw new IOException(url + " - error");
+    }
+    else {
+      WS.HttpResponse response = WS.url(url).timeout("5s").get();
+      int status = response.getStatus();
+      boolean isValidUrl = status == 200 || status == 301 || status == 302;
+
+      verifiedUrls.put(url, isValidUrl);
+      if (!isValidUrl)
+        throw new IOException(url + " - " + status + ": " + response.getStatusText());
+    }
+  }
+
+  static boolean isSafeToScan(String url) {
+    try {
+      URI uri = URI.create(url);
+      if ("localhost".equals(uri.getHost())) return false;
+      if (uri.getHost().endsWith(".local")) return false;
+      if (uri.getPort() >= 0) return false;
+      return !InetAddresses.isInetAddress(uri.getHost());
+    }
+    catch (Exception e) {
+      return false;
+    }
   }
 
   public static void browse(String path) throws MalformedURLException {

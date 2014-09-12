@@ -20,6 +20,6 @@
   <h1>No problems found</h1>
 #{/if}
 
-#{ifnot params.checkExternal}
-  <a class="btn btn-danger" href="@{WebAdmin.checkLinks()}" onclick="return confirm('&{'web.admin.checkExternalLinks.confirm'}')">&{'web.admin.checkExternalLinks'}</a>
-#{/ifnot}
+#{if params.verifyExternal}
+  <a class="btn btn-danger" href="@{WebAdmin.checkLinks(true)}" onclick="return confirm('&{'web.admin.checkExternalLinks.confirm'}')">&{'web.admin.checkExternalLinks'} ${externals.size()}</a>
+#{/if}
