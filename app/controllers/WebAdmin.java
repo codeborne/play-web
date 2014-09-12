@@ -13,7 +13,7 @@ import play.i18n.Messages;
 import play.libs.WS;
 import play.mvc.*;
 import play.vfs.VirtualFile;
-import util.Git;
+import util.Git.*;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -39,7 +39,7 @@ public class WebAdmin extends Controller {
 
   private static final Pattern LINKS = Pattern.compile("(href|src)=\"([^\"]*)\"");
 
-  public static void status() throws IOException, InterruptedException, Git.ExecException {
+  public static void status() throws IOException, InterruptedException, ExecException {
     git("add", ".");
     String status = git("status", "--porcelain");
 
@@ -57,14 +57,14 @@ public class WebAdmin extends Controller {
     render(status, log, unpushed);
   }
 
-  @Catch(Git.ExecException.class)
-  public static void gitFailure(Git.ExecException e) throws InterruptedException, IOException, Git.ExecException {
+  @Catch(ExecException.class)
+  public static void gitFailure(ExecException e) throws InterruptedException, IOException, ExecException {
     Logger.error("git failed: " + e.code + ": " + e.getMessage());
     flash.error(e.getMessage());
     if (!"WebAdmin.status".equals(request.action)) status();
   }
 
-  public static void publish(String message, String[] paths) throws IOException, InterruptedException, Git.ExecException {
+  public static void publish(String message, String[] paths) throws IOException, InterruptedException, ExecException {
     if (paths == null || paths.length == 0) status();
 
     List<String> args = new ArrayList<>(asList("commit",
@@ -77,14 +77,14 @@ public class WebAdmin extends Controller {
     push();
   }
 
-  public static void push() throws InterruptedException, IOException, Git.ExecException {
+  public static void push() throws InterruptedException, IOException, ExecException {
     safePull();
     String push = git("push", "origin", "master");
     flash.put("success", push + "\n" + flash.get("success"));
     status();
   }
 
-  public static void history(String path) throws InterruptedException, IOException, Git.ExecException {
+  public static void history(String path) throws InterruptedException, IOException, ExecException {
     WebPage page = WebPage.forPath(path);
     List<String> args = new ArrayList<>(asList("log", "--pretty=format:%h%x09%ct%x09%an%x09%ae%x09%s%x09%b%x03", "--max-count=50"));
     if (path.startsWith("/")) path = path.substring(1);
@@ -95,7 +95,7 @@ public class WebAdmin extends Controller {
     render(page, log);
   }
 
-  public static void diff(String path, String revision) throws InterruptedException, IOException, Git.ExecException {
+  public static void diff(String path, String revision) throws InterruptedException, IOException, ExecException {
     WebPage page = WebPage.forPath(path);
     List<String> args = new ArrayList<>(asList("diff", revision));
     if (path.startsWith("/")) path = path.substring(1);
@@ -109,13 +109,13 @@ public class WebAdmin extends Controller {
     render(page, revision, diff);
   }
 
-  public static void downloadRevision(String path, String revision) throws InterruptedException, IOException, Git.ExecException {
+  public static void downloadRevision(String path, String revision) throws InterruptedException, IOException, ExecException {
     if (path.startsWith("/")) path = path.substring(1);
     InputStream stream = gitForStream("show", revision + ":" + path);
     renderBinary(stream, FilenameUtils.getName(path), true);
   }
 
-  public static void restore(String path, String revision) throws InterruptedException, IOException, Git.ExecException {
+  public static void restore(String path, String revision) {
     checkAuthenticity();
     WebPage page = WebPage.forPath(path);
     List<String> args = new ArrayList<>(asList("checkout", revision, "--"));
@@ -135,7 +135,7 @@ public class WebAdmin extends Controller {
     status();
   }
 
-  public static void doc() throws IOException {
+  public static void doc() {
     Collection<WebPage.Template> templates = WebPage.availableTemplates();
     render(templates);
   }
@@ -181,7 +181,7 @@ public class WebAdmin extends Controller {
               Map<String, String> route = Router.route("GET", url);
 
               if (route.isEmpty() && url.startsWith("/")) {
-                verifyURL(WebPage.ROOT, url);
+                verifyURL(ROOT, url);
               }
               else if (route.isEmpty()) {
                 verifyURL(page, url);
@@ -365,7 +365,7 @@ public class WebAdmin extends Controller {
     return page.dir.child("template.html").exists() ? page.dir.child("template.html").contentAsString() : Messages.get("web.admin.defaultContent");
   }
 
-  public static void metadataDialog(String path) throws IOException {
+  public static void metadataDialog(String path) {
     WebPage page = WebPage.forPath(path);
     List<WebPage.Template> templates = WebPage.availableTemplates();
     render(page, templates);
