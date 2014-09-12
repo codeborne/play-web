@@ -1,16 +1,25 @@
 #{extends 'Web/layout.html'/}
 
-<h1>&{'web.admin.problems'}</h1>
+#{if problems}
+  <h1>&{'web.admin.problems'}</h1>
+  <ul>
+    #{list problems}<li>${_}</li>#{/list}
+  </ul>
+#{/if}
 
-<ul>
-#{list problems, as:'problem'}
-  <li>${problem}</li>
-#{/list}
-#{else}
-  <li>All good!</li>
-#{/else}
-</ul>
+#{if warnings}
+  <h1>&{'web.admin.warnings'}</h1>
+  <div>&{'web.admin.warnings.help'}</div>
+  <br>
+  <ul>
+    #{list warnings}<li>${_}</li>#{/list}
+  </ul>
+#{/if}
+
+#{if !problems && !warnings}
+  <h1>No problems found</h1>
+#{/if}
 
 #{ifnot params.checkExternal}
-  <a class="btn btn-danger" href="@{WebAdmin.checkLinks(true)}" onclick="return confirm('&{'web.admin.checkExternalLinks.confirm'}')">&{'web.admin.checkExternalLinks'}</a>
+  <a class="btn btn-danger" href="@{WebAdmin.checkLinks()}" onclick="return confirm('&{'web.admin.checkExternalLinks.confirm'}')">&{'web.admin.checkExternalLinks'}</a>
 #{/ifnot}

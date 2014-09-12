@@ -6,7 +6,6 @@ import org.apache.commons.io.IOUtils;
 import play.Logger;
 import play.Play;
 import play.data.validation.Required;
-import play.libs.WS;
 import play.mvc.Catch;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -31,6 +30,9 @@ import static util.Git.*;
 
 @Check("cms")
 public class WebAdmin extends Controller {
+
+  private static final Pattern LINKS = Pattern.compile("(href|src)=\"([^\"]*)\"");
+
   public static void status() throws IOException, InterruptedException, Git.ExecException {
     git("add", ".");
     String status = git("status", "--porcelain");
@@ -142,81 +144,68 @@ public class WebAdmin extends Controller {
     renderText(play.i18n.Messages.get("web.admin.saved"));
   }
 
-  public static void checkLinks(boolean checkExternal) {
-    final Pattern links = Pattern.compile("(href|src)=\"([^\"]*)\"");
+  public static void checkLinks() {
     List<String> problems = new ArrayList<>();
+    List<String> warnings = new ArrayList<>();
 
     for (WebPage page : WebPage.all()) {
       for (Map.Entry<String, String> part : page.contentParts().entrySet()) {
-        String html = part.getValue();
-        Matcher m = links.matcher(html);
-        while (m.find()) {
-          String url = m.group(2);
+        String name = part.getKey();
+        Matcher links = LINKS.matcher(part.getValue());
+
+        while (links.find()) {
+          String url = links.group(2);
           url = url.replaceFirst("#.*$", "");
           url = url.replace("+", " ");
+
           if (isEmpty(url)) continue;
 
           try {
-            if (url.startsWith("/public")) { checkPublic(url); continue; }
-            else if (url.startsWith("mailto:")) continue;
-            else if (url.startsWith("http:") || url.startsWith("https:")) {
-              if (checkExternal) checkExternal(url);
-              continue;
-            }
+            if (url.startsWith("http:") || url.startsWith("https:") || url.startsWith("javascript:"))
+              warnings.add(page.path + name + ".html - " + url);
+            else if (url.startsWith("/public"))
+              verifyPublicURL(url);
+            else if (!url.startsWith("mailto:") && !url.startsWith("cryptmail:") && !url.startsWith("tel:")) {
+              url = url.replaceFirst("\\?.*$", "");
 
-            url = url.replaceFirst("\\?.*$", "");
-            if (fixIfAlias(page, part.getKey(), url)) continue;
-            else if (url.startsWith("/")) checkAbsolute(url);
-            else checkRelative(page, url);
+              Map<String, String> route = Router.route("GET", url);
+
+              if (route.isEmpty() && url.startsWith("/")) {
+                verifyURL(WebPage.ROOT, url);
+              }
+              else if (route.isEmpty()) {
+                verifyURL(page, url);
+              }
+              else if ("Web.redirectAlias".equals(route.get("action"))) {
+                fixRedirectAlias(route, page, name, url);
+              }
+            }
           }
           catch (Exception e) {
-            problems.add(page.path + part.getKey() + ".html - " + e.toString());
+            problems.add(page.path + name + ".html - " + e);
           }
-
-          // TODO: validate metadata
         }
       }
     }
-    render(problems);
+
+    render(problems, warnings);
   }
 
-  private static void checkPublic(String url) throws IOException {
-    if (!Play.getVirtualFile(url).exists())
-      throw new FileNotFoundException(url);
+  private static void verifyPublicURL(String url) throws IOException {
+    if (!Play.getVirtualFile(url).exists()) throw new FileNotFoundException(url);
   }
 
-  private static boolean fixIfAlias(WebPage page, String name, String url) throws IOException {
-    Map<String, String> args = Router.route("GET", url);
-    if ("Web.redirectAlias".equals(args.get("action"))) {
-      VirtualFile file = page.dir.child(name + ".html");
-      String html = file.contentAsString();
-      html = html.replace("\"" + url + "\"", "\"" + args.get("path") + "\"");
-      file.write(html);
-      throw new IOException("Fixed link " + url + " to " + args.get("path"));
-    }
-    return !args.isEmpty();
-  }
-
-  private static void checkExternal(String url) throws IOException {
-    try {
-      WS.HttpResponse response = WS.url(url).timeout("5s").get();
-      int status = response.getStatus();
-      if (status != 200 && status != 301 && status != 302)
-        throw new IOException(url + " - " + status + ": " + response.getStatusText());
-    }
-    catch (RuntimeException e) {
-      throw new IOException(url, e);
-    }
-  }
-
-  private static void checkAbsolute(String url) throws FileNotFoundException {
-    checkRelative(WebPage.ROOT, url);
-  }
-
-  private static void checkRelative(WebPage page, String url) throws FileNotFoundException {
+  private static void verifyURL(WebPage page, String url) throws FileNotFoundException {
     VirtualFile file = page.dir.child(url);
-    if (!file.exists())
-      throw new FileNotFoundException(url);
+    if (!file.exists()) throw new FileNotFoundException(url);
+  }
+
+  private static void fixRedirectAlias(Map<String, String> route, WebPage page, String name, String url) throws IOException {
+    VirtualFile file = page.dir.child(name + ".html");
+    String html = file.contentAsString();
+    html = html.replace("\"" + url + "\"", "\"" + route.get("path") + "\"");
+    file.write(html);
+    throw new IOException("Fixed link " + url + " to " + route.get("path"));
   }
 
   public static void browse(String path) throws MalformedURLException {
