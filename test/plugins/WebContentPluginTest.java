@@ -31,8 +31,7 @@ public class WebContentPluginTest {
   public void setUp() {
     if (Play.configuration == null) Play.configuration = new Properties();
     if (Play.id == null) Play.id = "dev";
-    //noinspection deprecation
-    Http.Request.current.set(request = new Http.Request());
+    Http.Request.current.set(request = newHttpRequest());
     Http.Response.current.set(response = new Http.Response());
     Scope.RenderArgs.current.set(new Scope.RenderArgs());
     request.path = "/";
@@ -43,6 +42,11 @@ public class WebContentPluginTest {
     plugin = new WebContentPlugin();
     pages = asList(forPath("/en/marketing/"), forPath("/ru/marketing/"));
     resetWebCacheSetting();
+  }
+
+  private Http.Request newHttpRequest() {
+    @SuppressWarnings("deprecation") Http.Request result = new Http.Request();
+    return result;
   }
 
   @After
