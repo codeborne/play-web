@@ -24,5 +24,5 @@
 #{/if}
 
 #{if externals && !params.verifyExternal}
-  <a class="btn btn-danger" href="@{WebAdmin.checkLinks(true)}" onclick="return confirm('&{'web.admin.checkExternalLinks.confirm'}')">&{'web.admin.checkExternalLinks'} (${externals.size()})</a>
+  <a class="btn btn-danger" href="@{WebAdmin.checkLinks(true)}" onclick="return confirm('&{'web.admin.checkExternalLinks.confirm'}')">&{'web.admin.checkExternalLinks'} (${externals.keySet().size()})</a>
 #{/if}
