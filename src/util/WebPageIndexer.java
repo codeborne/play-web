@@ -43,7 +43,7 @@ public class WebPageIndexer {
   WebPageIndexer() {
     if (!shouldIndex()) return;
     try {
-      dir = FSDirectory.open(new File("tmp/web-index"));
+      dir = FSDirectory.open(new File(Play.tmpDir, "web-index"));
       analyzer = new RussianAnalyzer(version);
     }
     catch (IOException e) {
