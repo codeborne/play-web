@@ -6,7 +6,6 @@ import play.Play;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Scanner;
 
 public class Git {
@@ -16,7 +15,7 @@ public class Git {
     return exec(addExecutable(cmdLine));
   }
 
-  public static synchronized InputStream gitForStream(String ... cmdLine) throws IOException, InterruptedException, ExecException {
+  public static synchronized InputStream gitForStream(String ... cmdLine) throws IOException {
     return execProc(addExecutable(cmdLine)).getInputStream();
   }
 
@@ -27,14 +26,14 @@ public class Git {
     return cmdLine;
   }
 
-  static Process execProc(String ... cmdLine) throws IOException, ExecException, InterruptedException {
+  static Process execProc(String ... cmdLine) throws IOException {
     return new ProcessBuilder(cmdLine).directory(WebPage.ROOT.dir.getRealFile()).redirectErrorStream(true).start();
   }
 
   static String exec(String ... cmdLine) throws IOException, ExecException, InterruptedException {
     Process proc = execProc(cmdLine);
     try (InputStream in = proc.getInputStream()) {
-      String out = IOUtils.toString(new InputStreamReader(in));
+      String out = IOUtils.toString(in);
       int status = proc.waitFor();
       if (status != 0)
         throw new ExecException(status, out);
@@ -70,16 +69,17 @@ public class Git {
   private static void notifyListener(String pull) {
     if (pullListener == null) return;
 
-    Scanner lines = new Scanner(pull);
-    while (lines.hasNextLine()) {
-      String line = lines.nextLine();
-      if (line.startsWith(" create mode "))
-        pullListener.created(line.substring(" create mode 100644 ".length()));
+    try (Scanner lines = new Scanner(pull)) {
+      while (lines.hasNextLine()) {
+        String line = lines.nextLine();
+        if (line.startsWith(" create mode "))
+          pullListener.created(line.substring(" create mode 100644 ".length()));
+      }
     }
   }
 
   public static class ExecException extends Exception {
-    public int code;
+    public final int code;
 
     public ExecException(int code, String message) {
       super(message);
@@ -87,7 +87,7 @@ public class Git {
     }
   }
 
-  public static interface PullListener {
+  public interface PullListener {
     void created(String path);
   }
 }

@@ -27,12 +27,12 @@ import static org.apache.commons.lang.StringUtils.join;
 import static org.apache.commons.lang.StringUtils.split;
 
 public class WebPageIndexer {
-  static Version version = Version.LUCENE_43;
-  Directory dir;
+  private static final Version version = Version.LUCENE_43;
+  private Directory dir;
   public IndexReader reader;
   public IndexSearcher searcher;
   public QueryParser queryParser;
-  Analyzer analyzer;
+  private Analyzer analyzer;
   public Map<String, Map<String, AtomicInteger>> tagsFreqByTopPage = new HashMap<>();
 
   private static final WebPageIndexer instance = new WebPageIndexer();
@@ -65,31 +65,32 @@ public class WebPageIndexer {
     long start = System.currentTimeMillis();
 
     IndexWriterConfig conf = new IndexWriterConfig(version, analyzer);
-    final IndexWriter writer = new IndexWriter(dir, conf);
-    writer.deleteAll();
+    try (final IndexWriter writer = new IndexWriter(dir, conf)) {
+      writer.deleteAll();
 
-    Map<String, Map<String, AtomicInteger>> tagsFreqByTopPage = new HashMap<>();
-    for (WebPage page : WebPage.ROOT.childrenRecursively()) {
-      if (page instanceof WebPage.News && !((WebPage.News)page).isStory()) continue;
-      if ("true".equals(page.metadata.getProperty("hidden", "false"))) continue;
+      Map<String, Map<String, AtomicInteger>> tagsFreqByTopPage = new HashMap<>();
+      for (WebPage page : WebPage.ROOT.childrenRecursively()) {
+        if (page instanceof WebPage.News && !((WebPage.News) page).isStory()) continue;
+        if ("true".equals(page.metadata.getProperty("hidden", "false"))) continue;
 
-      float boost = 3600 * 24 * 1000f / (System.currentTimeMillis() - page.date().getTime());
+        float boost = 3600 * 24 * 1000f / (System.currentTimeMillis() - page.date().getTime());
 
-      Document doc = new Document();
-      doc.add(withBoost(boost, new TextField("path", page.path, Field.Store.YES)));
-      doc.add(withBoost(boost, new TextField("title", page.title, Field.Store.NO)));
-      doc.add(withBoost(boost, new TextField("keywords", page.metadata.getProperty("description", "") + " " + page.metadata.getProperty("keywords", ""), Field.Store.NO)));
+        Document doc = new Document();
+        doc.add(withBoost(boost, new TextField("path", page.path, Field.Store.YES)));
+        doc.add(withBoost(boost, new TextField("title", page.title, Field.Store.NO)));
+        doc.add(withBoost(boost, new TextField("keywords", page.metadata.getProperty("description", "") + " " + page.metadata.getProperty("keywords", ""), Field.Store.NO)));
 
-      String tags = page.metadata.getProperty("tags", "");
-      calcTagFreq(tagsFreqByTopPage, page, tags);
-      doc.add(withBoost(boost, new TextField("tags", tags, Field.Store.YES)));
+        String tags = page.metadata.getProperty("tags", "");
+        calcTagFreq(tagsFreqByTopPage, page, tags);
+        doc.add(withBoost(boost, new TextField("tags", tags, Field.Store.YES)));
 
-      doc.add(withBoost(boost, new TextField("text", removeTags(join(page.contentParts().values(), ' ')), Field.Store.NO)));
-      writer.addDocument(doc);
+        doc.add(withBoost(boost, new TextField("text", removeTags(join(page.contentParts().values(), ' ')), Field.Store.NO)));
+        writer.addDocument(doc);
+      }
+      this.tagsFreqByTopPage = unmodifiableMap(tagsFreqByTopPage);
+      Logger.info("Indexed " + writer.numDocs() + " pages in " + ((System.currentTimeMillis() - start) / 1000) + " sec");
     }
-    this.tagsFreqByTopPage = unmodifiableMap(tagsFreqByTopPage);
-    Logger.info("Indexed " + writer.numDocs() + " pages in " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-    writer.close();
+
     reopenIndex();
   }
 
