@@ -1,18 +1,23 @@
 package controllers;
 
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.net.InetAddresses;
 import models.WebPage;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import play.Logger;
 import play.Play;
 import play.data.validation.Required;
-import play.libs.WS;
+import play.i18n.Messages;
 import play.mvc.*;
 import play.vfs.VirtualFile;
-import util.Git;
+import util.Git.*;
 
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -21,6 +26,8 @@ import java.util.regex.Pattern;
 
 import static controllers.Web.isAllowed;
 import static java.util.Arrays.asList;
+import static models.WebPage.ROOT;
+import static models.WebPage.canonicalPath;
 import static org.apache.commons.io.FileUtils.copyDirectory;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static org.apache.commons.lang.StringUtils.*;
@@ -29,7 +36,10 @@ import static util.Git.*;
 @Check("cms")
 @With(Security.class)
 public class WebAdmin extends Controller {
-  public static void status() throws IOException, InterruptedException, Git.ExecException {
+
+  private static final Pattern LINKS = Pattern.compile("(href|src)=\"([^\"]*)\"");
+
+  public static void status() throws IOException, InterruptedException, ExecException {
     git("add", ".");
     String status = git("status", "--porcelain");
 
@@ -47,14 +57,14 @@ public class WebAdmin extends Controller {
     render(status, log, unpushed);
   }
 
-  @Catch(Git.ExecException.class)
-  public static void gitFailure(Git.ExecException e) throws InterruptedException, IOException, Git.ExecException {
+  @Catch(ExecException.class)
+  public static void gitFailure(ExecException e) throws InterruptedException, IOException, ExecException {
     Logger.error("git failed: " + e.code + ": " + e.getMessage());
     flash.error(e.getMessage());
-    if (!request.action.equals("WebAdmin.status")) status();
+    if (!"WebAdmin.status".equals(request.action)) status();
   }
 
-  public static void publish(String message, String[] paths) throws IOException, InterruptedException, Git.ExecException {
+  public static void publish(String message, String[] paths) throws IOException, InterruptedException, ExecException {
     if (paths == null || paths.length == 0) status();
 
     List<String> args = new ArrayList<>(asList("commit",
@@ -67,14 +77,14 @@ public class WebAdmin extends Controller {
     push();
   }
 
-  public static void push() throws InterruptedException, IOException, Git.ExecException {
+  public static void push() throws InterruptedException, IOException, ExecException {
     safePull();
     String push = git("push", "origin", "master");
     flash.put("success", push + "\n" + flash.get("success"));
     status();
   }
 
-  public static void history(String path) throws InterruptedException, IOException, Git.ExecException {
+  public static void history(String path) throws InterruptedException, IOException, ExecException {
     WebPage page = WebPage.forPath(path);
     List<String> args = new ArrayList<>(asList("log", "--pretty=format:%h%x09%ct%x09%an%x09%ae%x09%s%x09%b%x03", "--max-count=50"));
     if (path.startsWith("/")) path = path.substring(1);
@@ -85,7 +95,7 @@ public class WebAdmin extends Controller {
     render(page, log);
   }
 
-  public static void diff(String path, String revision) throws InterruptedException, IOException, Git.ExecException {
+  public static void diff(String path, String revision) throws InterruptedException, IOException, ExecException {
     WebPage page = WebPage.forPath(path);
     List<String> args = new ArrayList<>(asList("diff", revision));
     if (path.startsWith("/")) path = path.substring(1);
@@ -99,13 +109,13 @@ public class WebAdmin extends Controller {
     render(page, revision, diff);
   }
 
-  public static void downloadRevision(String path, String revision) throws InterruptedException, IOException, Git.ExecException {
+  public static void downloadRevision(String path, String revision) throws InterruptedException, IOException, ExecException {
     if (path.startsWith("/")) path = path.substring(1);
     InputStream stream = gitForStream("show", revision + ":" + path);
     renderBinary(stream, FilenameUtils.getName(path), true);
   }
 
-  public static void restore(String path, String revision) throws InterruptedException, IOException, Git.ExecException {
+  public static void restore(String path, String revision) {
     checkAuthenticity();
     WebPage page = WebPage.forPath(path);
     List<String> args = new ArrayList<>(asList("checkout", revision, "--"));
@@ -125,7 +135,7 @@ public class WebAdmin extends Controller {
     status();
   }
 
-  public static void doc() throws IOException {
+  public static void doc() {
     Collection<WebPage.Template> templates = WebPage.availableTemplates();
     render(templates);
   }
@@ -137,84 +147,119 @@ public class WebAdmin extends Controller {
     try (OutputStream out = page.dir.child(part).outputstream()) {
       IOUtils.copy(request.body, out);
     }
-    renderText(play.i18n.Messages.get("web.admin.saved"));
+    renderText(Messages.get("web.admin.saved"));
   }
 
-  public static void checkLinks(boolean checkExternal) {
-    final Pattern links = Pattern.compile("(href|src)=\"([^\"]*)\"");
+  public static void checkLinks(boolean verifyExternal) {
     List<String> problems = new ArrayList<>();
+    List<String> warnings = new ArrayList<>();
+
+    Multimap<String, String> externals = LinkedListMultimap.create();
 
     for (WebPage page : WebPage.all()) {
       for (Map.Entry<String, String> part : page.contentParts().entrySet()) {
-        String html = part.getValue();
-        Matcher m = links.matcher(html);
-        while (m.find()) {
-          String url = m.group(2);
+        String name = part.getKey();
+        Matcher links = LINKS.matcher(part.getValue());
+
+        while (links.find()) {
+          String url = links.group(2);
           url = url.replaceFirst("#.*$", "");
           url = url.replace("+", " ");
+
           if (isEmpty(url)) continue;
 
           try {
-            if (url.startsWith("/public")) { checkPublic(url); continue; }
-            else if (url.startsWith("mailto:")) continue;
-            else if (url.startsWith("http:") || url.startsWith("https:")) {
-              if (checkExternal) checkExternal(url);
-              continue;
-            }
+            if (url.startsWith("http:") || url.startsWith("https:"))
+              externals.put(url, page.path + name + ".html");
+            else if (url.startsWith("javascript:"))
+              warnings.add(page.path + name + ".html - " + url);
+            else if (url.startsWith("/public"))
+              verifyPublicURL(url);
+            else if (!url.startsWith("mailto:") && !url.startsWith("cryptmail:") && !url.startsWith("tel:")) {
+              url = url.replaceFirst("\\?.*$", "");
 
-            url = url.replaceFirst("\\?.*$", "");
-            if (fixIfAlias(page, part.getKey(), url)) continue;
-            else if (url.startsWith("/")) checkAbsolute(url);
-            else checkRelative(page, url);
+              Map<String, String> route = Router.route("GET", url);
+
+              if (route.isEmpty() && url.startsWith("/")) {
+                verifyURL(ROOT, url);
+              }
+              else if (route.isEmpty()) {
+                verifyURL(page, url);
+              }
+              else if ("Web.redirectAlias".equals(route.get("action"))) {
+                fixRedirectAlias(route, page, name, url);
+              }
+            }
           }
           catch (Exception e) {
-            problems.add(page.path + part.getKey() + ".html - " + e.toString());
+            problems.add(page.path + name + ".html - " + e);
           }
-
-          // TODO: validate metadata
         }
       }
     }
-    render(problems);
-  }
 
-  private static void checkPublic(String url) throws IOException {
-    if (!Play.getVirtualFile(url).exists())
-      throw new FileNotFoundException(url);
-  }
-
-  private static boolean fixIfAlias(WebPage page, String name, String url) throws IOException {
-    Map<String, String> args = Router.route("GET", url);
-    if ("Web.redirectAlias".equals(args.get("action"))) {
-      VirtualFile file = page.dir.child(name + ".html");
-      String html = file.contentAsString();
-      html = html.replace("\"" + url + "\"", "\"" + args.get("path") + "\"");
-      file.write(html);
-      throw new IOException("Fixed link " + url + " to " + args.get("path"));
+    if (verifyExternal) {
+      for (String url : externals.keySet()) {
+        if (isSafeToScan(url)) {
+          try {
+            verifyExternalURL(url);
+          }
+          catch (Exception e) {
+            for (String page : externals.get(url)) problems.add(page + " - " + url + " [" + e.getMessage() + "]");
+          }
+        }
+        else {
+          for (String page : externals.get(url)) warnings.add(page + " - " + url);
+        }
+      }
     }
-    return !args.isEmpty();
+
+    render(problems, warnings, externals);
   }
 
-  private static void checkExternal(String url) throws IOException {
-    try {
-      WS.HttpResponse response = WS.url(url).timeout("5s").get();
-      int status = response.getStatus();
-      if (status != 200 && status != 301 && status != 302)
-        throw new IOException(url + " - " + status + ": " + response.getStatusText());
-    }
-    catch (RuntimeException e) {
-      throw new IOException(url, e);
-    }
+  private static void verifyPublicURL(String url) throws IOException {
+    if (!Play.getVirtualFile(url).exists()) throw new FileNotFoundException(url);
   }
 
-  private static void checkAbsolute(String url) throws FileNotFoundException {
-    checkRelative(WebPage.ROOT, url);
-  }
-
-  private static void checkRelative(WebPage page, String url) throws FileNotFoundException {
+  private static void verifyURL(WebPage page, String url) throws FileNotFoundException {
     VirtualFile file = page.dir.child(url);
-    if (!file.exists())
-      throw new FileNotFoundException(url);
+    if (!file.exists()) throw new FileNotFoundException(url);
+  }
+
+  private static void fixRedirectAlias(Map<String, String> route, WebPage page, String name, String url) throws IOException {
+    VirtualFile file = page.dir.child(name + ".html");
+    String html = file.contentAsString();
+    html = html.replace("\"" + url + "\"", "\"" + route.get("path") + "\"");
+    file.write(html);
+    throw new IOException("Fixed link " + url + " to " + route.get("path"));
+  }
+
+  private static void verifyExternalURL(String url) throws IOException {
+    HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+    try {
+      connection.setConnectTimeout(5000);
+      connection.setReadTimeout(5000);
+      connection.setRequestMethod("HEAD");
+      int status = connection.getResponseCode();
+      if (status < 200 || status > 399)
+        throw new IOException("status: " + status);
+    }
+    finally {
+      connection.disconnect();
+    }
+  }
+
+  @Util static boolean isSafeToScan(String url) {
+    try {
+      URI uri = URI.create(url);
+      if ("localhost".equals(uri.getHost())) return false;
+      if (uri.getHost().endsWith(".local")) return false;
+      if (uri.getPort() >= 0) return false;
+      return !InetAddresses.isInetAddress(uri.getHost());
+    }
+    catch (Exception e) {
+      return false;
+    }
   }
 
   public static void browse(String path) throws MalformedURLException {
@@ -237,6 +282,7 @@ public class WebAdmin extends Controller {
     checkAuthenticity();
     WebPage page = WebPage.forPath(path);
     VirtualFile file = page.dir.child(data.getName());
+    checkFileBelongsToCmsContentRoot(file);
     try (InputStream in = new FileInputStream(data)) {
       try (OutputStream out = file.outputstream()) {
         IOUtils.copy(in, out);
@@ -251,10 +297,15 @@ public class WebAdmin extends Controller {
     if (validation.hasErrors()) forbidden(validation.errorsMap().toString());
     WebPage page = WebPage.forPath(path);
     VirtualFile file = page.dir.child(name);
+    checkFileBelongsToCmsContentRoot(file);
     file.getRealFile().delete();
     if (redirectTo != null) redirect(redirectTo);
     if (!request.querystring.contains("path=")) request.querystring += "&path=" + path;
     redirect(Router.reverse("WebAdmin.browse").url + "?" + request.querystring);
+  }
+
+  private static void checkFileBelongsToCmsContentRoot(VirtualFile file) {
+    if (!canonicalPath(file.getRealFile()).startsWith(canonicalPath(ROOT.dir.getRealFile()))) forbidden("Access denied");
   }
 
   public static void addPageDialog(String parentPath, String redirectTo) {
@@ -296,7 +347,7 @@ public class WebAdmin extends Controller {
 
     VirtualFile vdir = VirtualFile.open(dir);
     vdir.child("metadata.properties").write("title: " + title + "\ntags: " + defaultString(tags) + "\n");
-    vdir.child("content.html").write(play.i18n.Messages.get("web.admin.defaultContent"));
+    vdir.child("content.html").write(Messages.get("web.admin.defaultContent"));
 
     WebPage.News page = WebPage.forPath(vdir);
     redirect(page.path);
@@ -319,10 +370,10 @@ public class WebAdmin extends Controller {
 
   private static String defaultContent(String path) {
     WebPage page = WebPage.forPath(path);
-    return page.dir.child("template.html").exists() ? page.dir.child("template.html").contentAsString() : play.i18n.Messages.get("web.admin.defaultContent");
+    return page.dir.child("template.html").exists() ? page.dir.child("template.html").contentAsString() : Messages.get("web.admin.defaultContent");
   }
 
-  public static void metadataDialog(String path) throws IOException {
+  public static void metadataDialog(String path) {
     WebPage page = WebPage.forPath(path);
     List<WebPage.Template> templates = WebPage.availableTemplates();
     render(page, templates);

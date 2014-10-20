@@ -65,7 +65,7 @@ public class Web extends Controller {
     renderArgs.put("includeHiddenPages", Security.check("cms"));
   }
 
-  @After
+  @Finally
   public static void closeTxIfStarted() {
     JPAPlugin.closeTx(true);
   }
@@ -230,6 +230,7 @@ public class Web extends Controller {
   }
 
   public static void redirectAlias(String path) {
+    if (!path.startsWith("/")) forbidden();
     redirect(path, true);
   }
 
