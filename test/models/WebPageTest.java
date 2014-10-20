@@ -181,10 +181,19 @@ public class WebPageTest {
     news.path = "/hello/news/2013/05/13/";
     assertEquals(date("13.05.2013"), news.date());
 
+    news.path = "/hello/news/2013/05/13";
+    assertEquals(date("13.05.2013"), news.date());
+
     news.path = "/analytics/2012/05/10/";
     assertEquals(date("10.05.2012"), news.date());
 
     news.path = "/analytics/2012/05/10-2/";
+    assertEquals(date("10.05.2012"), news.date());
+
+    news.path = "/analytics/2012/05/10-1-1/";
+    assertEquals(date("10.05.2012"), news.date());
+
+    news.path = "/analytics/2012/05/10-1-1-1-1-1-1-1-1-1-1-1-1/";
     assertEquals(date("10.05.2012"), news.date());
 
     news.path = "/analytics/2012/05/10-24/";
@@ -198,6 +207,18 @@ public class WebPageTest {
 
     news.path = "/et/uudised/2013/03/";
     assertEquals(date("1.03.2013"), news.date());
+  }
+
+  @Test
+  public void dateForNewsWithExtraDashesInPath() throws ParseException{
+    WebPage.News.pathPrefixes = asList("/news");
+    WebPage.News news = WebPage.forPath("/news");
+
+    news.path = "/a-and-b/c-or-d/2012/05/10-1-1-1/";
+    assertEquals(date("10.05.2012"), news.date());
+
+    news.path = "/a-and-b/c-or-d/2012/05/10-1-1---1";
+    assertEquals(date("10.05.2012"), news.date());
   }
 
   @Test

@@ -395,8 +395,9 @@ public class WebPage implements Comparable<WebPage> {
       if (path.endsWith("/")) path = path.substring(0, path.length()-1);
 
       int lastSlashIndex = path.lastIndexOf('/');
-      int lastDashIndex = path.lastIndexOf('-');
-      if (lastDashIndex > lastSlashIndex) path = path.substring(0, lastDashIndex);
+      int firstDashIndexAfterLastSlash = path.indexOf('-', lastSlashIndex);
+      if (firstDashIndexAfterLastSlash > lastSlashIndex)
+        path = path.substring(0, firstDashIndexAfterLastSlash);
 
       path = path.substring(path.length() - 10);
       try {
