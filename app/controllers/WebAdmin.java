@@ -65,6 +65,7 @@ public class WebAdmin extends Controller {
   }
 
   public static void publish(String message, String[] paths) throws IOException, InterruptedException, ExecException {
+    checkAuthenticity();
     if (paths == null || paths.length == 0) status();
 
     List<String> args = new ArrayList<>(asList("commit",
@@ -109,7 +110,7 @@ public class WebAdmin extends Controller {
     render(page, revision, diff);
   }
 
-  public static void downloadRevision(String path, String revision) throws InterruptedException, IOException, ExecException {
+  public static void downloadRevision(String path, String revision) throws IOException {
     if (path.startsWith("/")) path = path.substring(1);
     InputStream stream = gitForStream("show", revision + ":" + path);
     renderBinary(stream, FilenameUtils.getName(path), true);
