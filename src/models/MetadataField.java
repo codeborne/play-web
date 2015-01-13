@@ -6,7 +6,7 @@ import java.util.List;
 import static java.util.Arrays.asList;
 
 public class MetadataField implements Serializable {
-  public static List<MetadataField> ALL = asList(
+  public static final List<MetadataField> ALL = asList(
       new MetadataField("title"),
       new MetadataField("template"),
       new MetadataField("order", "number", null),
@@ -25,13 +25,13 @@ public class MetadataField implements Serializable {
 
   public String name;
   public String type = "text";
-  public Object defaultValue;
+  public Serializable defaultValue;
 
   public MetadataField(String name) {
     this.name = name;
   }
 
-  public MetadataField(String name, String type, Object defaultValue) {
+  public MetadataField(String name, String type, Serializable defaultValue) {
     this.name = name;
     this.type = type;
     this.defaultValue = defaultValue;
