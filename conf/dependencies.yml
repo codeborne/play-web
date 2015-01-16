@@ -11,4 +11,4 @@ require:
 
     - com.google.guava -> guava 18.0
 
-    - org.mockito -> mockito-all 1.9.5
+    - org.mockito -> mockito-all 1.10.19

@@ -9,12 +9,12 @@ Adding to dependencies.yml
     require:
       - play
       - play -> secure
-      - play-web -> web 1.5.4
+      - play-web -> web 1.8.6
 
     repositories:
       - codeborne:
         type: http
-        artifact: http://repo.codeborne.com/[organization]/[module]-[revision].zip
+        artifact: https://repo.codeborne.com/[organization]/[module]-[revision].zip
         contains:
           - play-web
 
