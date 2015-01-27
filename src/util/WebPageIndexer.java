@@ -12,7 +12,8 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
-import play.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import play.Play;
 
 import java.io.File;
@@ -27,6 +28,8 @@ import static org.apache.commons.lang.StringUtils.join;
 import static org.apache.commons.lang.StringUtils.split;
 
 public class WebPageIndexer {
+  private static final Logger logger = LoggerFactory.getLogger(WebPageIndexer.class);
+
   private static final Version version = Version.LUCENE_43;
   private Directory dir;
   public IndexReader reader;
@@ -61,7 +64,7 @@ public class WebPageIndexer {
   }
 
   public synchronized void indexWebPages() throws IOException {
-    Logger.info("Indexing web pages...");
+    logger.info("Indexing web pages...");
     long start = System.currentTimeMillis();
 
     IndexWriterConfig conf = new IndexWriterConfig(version, analyzer);
@@ -88,7 +91,7 @@ public class WebPageIndexer {
         writer.addDocument(doc);
       }
       this.tagsFreqByTopPage = unmodifiableMap(tagsFreqByTopPage);
-      Logger.info("Indexed " + writer.numDocs() + " pages in " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+      logger.info("Indexed " + writer.numDocs() + " pages in " + ((System.currentTimeMillis() - start) / 1000) + " sec");
     }
 
     reopenIndex();

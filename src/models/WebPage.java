@@ -1,6 +1,7 @@
 package models;
 
-import play.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import play.Play;
 import play.i18n.Lang;
 import play.templates.JavaExtensions;
@@ -28,6 +29,7 @@ import static play.libs.Codec.byteToHexString;
 import static util.UrlEncoder.safeUrlEncode;
 
 public class WebPage implements Comparable<WebPage> {
+  private static final Logger logger = LoggerFactory.getLogger(WebPage.class);
   public static final Set<String> ALLOWED_FILE_TYPES = new HashSet<>(asList(Play.configuration.getProperty("web.downloadable.files", "png,jpg,gif,pdf,rtf,swf,mp3,flv,zip").split("\\s*,\\s*")));
   public static final String BOM = new String(new byte[]{(byte)0xEF, (byte)0xBB, (byte)0xBF});
   static final Pattern LINK_PATTERN = Pattern.compile("<a([^>]*?)href=\"([^\"]+?)\"([^>]*?)>(\\s*[^<].+?[^>]\\s*)</a>", DOTALL);
@@ -180,7 +182,7 @@ public class WebPage implements Comparable<WebPage> {
         return metadata;
       }
       catch (IOException e) {
-        Logger.error("Cannot load " + metaFile, e);
+        logger.error("Cannot load " + metaFile, e);
       }
     }
     return new Properties();

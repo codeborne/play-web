@@ -1,7 +1,8 @@
 package plugins;
 
 import models.WebPage;
-import play.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import play.Play;
 import play.PlayPlugin;
 import play.cache.CacheFor;
@@ -17,6 +18,8 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.apache.commons.lang.StringUtils.substring;
 
 public class WebContentPlugin extends PlayPlugin {
+  private static final Logger logger = LoggerFactory.getLogger(WebContentPlugin.class);
+
   public static final String WEB_CONTENT_METHOD = "serveContent";
   public static final String WEB_CACHED_CONTENT_METHOD = "serveContentCached";
   public static final String WEB_NEWS_METHOD = "news";
@@ -65,7 +68,7 @@ public class WebContentPlugin extends PlayPlugin {
 
   @Override public void detectChange() {
     if (WebPage.ROOT.dir.lastModified() > lastModified) {
-      Logger.info(WebPage.ROOT.dir + " change detected, reloading web routes");
+      logger.info(WebPage.ROOT.dir + " change detected, reloading web routes");
       onApplicationStart();
     }
   }
