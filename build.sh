@@ -14,6 +14,6 @@ if [ -d $DESTINATION ]; then
       echo "Not publishing, $MODULE-$VERSION.zip already exists"
   else
       cp dist/*.zip $TARGET || exit $?
-      echo "Package is available at http://repo.codeborne.com/play-$MODULE/$MODULE-$VERSION.zip"
+      echo "Package is available at https://repo.codeborne.com/play-$MODULE/$MODULE-$VERSION.zip"
   fi
 fi
