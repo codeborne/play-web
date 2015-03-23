@@ -7,7 +7,7 @@ TARGET=$DESTINATION/$MODULE-$VERSION.zip
 rm -fr dist
 play dependencies --sync || exit $?
 play build-module || exit $?
-zip --delete dist/*.zip "modules/secure" "lib/mockito*"
+zip --delete dist/*.zip "modules/secure" "lib/mockito*" "lib/hamcrest*" "lib/objenesis*"
 
 if [ -d $DESTINATION ]; then
   if [ -e $TARGET ]; then
