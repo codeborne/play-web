@@ -6,7 +6,8 @@ import com.google.common.net.InetAddresses;
 import models.WebPage;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import play.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import play.Play;
 import play.data.validation.Required;
 import play.i18n.Messages;
@@ -36,7 +37,7 @@ import static util.Git.*;
 @Check("cms")
 @With(Security.class)
 public class WebAdmin extends Controller {
-
+  private static final Logger logger = LoggerFactory.getLogger(WebAdmin.class);
   private static final Pattern LINKS = Pattern.compile("(href|src)=\"([^\"]*)\"");
 
   public static void status() throws IOException, InterruptedException, ExecException {
@@ -59,12 +60,13 @@ public class WebAdmin extends Controller {
 
   @Catch(ExecException.class)
   public static void gitFailure(ExecException e) throws InterruptedException, IOException, ExecException {
-    Logger.error("git failed: " + e.code + ": " + e.getMessage());
+    logger.error("git failed: " + e.code + ": " + e.getMessage());
     flash.error(e.getMessage());
     if (!"WebAdmin.status".equals(request.action)) status();
   }
 
   public static void publish(String message, String[] paths) throws IOException, InterruptedException, ExecException {
+    checkAuthenticity();
     if (paths == null || paths.length == 0) status();
 
     List<String> args = new ArrayList<>(asList("commit",
@@ -109,7 +111,7 @@ public class WebAdmin extends Controller {
     render(page, revision, diff);
   }
 
-  public static void downloadRevision(String path, String revision) throws InterruptedException, IOException, ExecException {
+  public static void downloadRevision(String path, String revision) throws IOException {
     if (path.startsWith("/")) path = path.substring(1);
     InputStream stream = gitForStream("show", revision + ":" + path);
     renderBinary(stream, FilenameUtils.getName(path), true);
@@ -123,7 +125,7 @@ public class WebAdmin extends Controller {
     for (VirtualFile file : page.dir.list()) {
       if (!file.isDirectory()) args.add(path + file.getName());
     }
-    Logger.info("Restored " + page.path + " to " + revision);
+    logger.info("Restored " + page.path + " to " + revision);
     redirect(page.path);
   }
 

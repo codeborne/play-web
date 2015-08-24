@@ -8,9 +8,10 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import play.Logger;
 import play.Play;
 import play.cache.CacheFor;
 import play.db.jpa.JPAPlugin;
@@ -48,6 +49,7 @@ import static util.UrlEncoder.safeUrlEncode;
 
 @With(Security.class) @NoTransaction
 public class Web extends Controller {
+  private static final Logger logger = LoggerFactory.getLogger(Web.class);
   static WebPageIndexer indexer = WebPageIndexer.getInstance();
 
   @After public static void setHeaders() {
@@ -277,7 +279,7 @@ public class Web extends Controller {
 
     msg.setFrom(Play.configuration.getProperty("email.from"), Play.configuration.getProperty("email.from.name"));
 
-    Logger.info("Sending web form to " + msg.getToAddresses() + ": " + body);
+    logger.info("Sending web form to " + msg.getToAddresses() + ": " + body);
     if (await(Mail.send(msg))) {
       flash.success(play.i18n.Messages.get("web.form.sent"));
       redirect(page.path);

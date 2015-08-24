@@ -1,12 +1,14 @@
 *{form item for twitter bootstrap}*
 %{label = _label ? _label : ''}%
-<div class="control-group#{ifError _field ?: ''} error#{/ifError}#{if _class} ${_class}#{/if}" id="${_id}">
-  <label
-     #{if _labelFor}for="${_labelFor}"#{/if}
-     style="${_style}" class="control-label">
-   &{label}</label>
-  <div class="controls">
-    #{doBody /}
-    #{ifError _field ?: ''}<span class="help-inline error-message">#{error _field /}</span>#{/ifError}
+
+#{field _field ?: _arg ?: ''}
+  <div class="control-group#{ifError field.name ?: ''} error#{/ifError}#{if _class} ${_class}#{/if}" id="${_id}">
+    <label
+      #{if _labelFor}for="${_labelFor}"#{/if}
+      style="${_style}" class="control-label">&{label}</label>
+    <div class="controls">
+      #{doBody vars:[field:field]/}
+      #{ifError field.name ?: ''}<span class="help-inline error-message">#{error field.name /}</span>#{/ifError}
+    </div>
   </div>
-</div>
+#{/field}
