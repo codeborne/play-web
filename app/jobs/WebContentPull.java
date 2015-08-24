@@ -16,7 +16,7 @@ public class WebContentPull extends Job {
   static Logger logger = LoggerFactory.getLogger(WebContentPull.class);
 
   @Override public void doJob() throws Exception {
-    if ("test".equals(Play.id) || !WebPage.ROOT.dir.exists()) return;
+    if (Play.runingInTestMode() || !WebPage.ROOT.dir.child(".git").exists()) return;
     String result = Git.safePull();
     if (isNotEmpty(result))
       logger.info("Pulled content: " + result);
