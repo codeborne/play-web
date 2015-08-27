@@ -6,6 +6,7 @@ import play.Play;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Scanner;
 
 public class Git {
@@ -13,6 +14,10 @@ public class Git {
 
   public static synchronized String git(String ... cmdLine) throws IOException, InterruptedException, ExecException {
     return exec(addExecutable(cmdLine));
+  }
+
+  public static synchronized String git(List<String> cmdLine) throws IOException, InterruptedException, ExecException {
+    return exec(addExecutable(cmdLine.toArray(new String[cmdLine.size()])));
   }
 
   public static synchronized InputStream gitForStream(String ... cmdLine) throws IOException {

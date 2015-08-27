@@ -68,15 +68,23 @@ public class WebAdmin extends Controller {
   public static void publish(String message, String[] paths) throws IOException, InterruptedException, ExecException {
     checkAuthenticity();
     if (paths == null || paths.length == 0) status();
+    validateGitPaths(paths);
 
     List<String> args = new ArrayList<>(asList("commit",
         "-m", defaultIfEmpty(message, "no message specified"),
         "--author=" + Security.connected() + " <" + Security.connected() + ">"));
     args.addAll(asList(paths));
-    String committed = git(args.toArray(new String[args.size()]));
+    String committed = git(args);
 
     flash.put("success", committed);
     push();
+  }
+
+  protected static void validateGitPaths(String...paths) {
+    for (String path : paths) {
+      if (path.startsWith("-") || path.contains(".."))
+        forbidden("Invalid paths");
+    }
   }
 
   public static void push() throws InterruptedException, IOException, ExecException {
@@ -87,17 +95,19 @@ public class WebAdmin extends Controller {
   }
 
   public static void history(String path) throws InterruptedException, IOException, ExecException {
+    validateGitPaths(path);
     WebPage page = WebPage.forPath(path);
     List<String> args = new ArrayList<>(asList("log", "--pretty=format:%h%x09%ct%x09%an%x09%ae%x09%s%x09%b%x03", "--max-count=50"));
     if (path.startsWith("/")) path = path.substring(1);
     for (VirtualFile file : page.dir.list()) {
       if (!file.isDirectory()) args.add(path + file.getName());
     }
-    String[] log = git(args.toArray(new String[args.size()])).split("\u0003");
+    String[] log = git(args).split("\u0003");
     render(page, log);
   }
 
   public static void diff(String path, String revision) throws InterruptedException, IOException, ExecException {
+    validateGitPaths(path);
     WebPage page = WebPage.forPath(path);
     List<String> args = new ArrayList<>(asList("diff", revision));
     if (path.startsWith("/")) path = path.substring(1);
@@ -107,31 +117,34 @@ public class WebAdmin extends Controller {
         if (!file.isDirectory()) args.add(path + file.getName());
       }
     }
-    String diff = git(args.toArray(new String[args.size()]));
+    String diff = git(args);
     render(page, revision, diff);
   }
 
   public static void downloadRevision(String path, String revision) throws IOException {
+    validateGitPaths(path);
     if (path.startsWith("/")) path = path.substring(1);
     InputStream stream = gitForStream("show", revision + ":" + path);
     renderBinary(stream, FilenameUtils.getName(path), true);
   }
 
-  public static void restore(String path, String revision) {
+  public static void restore(String path, String revision) throws InterruptedException, IOException, ExecException {
     checkAuthenticity();
+    validateGitPaths(path);
     WebPage page = WebPage.forPath(path);
     List<String> args = new ArrayList<>(asList("checkout", revision, "--"));
     if (path.startsWith("/")) path = path.substring(1);
     for (VirtualFile file : page.dir.list()) {
       if (!file.isDirectory()) args.add(path + file.getName());
     }
+    git(args);
     logger.info("Restored " + page.path + " to " + revision);
     redirect(page.path);
   }
 
   public static void revert(String status, String filePath) throws InterruptedException, IOException, ExecException {
     checkAuthenticity();
-    if (filePath.contains("..")) forbidden();
+    validateGitPaths(filePath);
     if (status.startsWith("A")) git("rm", "-f", filePath);
     else git("checkout", "HEAD", "--", filePath);
     status();
@@ -145,6 +158,7 @@ public class WebAdmin extends Controller {
   public static void saveContent(@Required String path, @Required String part) throws IOException {
     checkAuthenticity();
     if (validation.hasErrors()) forbidden();
+    validateGitPaths(path);
     WebPage page = WebPage.forPath(path);
     try (OutputStream out = page.dir.child(part).outputstream()) {
       IOUtils.copy(request.body, out);
