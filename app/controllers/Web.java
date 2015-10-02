@@ -16,6 +16,7 @@ import play.Play;
 import play.cache.CacheFor;
 import play.db.jpa.JPAPlugin;
 import play.db.jpa.NoTransaction;
+import play.i18n.Messages;
 import play.libs.Mail;
 import play.libs.XML;
 import play.mvc.*;
@@ -116,6 +117,11 @@ public class Web extends Controller {
   }
 
   public static void search(String q) throws ParseException, IOException {
+    if (!indexer.shouldIndex()) {
+      error(404, Messages.get("error.notFound"));
+      return;
+    }
+    
     Query query = indexer.queryParser.parse("title:\"" + q + "\"^3 text:\"" + q + "\" keywords:\"" + q + "\"^2 path:\"" + q + "\"^2");
     TopDocs topDocs = indexer.searcher.search(query, 50);
     List<WebPage> results = new ArrayList<>();

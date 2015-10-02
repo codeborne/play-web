@@ -88,6 +88,8 @@ web.metadata.sitemap=<b>false</b> - in order to hide the page from sitemap
 
 web.form.sent=Message has been sent
 
+error.notFound=not found
+
 git.status.A=Added
 git.status.D=Deleted
 git.status.M=Modified

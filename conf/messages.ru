@@ -88,6 +88,8 @@ web.metadata.sitemap=<b>false</b>, чтобы страница не показы
 
 web.form.sent=Ваше сообщение отправлено
 
+error.notFound=не найдено
+
 git.status.A=Добавлен
 git.status.D=Удалён
 git.status.M=Изменён
