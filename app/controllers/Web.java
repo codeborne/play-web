@@ -18,6 +18,7 @@ import play.db.jpa.JPAPlugin;
 import play.db.jpa.NoTransaction;
 import play.i18n.Messages;
 import play.libs.Mail;
+import play.libs.MimeTypes;
 import play.libs.XML;
 import play.mvc.*;
 import play.templates.BaseTemplate;
@@ -74,16 +75,16 @@ public class Web extends Controller {
   }
 
   @SetLangByURL @CacheFor("5mn")
-  public static void serveContentCached() throws UnsupportedEncodingException {
+  public static void serveContentCached() throws IOException, ParseException {
     serveContentInternal();
   }
 
   @SetLangByURL
-  public static void serveContent() throws UnsupportedEncodingException {
+  public static void serveContent() throws IOException, ParseException {
     serveContentInternal();
   }
 
-  private static void serveContentInternal() throws UnsupportedEncodingException {
+  private static void serveContentInternal() throws IOException, ParseException {
     VirtualFile dir = serveFileOrGetDirectory();
     if (!request.path.endsWith("/")) redirect(request.path + "/");
     WebPage page = WebPage.forPath(dir);
@@ -93,14 +94,26 @@ public class Web extends Controller {
     renderPage(page);
   }
 
-  private static VirtualFile serveFileOrGetDirectory() throws UnsupportedEncodingException {
+  private static VirtualFile serveFileOrGetDirectory() throws IOException, ParseException {
     VirtualFile file = WebPage.toVirtualFile(URLDecoder.decode(request.path, "UTF-8"));
     if (file.exists() && isAllowed(file)) {
       response.cacheFor("30d");
       renderBinary(file.getRealFile());
     }
-    else if (!file.isDirectory()) notFound();
+    else if (!file.isDirectory()) showNotFoundError();
     return file;
+  }
+
+  private static void showNotFoundError() throws IOException, ParseException {
+    String contentType = MimeTypes.getContentType(request.path, "text/html");
+
+    if (!indexer.shouldIndex() || !contentType.startsWith("text/html")) {
+      notFound();
+    }
+    else {
+      response.status = Http.StatusCode.NOT_FOUND;
+      renderSearch(request.path.replaceFirst(".*/", ""));
+    }
   }
 
   private static String fixRedirectUrl(String url) {
@@ -121,7 +134,10 @@ public class Web extends Controller {
       error(404, Messages.get("error.notFound"));
       return;
     }
-    
+    renderSearch(q);
+  }
+  
+  private static void renderSearch(String q) throws ParseException, IOException {
     Query query = indexer.queryParser.parse("title:\"" + q + "\"^3 text:\"" + q + "\" keywords:\"" + q + "\"^2 path:\"" + q + "\"^2");
     TopDocs topDocs = indexer.searcher.search(query, 50);
     List<WebPage> results = new ArrayList<>();
@@ -131,7 +147,7 @@ public class Web extends Controller {
     }
 
     renderArgs.put("numResults", topDocs.totalHits);
-    render(results);
+    render("@search", q, results);
   }
 
   public static void contacts() {

@@ -1,7 +1,7 @@
 #{extends 'Web/layout.html'/}
 
 <div class="search content">
-  <h2>#{if params.q}${java.text.MessageFormat.format(play.i18n.Messages.get('web.search.total'), numResults%10, numResults)} '<span class="highlighted">${params.q}</span>'#{/if}</h2>
+  <h2>#{if q}${java.text.MessageFormat.format(play.i18n.Messages.get('web.search.total'), numResults%10, numResults)} '<span class="highlighted">${q}</span>'#{/if}</h2>
 
   <ul class="results">
   #{list results, as:'p'}
