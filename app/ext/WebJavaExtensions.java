@@ -16,6 +16,7 @@ public class WebJavaExtensions extends JavaExtensions {
       result.append(ch);
 
       boolean isNoWrapChar = noWrapChars.indexOf(ch) != -1;
+      if (isNoWrapChar) result.append(delimiter);
       if (isWhitespace(ch) || isNoWrapChar)
         wordLen = 0;
       else if (++wordLen >= maxLineLength && i+1 < s.length()) {
