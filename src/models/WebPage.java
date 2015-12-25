@@ -319,6 +319,10 @@ public class WebPage implements Comparable<WebPage> {
       return (object instanceof Template) && name.equals(((Template)object).name);
     }
 
+    @Override public int hashCode() {
+      return name.hashCode();
+    }
+
     @Override public int compareTo(Template that) {
       return name.compareTo(that.name);
     }
