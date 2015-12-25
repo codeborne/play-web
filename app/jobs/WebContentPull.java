@@ -13,7 +13,7 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 @On("cron.webContentPull") @NoTransaction
 public class WebContentPull extends Job {
-  static Logger logger = LoggerFactory.getLogger(WebContentPull.class);
+  private static final Logger logger = LoggerFactory.getLogger(WebContentPull.class);
 
   @Override public void doJob() throws Exception {
     if (Play.runingInTestMode() || !WebPage.ROOT.dir.child(".git").exists()) return;
