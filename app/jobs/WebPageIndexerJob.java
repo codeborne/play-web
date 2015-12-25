@@ -8,7 +8,7 @@ import util.WebPageIndexer;
 
 @OnApplicationStart(async = true) @Every("6h") @NoTransaction
 public class WebPageIndexerJob extends Job {
-  static WebPageIndexer indexer = WebPageIndexer.getInstance();
+  private static final WebPageIndexer indexer = WebPageIndexer.getInstance();
 
   @Override public void doJob() throws Exception {
     if (indexer.shouldIndex())
