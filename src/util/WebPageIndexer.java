@@ -76,7 +76,7 @@ public class WebPageIndexer {
         if (page instanceof WebPage.News && !((WebPage.News) page).isStory()) continue;
         if ("true".equals(page.metadata.getProperty("hidden", "false"))) continue;
 
-        float boost = 3600 * 24 * 1000f / (System.currentTimeMillis() - page.date().getTime());
+        float boost = 3600 * 24 * 1000.0f / (System.currentTimeMillis() - page.date().getTime());
 
         Document doc = new Document();
         doc.add(withBoost(boost, new TextField("path", page.path, Field.Store.YES)));
