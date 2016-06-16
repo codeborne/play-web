@@ -9,7 +9,7 @@ Adding to dependencies.yml
     require:
       - play
       - play -> secure
-      - play-web -> web 1.9.5
+      - play-web -> web 1.9.6
 
     repositories:
       - codeborne:

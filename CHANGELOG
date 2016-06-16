@@ -1,0 +1,13 @@
+== Changelog
+
+=== 1.9.6 (16.06.2016)
+* support status C (Copied)
+
+=== 1.9.5 (25.12.2015)
+* upgrade to guava 19.0
+
+=== 1.9.4 (12.11.2015)
+* add delimiter after hyphens as Firefox does not wrap them
+
+=== 1.9.1 (18.09.2015)
+* upgrade ckeditor to 4.5.3

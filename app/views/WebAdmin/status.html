@@ -14,7 +14,7 @@
         %{
         fileStatus = m.substring(0,2).trim()
         filePath = m.substring(3).trim().replaceFirst('^"(.*)"$', '$1')
-        if (fileStatus == 'R') filePath = filePath.substring(filePath.indexOf(' -> ') + 4)
+        if (fileStatus == 'R' || fileStatus == 'C') filePath = filePath.substring(filePath.indexOf(' -> ') + 4)
         }%
         <tr>
           <td>
