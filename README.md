@@ -1,7 +1,7 @@
 play-web
 ========
 
-Module for Play framework 1.x for adding of website capability based on git to your project with some WYSIWYG CMS features.
+Module for Play framework 1.4.x for adding of website capability based on git to your project with some WYSIWYG CMS features.
 
 Adding to dependencies.yml
 --------------------------
@@ -9,7 +9,7 @@ Adding to dependencies.yml
     require:
       - play
       - play -> secure
-      - play-web -> web 1.9.6
+      - play-web -> web 1.9.7
 
     repositories:
       - codeborne:

@@ -335,7 +335,8 @@ public class Web extends Controller {
   }
 
   @SuppressWarnings("unchecked")
-  private static void renderPage(WebPage page) {
+  @Util
+  public static void renderPage(WebPage page) {
     BaseTemplate.layoutData.set((Map) page.contentParts()); // init layoutData ourselves
     TagContext.init();
     renderArgs.put("_isLayout", true); // tell play not to reset layoutData itself

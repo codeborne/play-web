@@ -1,5 +1,8 @@
 == Changelog
 
+=== 1.9.7 (29.08.2016)
+* Make method Web.renderPage() public - it now can be reused from other controllers
+
 === 1.9.6 (16.06.2016)
 * support status C (Copied)
 
