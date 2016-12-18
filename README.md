@@ -81,5 +81,5 @@ In your site's layout include these lines among the header:
 
     #{secure.check 'cms'}
       #{include 'WebAdmin/pageEditor.html'/}
-      <a class="btn btn-primary" href="@{WebAdmin.status()}">&{'web.admin'}</a>
+      <a class="btn btn-primary" href="/webadmin/status">&{'web.admin'}</a>
     #{/secure.check}

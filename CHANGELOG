@@ -1,6 +1,7 @@
 == Changelog
 
 === 2.0 (19.12.2016)
+* redirect to URL instead of action
 * upgrade to guava 20.0
 * upgrade to mockito-core 2.3.7
 

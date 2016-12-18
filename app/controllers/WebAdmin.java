@@ -62,12 +62,17 @@ public class WebAdmin extends Controller {
   public static void gitFailure(ExecException e) throws InterruptedException, IOException, ExecException {
     logger.error("git failed: " + e.code + ": " + e.getMessage());
     flash.error(e.getMessage());
-    if (!"WebAdmin.status".equals(request.action)) status();
+    if (!"WebAdmin.status".equals(request.action)) {
+      redirect("/webadmin/status");
+    }
   }
 
   public static void publish(String message, String[] paths) throws IOException, InterruptedException, ExecException {
     checkAuthenticity();
-    if (paths == null || paths.length == 0) status();
+    if (paths == null || paths.length == 0) {
+      redirect("/webadmin/status");
+    }
+    
     validateGitPaths(paths);
 
     List<String> args = new ArrayList<>(asList("commit",
@@ -77,7 +82,7 @@ public class WebAdmin extends Controller {
     String committed = git(args);
 
     flash.put("success", committed);
-    push();
+    redirect("/webadmin/push");
   }
 
   protected static void validateGitPaths(String...paths) {
@@ -91,7 +96,7 @@ public class WebAdmin extends Controller {
     safePull();
     String push = git("push", "origin", "master");
     flash.put("success", push + "\n" + flash.get("success"));
-    status();
+    redirect("/webadmin/status");
   }
 
   public static void history(String path) throws InterruptedException, IOException, ExecException {
@@ -147,7 +152,7 @@ public class WebAdmin extends Controller {
     validateGitPaths(filePath);
     if (status.startsWith("A")) git("rm", "-f", filePath);
     else git("checkout", "HEAD", "--", filePath);
-    status();
+    redirect("/webadmin/status");
   }
 
   public static void doc() {
