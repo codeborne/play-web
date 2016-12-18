@@ -1,5 +1,9 @@
 == Changelog
 
+=== 2.0 (19.12.2016)
+* upgrade to guava 20.0
+* upgrade to mockito-core 2.3.7
+
 === 1.9.7 (29.08.2016)
 * Make method Web.renderPage() public - it now can be reused from other controllers
 
