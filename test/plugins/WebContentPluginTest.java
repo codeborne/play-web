@@ -12,7 +12,6 @@ import play.mvc.Router;
 import play.mvc.Scope;
 
 import java.util.List;
-import java.util.Properties;
 
 import static java.util.Arrays.asList;
 import static models.WebPage.forPath;
@@ -29,8 +28,7 @@ public class WebContentPluginTest {
 
   @Before
   public void setUp() {
-    if (Play.configuration == null) Play.configuration = new Properties();
-    if (Play.id == null) Play.id = "dev";
+    Play.configuration.clear();
     Http.Request.current.set(request = newHttpRequest());
     Http.Response.current.set(response = new Http.Response());
     Scope.RenderArgs.current.set(new Scope.RenderArgs());

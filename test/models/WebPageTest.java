@@ -30,7 +30,7 @@ public class WebPageTest {
 
   @BeforeClass
   public static void setUp() throws IOException {
-    if (Play.configuration == null) Play.configuration = new Properties();
+    Play.configuration.clear();
     currentDirName = new File(".").getCanonicalFile().getName();
     Play.configuration.setProperty("web.content", "../" + currentDirName);
     Play.applicationPath = null;
