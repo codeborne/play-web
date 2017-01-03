@@ -1,5 +1,6 @@
 package controllers;
 
+import com.google.common.collect.ImmutableMap;
 import models.WebPage;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.mail.EmailException;
@@ -147,15 +148,17 @@ public class Web extends Controller {
     }
 
     renderArgs.put("numResults", topDocs.totalHits);
-    render("@search", q, results);
+    renderArgs.put("q", q);
+    renderArgs.put("results", results);
+    renderTemplate("@search");
   }
 
   public static void contacts() {
-    render();
+    renderTemplate("@contacts");
   }
 
   public static void map() {
-    render();
+    renderTemplate("@map");
   }
 
   public static void locale(String locale) {
@@ -172,7 +175,13 @@ public class Web extends Controller {
     List<WebPage> news = page.isStory() ? asList((WebPage)page) : limit(allNews, 30);
     List<Entry<String, Float>> tagFreq = tagFreq(page);
     int total = allNews.size();
-    renderTemplate("Web/templates/news.html", page, news, tag, tagFreq, total);
+    
+    renderArgs.put("page", page);
+    renderArgs.put("news", news);
+    renderArgs.put("tag", tag);
+    renderArgs.put("tagFreq", tagFreq);
+    renderArgs.put("total", total);
+    renderTemplate("Web/templates/news.html");
   }
 
   private static List<Map.Entry<String, Float>> tagFreq(WebPage page) {
@@ -219,7 +228,7 @@ public class Web extends Controller {
     try {
       JPAPlugin.startTx(true);
       WebPage root = rootForLocale();
-      render(root);
+      renderTemplate("@sitemap", ImmutableMap.of("root", root));
     }
     finally {
       JPAPlugin.closeTx(true);
@@ -343,7 +352,8 @@ public class Web extends Controller {
 
     renderArgs.put("metaDescription", page.metadata.getProperty("description"));
     renderArgs.put("metaKeywords", page.metadata.getProperty("keywords"));
+    renderArgs.put("page", page);
 
-    renderTemplate("Web/templates/" + page.template + ".html", page);
+    renderTemplate("Web/templates/" + page.template + ".html");
   }
 }

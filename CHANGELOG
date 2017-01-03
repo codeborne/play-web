@@ -1,5 +1,8 @@
 == Changelog
 
+=== 2.1 (03.01.2017)
+* use methods renderTemplate(...) that work without ControllerEnhancer
+
 === 2.0 (19.12.2016)
 * redirect to URL instead of action
 * upgrade to guava 20.0
