@@ -57,7 +57,7 @@ public class Web extends Controller {
 
   @After public static void setHeaders() {
     response.setHeader("X-XSS-Protection", "1; mode=block");
-    response.setHeader("X-UA-Compatible", "IE=edge,chrome=1"); // force IE to normal mode (not "compatibility") or use Chrome Frame ;-)
+    response.setHeader("X-UA-Compatible", "IE=edge"); // force IE to normal mode (not "compatibility")
   }
 
   private static boolean shouldStartTx() {
