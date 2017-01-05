@@ -79,7 +79,7 @@ public class WebAdmin extends Controller {
     List<String> args = new ArrayList<>(asList("commit",
         "-m", defaultIfEmpty(message, "no message specified"),
         "--author=" + Security.connected() + " <" + Security.connected() + ">"));
-    args.addAll(asList(paths));
+    if (paths != null) args.addAll(asList(paths));
     String committed = git(args);
 
     flash.put("success", committed);
