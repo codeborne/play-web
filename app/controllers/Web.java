@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.awt.RenderingHints.*;
 import static java.lang.Math.min;
 import static java.util.Arrays.asList;
-import static java.util.Collections.sort;
+import static java.util.Comparator.comparingInt;
 import static models.WebPage.ALLOWED_FILE_TYPES;
 import static models.WebPage.rootForLocale;
 import static org.apache.commons.io.FilenameUtils.getExtension;
@@ -194,11 +194,7 @@ public class Web extends Controller {
       tags.add(tag);
       total += tag.getValue().intValue();
     }
-    sort(tags, new Comparator<Map.Entry<String, AtomicInteger>>() {
-      @Override public int compare(Map.Entry<String, AtomicInteger> tag1, Map.Entry<String, AtomicInteger> tag2) {
-        return tag2.getValue().intValue() - tag1.getValue().intValue();
-      }
-    });
+    tags.sort(comparingInt(t -> t.getValue().intValue()));
 
     LinkedList<Map.Entry<String, Float>> result = new LinkedList<>();
     boolean even = false;
