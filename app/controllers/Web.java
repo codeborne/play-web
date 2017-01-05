@@ -312,7 +312,7 @@ public class Web extends Controller {
 
     logger.info("Sending web form to " + msg.getToAddresses() + ": " + body);
     if (await(Mail.send(msg))) {
-      flash.success(play.i18n.Messages.get("web.form.sent"));
+      flash.success(Messages.get("web.form.sent"));
       redirect(page.path);
     }
     else {
