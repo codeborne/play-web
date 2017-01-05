@@ -60,7 +60,7 @@ public class WebAdmin extends Controller {
   }
 
   @Catch(ExecException.class)
-  public static void gitFailure(ExecException e) throws InterruptedException, IOException, ExecException {
+  public static void gitFailure(ExecException e) {
     logger.error("git failed: " + e.code + ": " + e.getMessage());
     flash.error(e.getMessage());
     if (!"WebAdmin.status".equals(request.action)) {
