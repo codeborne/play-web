@@ -56,7 +56,7 @@ public class WebAdmin extends Controller {
     Set<String> unpushed = new HashSet<>(asList(split(git("log", "origin/master..master", "--pretty=format:%h"), "\n")));
 
     String[] log = git("log", "--pretty=format:%h%x09%ct%x09%an%x09%ae%x09%s%x09%b%x03", "--max-count=50").split("\u0003");
-    renderTemplate("@status", ImmutableMap.of("status", status, "log", log, "unpushed", unpushed));
+    render(ImmutableMap.of("status", status, "log", log, "unpushed", unpushed));
   }
 
   @Catch(ExecException.class)
@@ -109,7 +109,7 @@ public class WebAdmin extends Controller {
       if (!file.isDirectory()) args.add(path + file.getName());
     }
     String[] log = git(args).split("\u0003");
-    renderTemplate("@history", ImmutableMap.of("page", page, "log", log));
+    render(ImmutableMap.of("page", page, "log", log));
   }
 
   public static void diff(String path, String revision) throws InterruptedException, IOException, ExecException {
@@ -124,7 +124,7 @@ public class WebAdmin extends Controller {
       }
     }
     String diff = git(args);
-    renderTemplate("@diff", ImmutableMap.of("page", page, "revision", revision, "diff", diff));
+    render(ImmutableMap.of("page", page, "revision", revision, "diff", diff));
   }
 
   public static void downloadRevision(String path, String revision) throws IOException {
@@ -158,7 +158,7 @@ public class WebAdmin extends Controller {
 
   public static void doc() {
     Collection<WebPage.Template> templates = WebPage.availableTemplates();
-    renderTemplate("@doc", ImmutableMap.of("templates", templates));
+    render(ImmutableMap.of("templates", templates));
   }
 
   public static void saveContent(@Required String path, @Required String part) throws IOException {
@@ -236,7 +236,7 @@ public class WebAdmin extends Controller {
       }
     }
 
-    renderTemplate("@checkLinks", ImmutableMap.of("problems", problems, "warnings", warnings, "externals", externals));
+    render(ImmutableMap.of("problems", problems, "warnings", warnings, "externals", externals));
   }
 
   private static void verifyPublicURL(String url) throws IOException {
@@ -297,7 +297,7 @@ public class WebAdmin extends Controller {
       VirtualFile file = i.next();
       if (!file.isDirectory() && !isAllowed(file)) i.remove();
     }
-    renderTemplate("@browse", ImmutableMap.of("page", page, "files", files));
+    render(ImmutableMap.of("page", page, "files", files));
   }
 
   public static void upload(String path, File data) throws Throwable {
@@ -339,7 +339,7 @@ public class WebAdmin extends Controller {
     }
     renderArgs.put("parent", parent);
     renderArgs.put("redirectTo", redirectTo);
-    renderTemplate("@addPageDialog");
+    render();
   }
 
   public static void addPage(@Required String parentPath, @Required String title, @Required String name, @Required String template, String redirectTo) {
@@ -353,7 +353,7 @@ public class WebAdmin extends Controller {
   }
 
   public static void addNewsDialog() {
-    renderTemplate("@addNewsDialog");
+    render();
   }
 
   public static void addNews(@Required String path, @Required String title, @Required Date date, String tags) {
@@ -381,7 +381,7 @@ public class WebAdmin extends Controller {
     WebPage page = WebPage.forPath(path);
     renderArgs.put("page", page);
     renderArgs.put("redirectTo", redirectTo);
-    renderTemplate("@addFileDialog");
+    render();
   }
 
   public static void addFile(@Required String path, @Required String name, @Required String title, String redirectTo) {
@@ -404,7 +404,7 @@ public class WebAdmin extends Controller {
     List<WebPage.Template> templates = WebPage.availableTemplates();
     renderArgs.put("page", page);
     renderArgs.put("templates", templates);
-    renderTemplate("@metadataDialog");
+    render();
   }
 
   public static void saveMetadata(@Required String path) throws IOException {

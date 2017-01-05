@@ -150,15 +150,15 @@ public class Web extends Controller {
     renderArgs.put("numResults", topDocs.totalHits);
     renderArgs.put("q", q);
     renderArgs.put("results", results);
-    renderTemplate("@search");
+    render();
   }
 
   public static void contacts() {
-    renderTemplate("@contacts");
+    render();
   }
 
   public static void map() {
-    renderTemplate("@map");
+    render();
   }
 
   public static void locale(String locale) {
@@ -228,7 +228,7 @@ public class Web extends Controller {
     try {
       JPAPlugin.startTx(true);
       WebPage root = rootForLocale();
-      renderTemplate("@sitemap", ImmutableMap.of("root", root));
+      render(ImmutableMap.of("root", root));
     }
     finally {
       JPAPlugin.closeTx(true);
