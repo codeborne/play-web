@@ -293,10 +293,7 @@ public class WebAdmin extends Controller {
     }
     WebPage page = WebPage.forPath(path);
     List<VirtualFile> files = page.dir.list();
-    for (Iterator<VirtualFile> i = files.iterator(); i.hasNext(); ) {
-      VirtualFile file = i.next();
-      if (!file.isDirectory() && !isAllowed(file)) i.remove();
-    }
+    files.removeIf(file -> !file.isDirectory() && !isAllowed(file));
     render(ImmutableMap.of("page", page, "files", files));
   }
 
