@@ -53,6 +53,7 @@ import static util.UrlEncoder.safeUrlEncode;
 @With(Security.class) @NoTransaction
 public class Web extends Controller {
   private static final Logger logger = LoggerFactory.getLogger(Web.class);
+  private static boolean usePlayGroovyTemplates = "true".equals(Play.configuration.getProperty("web.usePlayGroovyTemplates", "true"));
   static WebPageIndexer indexer = WebPageIndexer.getInstance();
 
   @After public static void setHeaders() {
@@ -339,12 +340,13 @@ public class Web extends Controller {
     for (String email : addresses.split("\\s*,\\s")) msg.addTo(email);
   }
 
-  @SuppressWarnings("unchecked")
   @Util
   public static void renderPage(WebPage page) {
-    BaseTemplate.layoutData.set((Map) page.contentParts()); // init layoutData ourselves
-    TagContext.init();
-    renderArgs.put("_isLayout", true); // tell play not to reset layoutData itself
+    if (usePlayGroovyTemplates) {
+      BaseTemplate.layoutData.set((Map) page.contentParts()); // init layoutData ourselves
+      TagContext.init();
+      renderArgs.put("_isLayout", true); // tell play not to reset layoutData itself
+    }
 
     renderArgs.put("metaDescription", page.metadata.getProperty("description"));
     renderArgs.put("metaKeywords", page.metadata.getProperty("keywords"));
