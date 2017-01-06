@@ -56,7 +56,7 @@ public class WebAdmin extends Controller {
     Set<String> unpushed = new HashSet<>(asList(split(git("log", "origin/master..master", "--pretty=format:%h"), "\n")));
 
     String[] log = git("log", "--pretty=format:%h%x09%ct%x09%an%x09%ae%x09%s%x09%b%x03", "--max-count=50").split("\u0003");
-    render(ImmutableMap.of("status", status, "log", log, "unpushed", unpushed));
+    renderTemplate(ImmutableMap.of("status", status, "log", log, "unpushed", unpushed));
   }
 
   @Catch(ExecException.class)
@@ -109,7 +109,7 @@ public class WebAdmin extends Controller {
       if (!file.isDirectory()) args.add(path + file.getName());
     }
     String[] log = git(args).split("\u0003");
-    render(ImmutableMap.of("page", page, "log", log));
+    renderTemplate(ImmutableMap.of("page", page, "log", log));
   }
 
   public static void diff(String path, String revision) throws InterruptedException, IOException, ExecException {
@@ -124,7 +124,7 @@ public class WebAdmin extends Controller {
       }
     }
     String diff = git(args);
-    render(ImmutableMap.of("page", page, "revision", revision, "diff", diff));
+    renderTemplate(ImmutableMap.of("page", page, "revision", revision, "diff", diff));
   }
 
   public static void downloadRevision(String path, String revision) throws IOException {
@@ -158,7 +158,7 @@ public class WebAdmin extends Controller {
 
   public static void doc() {
     Collection<WebPage.Template> templates = WebPage.availableTemplates();
-    render(ImmutableMap.of("templates", templates));
+    renderTemplate(ImmutableMap.of("templates", templates));
   }
 
   public static void saveContent(@Required String path, @Required String part) throws IOException {
@@ -236,7 +236,7 @@ public class WebAdmin extends Controller {
       }
     }
 
-    render(ImmutableMap.of("problems", problems, "warnings", warnings, "externals", externals));
+    renderTemplate(ImmutableMap.of("problems", problems, "warnings", warnings, "externals", externals));
   }
 
   private static void verifyPublicURL(String url) throws IOException {
@@ -294,7 +294,7 @@ public class WebAdmin extends Controller {
     WebPage page = WebPage.forPath(path);
     List<VirtualFile> files = page.dir.list();
     files.removeIf(file -> !file.isDirectory() && !isAllowed(file));
-    render(ImmutableMap.of("page", page, "files", files));
+    renderTemplate(ImmutableMap.of("page", page, "files", files));
   }
 
   public static void upload(String path, File data) throws Throwable {
@@ -332,7 +332,9 @@ public class WebAdmin extends Controller {
     if (parentPath != null) {
       parent = WebPage.forPath(parentPath);
       List<WebPage> children = parent.children();
-      if (!children.isEmpty()) renderArgs.put("template", children.get(0).metadata.getProperty("template"));
+      if (!children.isEmpty()) {
+        renderArgs.put("template", children.get(0).metadata.getProperty("template"));
+      }
     }
     renderArgs.put("parent", parent);
     renderArgs.put("redirectTo", redirectTo);

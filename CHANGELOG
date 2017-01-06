@@ -1,5 +1,8 @@
 == Changelog
 
+=== 2.2.1 (06.01.2017)
+* bugfix: render(Map) -> renderTemplate(Map)
+
 === 2.2 (05.01.2017)
 * config parameter to allow for alternative template engines, e.g. fastergt
 * require Java 8

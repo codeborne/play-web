@@ -225,7 +225,7 @@ public class Web extends Controller {
     try {
       JPAPlugin.startTx(true);
       WebPage root = rootForLocale();
-      render(ImmutableMap.of("root", root));
+      renderTemplate(ImmutableMap.of("root", root));
     }
     finally {
       JPAPlugin.closeTx(true);
