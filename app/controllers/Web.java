@@ -15,7 +15,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import play.Play;
 import play.cache.CacheFor;
-import play.db.jpa.JPAPlugin;
+import play.db.jpa.JPA;
 import play.db.jpa.NoTransaction;
 import play.i18n.Messages;
 import play.libs.Mail;
@@ -61,19 +61,9 @@ public class Web extends Controller {
     response.setHeader("X-UA-Compatible", "IE=edge"); // force IE to normal mode (not "compatibility")
   }
 
-  private static boolean shouldStartTx() {
-    return "always".equals(Play.configuration.getProperty("web.tx", "logged-in")) || Security.isConnected();
-  }
-
   @Before
-  public static void startTxIfNeeded() {
-    if (shouldStartTx()) JPAPlugin.startTx(true);
+  public static void before() {
     renderArgs.put("includeHiddenPages", Security.check("cms"));
-  }
-
-  @Finally
-  public static void closeTxIfStarted() {
-    JPAPlugin.closeTx(true);
   }
 
   @SetLangByURL @CacheFor("5mn")
@@ -223,16 +213,16 @@ public class Web extends Controller {
 
   public static void sitemap() {
     try {
-      JPAPlugin.startTx(true);
+      JPA.startTx(JPA.DEFAULT, true);
       WebPage root = rootForLocale();
       renderTemplate(ImmutableMap.of("root", root));
     }
     finally {
-      JPAPlugin.closeTx(true);
+      JPA.closeTx(JPA.DEFAULT);
     }
   }
 
-  public static void robotsTxt() throws IOException {
+  public static void robotsTxt() {
     renderText(WebPage.ROOT.dir.child("robots.txt").exists() ? WebPage.ROOT.loadFile("robots.txt") :
       "Sitemap: " + request.getBase() + Router.reverse("Web.sitemapXml") + "\n" +
         "User-Agent: *\n");

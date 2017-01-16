@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import play.Play;
 import play.PlayPlugin;
 import play.cache.CacheFor;
+import play.db.jpa.JPA;
 import play.i18n.Lang;
 import play.mvc.Http;
 import play.mvc.Router;
@@ -73,12 +74,30 @@ public class WebContentPlugin extends PlayPlugin {
     }
   }
 
+  private static boolean shouldStartTx() {
+    return "always".equals(Play.configuration.getProperty("web.tx", "logged-in")) || isLoggedIn();
+  }
+
+  private static boolean isLoggedIn() {
+    return Scope.Session.current().contains("username");
+  }
+
   @Override public void beforeActionInvocation(Method actionMethod) {
     if (actionMethod.isAnnotationPresent(SetLangByURL.class))
       setLangByURL();
     if (cacheEnabled() && actionMethod.isAnnotationPresent(CacheFor.class))
       Http.Response.current().cacheFor("12h");
     Scope.RenderArgs.current().put("rootPage", WebPage.rootForLocale());
+
+    if ("controllers.Web".equals(actionMethod.getDeclaringClass().getName()) && shouldStartTx()) {
+      JPA.startTx(JPA.DEFAULT, true);
+      Http.Request.current().args.put("webTxStarted", true);
+    }
+  }
+
+  @Override public void afterActionInvocation() {
+    if (Http.Request.current().args.get("webTxStarted") != null)
+      JPA.closeTx(JPA.DEFAULT);
   }
 
   private void setLangByURL() {

@@ -31,6 +31,7 @@ public class WebContentPluginTest {
     Play.configuration.clear();
     Http.Request.current.set(request = newHttpRequest());
     Http.Response.current.set(response = new Http.Response());
+    Scope.Session.current.set(new Scope.Session());
     Scope.RenderArgs.current.set(new Scope.RenderArgs());
     request.path = "/";
     Play.langs.add("en");
