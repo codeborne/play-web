@@ -1,5 +1,8 @@
 == Changelog
 
+=== 2.3 (21.01.2017)
+* use play-rebel 0.6, extend RebelController
+
 === 2.2.1 (06.01.2017)
 * bugfix: render(Map) -> renderTemplate(Map)
 

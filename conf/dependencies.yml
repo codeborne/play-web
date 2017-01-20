@@ -1,4 +1,4 @@
-self: play -> web 2.2.2
+self: play -> web 2.3
 
 require:
     - play 1.4+
@@ -9,8 +9,18 @@ require:
     - org.apache.lucene -> lucene-queries 4.3.0
     - org.apache.lucene -> lucene-queryparser 4.3.0
 
-    - com.google.guava -> guava 20.0
+    - com.google.guava -> guava 21.0
 
-    - org.mockito -> mockito-core 2.3.7:
+    - org.mockito -> mockito-core 2.6.4:
         exclude:
             - org.hamcrest
+
+    - play-codeborne -> rebel 0.6
+
+repositories:
+
+    - codeborne-modules-jars:
+        type: http
+        artifact: https://repo.codeborne.com/play-[module]/[module]-[revision].jar
+        contains:
+            - play-codeborne -> rebel

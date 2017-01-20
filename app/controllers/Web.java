@@ -22,6 +22,7 @@ import play.libs.Mail;
 import play.libs.MimeTypes;
 import play.libs.XML;
 import play.mvc.*;
+import play.rebel.RebelController;
 import play.templates.BaseTemplate;
 import play.templates.TagContext;
 import play.vfs.VirtualFile;
@@ -51,32 +52,32 @@ import static plugins.WebContentPlugin.cacheEnabled;
 import static util.UrlEncoder.safeUrlEncode;
 
 @With(Security.class) @NoTransaction
-public class Web extends Controller {
+public class Web extends RebelController {
   private static final Logger logger = LoggerFactory.getLogger(Web.class);
   private static boolean usePlayGroovyTemplates = "true".equals(Play.configuration.getProperty("web.usePlayGroovyTemplates", "true"));
   static WebPageIndexer indexer = WebPageIndexer.getInstance();
 
-  @After public static void setHeaders() {
-    response.setHeader("X-XSS-Protection", "1; mode=block");
-    response.setHeader("X-UA-Compatible", "IE=edge"); // force IE to normal mode (not "compatibility")
+  @After public void setHeaders() {
+    Http.Response.current().setHeader("X-XSS-Protection", "1; mode=block");
+    Http.Response.current().setHeader("X-UA-Compatible", "IE=edge"); // force IE to normal mode (not "compatibility")
   }
 
   @Before
-  public static void before() {
+  public void before() {
     renderArgs.put("includeHiddenPages", Security.check("cms"));
   }
 
   @SetLangByURL @CacheFor("5mn")
-  public static void serveContentCached() throws IOException, ParseException {
+  public void serveContentCached() throws IOException, ParseException {
     serveContentInternal();
   }
 
   @SetLangByURL
-  public static void serveContent() throws IOException, ParseException {
+  public void serveContent() throws IOException, ParseException {
     serveContentInternal();
   }
 
-  private static void serveContentInternal() throws IOException, ParseException {
+  private void serveContentInternal() throws IOException, ParseException {
     VirtualFile dir = serveFileOrGetDirectory();
     if (!request.path.endsWith("/")) redirect(request.path + "/");
     WebPage page = WebPage.forPath(dir);
@@ -86,29 +87,29 @@ public class Web extends Controller {
     renderPage(page);
   }
 
-  private static VirtualFile serveFileOrGetDirectory() throws IOException, ParseException {
+  private VirtualFile serveFileOrGetDirectory() throws IOException, ParseException {
     VirtualFile file = WebPage.toVirtualFile(URLDecoder.decode(request.path, "UTF-8"));
     if (file.exists() && isAllowed(file)) {
-      response.cacheFor("30d");
+      Http.Response.current().cacheFor("30d");
       renderBinary(file.getRealFile());
     }
     else if (!file.isDirectory()) showNotFoundError();
     return file;
   }
 
-  private static void showNotFoundError() throws IOException, ParseException {
+  private void showNotFoundError() throws IOException, ParseException {
     String contentType = MimeTypes.getContentType(request.path, "text/html");
 
     if (!indexer.shouldIndex() || !contentType.startsWith("text/html")) {
       notFound();
     }
     else {
-      response.status = Http.StatusCode.NOT_FOUND;
+      Http.Response.current().status = Http.StatusCode.NOT_FOUND;
       renderSearch(request.path.replaceFirst(".*/", ""));
     }
   }
 
-  private static String fixRedirectUrl(String url) {
+  private String fixRedirectUrl(String url) {
     if (url.startsWith("http:") || url.startsWith("https:"))
       return url;
     else if (url.startsWith("/"))
@@ -121,7 +122,7 @@ public class Web extends Controller {
     return ALLOWED_FILE_TYPES.contains(getExtension(file.getName()));
   }
 
-  public static void search(String q) throws ParseException, IOException {
+  public void search(String q) throws ParseException, IOException {
     if (!indexer.shouldIndex()) {
       error(404, Messages.get("error.notFound"));
       return;
@@ -129,7 +130,7 @@ public class Web extends Controller {
     renderSearch(q);
   }
   
-  private static void renderSearch(String q) throws ParseException, IOException {
+  private void renderSearch(String q) throws ParseException, IOException {
     Query query = indexer.queryParser.parse("title:\"" + q + "\"^3 text:\"" + q + "\" keywords:\"" + q + "\"^2 path:\"" + q + "\"^2");
     TopDocs topDocs = indexer.searcher.search(query, 50);
     List<WebPage> results = new ArrayList<>();
@@ -144,20 +145,20 @@ public class Web extends Controller {
     render();
   }
 
-  public static void contacts() {
+  public void contacts() {
     render();
   }
 
-  public static void map() {
+  public void map() {
     render();
   }
 
-  public static void locale(String locale) {
+  public void locale(String locale) {
     redirect(Play.configuration.getProperty("web." + locale + ".home"));
   }
 
   @SetLangByURL
-  public static void news(String tag) throws Exception {
+  public void news(String tag) throws Exception {
     VirtualFile dir = serveFileOrGetDirectory();
     tag = fixEncodingForIE(tag);
     WebPage.News page = WebPage.forPath(dir);
@@ -172,7 +173,7 @@ public class Web extends Controller {
     renderArgs.put("tag", tag);
     renderArgs.put("tagFreq", tagFreq);
     renderArgs.put("total", total);
-    renderTemplate("Web/templates/news.html");
+    render("Web/templates/news.html");
   }
 
   private static List<Map.Entry<String, Float>> tagFreq(WebPage page) {
@@ -211,7 +212,7 @@ public class Web extends Controller {
     return list.subList(0, min(list.size(), limit));
   }
 
-  public static void sitemap() {
+  public void sitemap() {
     try {
       JPA.startTx(JPA.DEFAULT, true);
       WebPage root = rootForLocale();
@@ -222,26 +223,26 @@ public class Web extends Controller {
     }
   }
 
-  public static void robotsTxt() {
+  public void robotsTxt() {
     renderText(WebPage.ROOT.dir.child("robots.txt").exists() ? WebPage.ROOT.loadFile("robots.txt") :
       "Sitemap: " + request.getBase() + Router.reverse("Web.sitemapXml") + "\n" +
         "User-Agent: *\n");
   }
 
-  public static void sitemapXml() {
+  public void sitemapXml() {
     Document sitemap = XML.getDocument("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"/>");
     appendToSitemapRecursively(sitemap, WebPage.ROOT);
     renderXml(sitemap);
   }
 
-  private static void appendToSitemapRecursively(Document sitemap, WebPage page) {
+  private void appendToSitemapRecursively(Document sitemap, WebPage page) {
     for (WebPage child : page.children()) {
       appendEntryToSitemap(sitemap, child.path, child.dir.lastModified(), "daily");
       appendToSitemapRecursively(sitemap, child);
     }
   }
 
-  private static void appendEntryToSitemap(Document sitemap, String path, long lastModified, String frequency) {
+  private void appendEntryToSitemap(Document sitemap, String path, long lastModified, String frequency) {
     Node url = sitemap.getDocumentElement().appendChild(sitemap.createElement("url"));
     url.appendChild(sitemap.createElement("loc")).setTextContent(request.getBase() + path);
     url.appendChild(sitemap.createElement("lastmod")).setTextContent(new SimpleDateFormat("yyyy-MM-dd").format(lastModified));
@@ -249,12 +250,12 @@ public class Web extends Controller {
     url.appendChild(sitemap.createElement("priority")).setTextContent(Double.toString(1.0 / Math.max(countMatches(path, "/"), 0.1)));
   }
 
-  public static void redirectAlias(String path) {
+  public void redirectAlias(String path) {
     if (!path.startsWith("/")) forbidden();
     redirect(path, true);
   }
 
-  public static void postForm() throws Exception {
+  public void postForm() throws Exception {
     checkAuthenticity();
 
     String path = new URL(request.headers.get("referer").value()).getPath();
@@ -307,7 +308,7 @@ public class Web extends Controller {
     }
   }
 
-  public static void thumbnail(String path, String name, int height) throws IOException {
+  public void thumbnail(String path, String name, int height) throws IOException {
     File imgFile = WebPage.forPath(path).dir.child(name).getRealFile();
     BufferedImage img = ImageIO.read(imgFile);
     BufferedImage resized = new BufferedImage(img.getWidth() * height / img.getHeight(), height, img.getType());
@@ -321,7 +322,7 @@ public class Web extends Controller {
 
     ByteArrayOutputStream out = new ByteArrayOutputStream((int) imgFile.length());
     ImageIO.write(resized, "png", out);
-    response.cacheFor(String.valueOf(imgFile.lastModified()), "30d", imgFile.lastModified());
+    Http.Response.current().cacheFor(String.valueOf(imgFile.lastModified()), "30d", imgFile.lastModified());
     renderBinary(new ByteArrayInputStream(out.toByteArray()), imgFile.getName(), "image/png", true);
   }
 
@@ -335,13 +336,13 @@ public class Web extends Controller {
     if (usePlayGroovyTemplates) {
       BaseTemplate.layoutData.set((Map) page.contentParts()); // init layoutData ourselves
       TagContext.init();
-      renderArgs.put("_isLayout", true); // tell play not to reset layoutData itself
+      renderArgs().put("_isLayout", true); // tell play not to reset layoutData itself
     }
 
-    renderArgs.put("metaDescription", page.metadata.getProperty("description"));
-    renderArgs.put("metaKeywords", page.metadata.getProperty("keywords"));
-    renderArgs.put("page", page);
+    renderArgs().put("metaDescription", page.metadata.getProperty("description"));
+    renderArgs().put("metaKeywords", page.metadata.getProperty("keywords"));
+    renderArgs().put("page", page);
 
-    renderTemplate("Web/templates/" + page.template + ".html");
+    render("Web/templates/" + page.template + ".html");
   }
 }

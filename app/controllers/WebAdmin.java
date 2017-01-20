@@ -13,6 +13,7 @@ import play.Play;
 import play.data.validation.Required;
 import play.i18n.Messages;
 import play.mvc.*;
+import play.rebel.RebelController;
 import play.vfs.VirtualFile;
 import util.Git.*;
 
@@ -37,11 +38,11 @@ import static util.Git.*;
 
 @Check("cms")
 @With(Security.class)
-public class WebAdmin extends Controller {
+public class WebAdmin extends RebelController {
   private static final Logger logger = LoggerFactory.getLogger(WebAdmin.class);
   private static final Pattern LINKS = Pattern.compile("(href|src)=\"([^\"]*)\"");
 
-  public static void status() throws IOException, InterruptedException, ExecException {
+  public void status() throws IOException, InterruptedException, ExecException {
     git("add", ".");
     String status = git("status", "--porcelain");
 
@@ -60,7 +61,7 @@ public class WebAdmin extends Controller {
   }
 
   @Catch(ExecException.class)
-  public static void gitFailure(ExecException e) {
+  public void gitFailure(ExecException e) {
     logger.error("git failed: " + e.code + ": " + e.getMessage());
     flash.error(e.getMessage());
     if (!"WebAdmin.status".equals(request.action)) {
@@ -68,7 +69,7 @@ public class WebAdmin extends Controller {
     }
   }
 
-  public static void publish(String message, String[] paths) throws IOException, InterruptedException, ExecException {
+  public void publish(String message, String[] paths) throws Exception {
     checkAuthenticity();
     if (paths == null || paths.length == 0) {
       redirect("/webadmin/status");
@@ -93,14 +94,14 @@ public class WebAdmin extends Controller {
     }
   }
 
-  public static void push() throws InterruptedException, IOException, ExecException {
+  public void push() throws InterruptedException, IOException, ExecException {
     safePull();
     String push = git("push", "origin", "master");
     flash.put("success", push + "\n" + flash.get("success"));
     redirect("/webadmin/status");
   }
 
-  public static void history(String path) throws InterruptedException, IOException, ExecException {
+  public void history(String path) throws InterruptedException, IOException, ExecException {
     validateGitPaths(path);
     WebPage page = WebPage.forPath(path);
     List<String> args = new ArrayList<>(asList("log", "--pretty=format:%h%x09%ct%x09%an%x09%ae%x09%s%x09%b%x03", "--max-count=50"));
@@ -112,7 +113,7 @@ public class WebAdmin extends Controller {
     renderTemplate(ImmutableMap.of("page", page, "log", log));
   }
 
-  public static void diff(String path, String revision) throws InterruptedException, IOException, ExecException {
+  public void diff(String path, String revision) throws InterruptedException, IOException, ExecException {
     validateGitPaths(path);
     WebPage page = WebPage.forPath(path);
     List<String> args = new ArrayList<>(asList("diff", revision));
@@ -127,14 +128,14 @@ public class WebAdmin extends Controller {
     renderTemplate(ImmutableMap.of("page", page, "revision", revision, "diff", diff));
   }
 
-  public static void downloadRevision(String path, String revision) throws IOException {
+  public void downloadRevision(String path, String revision) throws IOException {
     validateGitPaths(path);
     if (path.startsWith("/")) path = path.substring(1);
     InputStream stream = gitForStream("show", revision + ":" + path);
     renderBinary(stream, FilenameUtils.getName(path), true);
   }
 
-  public static void restore(String path, String revision) throws InterruptedException, IOException, ExecException {
+  public void restore(String path, String revision) throws InterruptedException, IOException, ExecException {
     checkAuthenticity();
     validateGitPaths(path);
     WebPage page = WebPage.forPath(path);
@@ -148,7 +149,7 @@ public class WebAdmin extends Controller {
     redirect(page.path);
   }
 
-  public static void revert(String status, String filePath) throws InterruptedException, IOException, ExecException {
+  public void revert(String status, String filePath) throws InterruptedException, IOException, ExecException {
     checkAuthenticity();
     validateGitPaths(filePath);
     if (status.startsWith("A")) git("rm", "-f", filePath);
@@ -156,12 +157,12 @@ public class WebAdmin extends Controller {
     redirect("/webadmin/status");
   }
 
-  public static void doc() {
+  public void doc() {
     Collection<WebPage.Template> templates = WebPage.availableTemplates();
     renderTemplate(ImmutableMap.of("templates", templates));
   }
 
-  public static void saveContent(@Required String path, @Required String part) throws IOException {
+  public void saveContent(@Required String path, @Required String part) throws IOException {
     checkAuthenticity();
     if (validation.hasErrors()) forbidden();
     validateGitPaths(path);
@@ -172,7 +173,7 @@ public class WebAdmin extends Controller {
     renderText(Messages.get("web.admin.saved"));
   }
 
-  public static void checkLinks(boolean verifyExternal) {
+  public void checkLinks(boolean verifyExternal) {
     List<String> problems = new ArrayList<>();
     List<String> warnings = new ArrayList<>();
 
@@ -239,16 +240,16 @@ public class WebAdmin extends Controller {
     renderTemplate(ImmutableMap.of("problems", problems, "warnings", warnings, "externals", externals));
   }
 
-  private static void verifyPublicURL(String url) throws IOException {
+  private void verifyPublicURL(String url) throws IOException {
     if (!Play.getVirtualFile(url).exists()) throw new FileNotFoundException(url);
   }
 
-  private static void verifyURL(WebPage page, String url) throws FileNotFoundException {
+  private void verifyURL(WebPage page, String url) throws FileNotFoundException {
     VirtualFile file = page.dir.child(url);
     if (!file.exists()) throw new FileNotFoundException(url);
   }
 
-  private static void fixRedirectAlias(Map<String, String> route, WebPage page, String name, String url) throws IOException {
+  private void fixRedirectAlias(Map<String, String> route, WebPage page, String name, String url) throws IOException {
     VirtualFile file = page.dir.child(name + ".html");
     String html = file.contentAsString();
     html = html.replace("\"" + url + "\"", "\"" + route.get("path") + "\"");
@@ -256,7 +257,7 @@ public class WebAdmin extends Controller {
     throw new IOException("Fixed link " + url + " to " + route.get("path"));
   }
 
-  private static void verifyExternalURL(String url) throws IOException {
+  private void verifyExternalURL(String url) throws IOException {
     HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
     try {
       connection.setConnectTimeout(5000);
@@ -284,7 +285,7 @@ public class WebAdmin extends Controller {
     }
   }
 
-  public static void browse(String path) throws MalformedURLException {
+  public void browse(String path) throws MalformedURLException {
     if (isEmpty(path)) {
       Http.Header referer = request.headers.get("referer");
       path = referer != null ? new URL(referer.value()).getPath() : "/";
@@ -297,7 +298,7 @@ public class WebAdmin extends Controller {
     renderTemplate(ImmutableMap.of("page", page, "files", files));
   }
 
-  public static void upload(String path, File data) throws Throwable {
+  public void upload(String path, File data) throws Throwable {
     checkAuthenticity();
     WebPage page = WebPage.forPath(path);
     VirtualFile file = page.dir.child(data.getName());
@@ -311,7 +312,7 @@ public class WebAdmin extends Controller {
     redirect(Router.reverse("WebAdmin.browse").url + "?" + request.querystring);
   }
 
-  public static void delete(@Required String path, @Required String name, String redirectTo) throws Throwable {
+  public void delete(@Required String path, @Required String name, String redirectTo) throws Throwable {
     checkAuthenticity();
     if (validation.hasErrors()) forbidden(validation.errorsMap().toString());
     WebPage page = WebPage.forPath(path);
@@ -327,7 +328,7 @@ public class WebAdmin extends Controller {
     if (!canonicalPath(file.getRealFile()).startsWith(canonicalPath(ROOT.dir.getRealFile()))) forbidden("Access denied");
   }
 
-  public static void addPageDialog(String parentPath, String redirectTo) {
+  public void addPageDialog(String parentPath, String redirectTo) {
     WebPage parent = null;
     if (parentPath != null) {
       parent = WebPage.forPath(parentPath);
@@ -341,7 +342,7 @@ public class WebAdmin extends Controller {
     render();
   }
 
-  public static void addPage(@Required String parentPath, @Required String title, @Required String name, @Required String template, String redirectTo) {
+  public void addPage(@Required String parentPath, @Required String title, @Required String name, @Required String template, String redirectTo) {
     checkAuthenticity();
     if (validation.hasErrors()) forbidden(validation.errorsMap().toString());
     WebPage page = WebPage.forPath(parentPath + name);
@@ -351,11 +352,11 @@ public class WebAdmin extends Controller {
     redirect(defaultIfEmpty(redirectTo, page.path));
   }
 
-  public static void addNewsDialog() {
+  public void addNewsDialog() {
     render();
   }
 
-  public static void addNews(@Required String path, @Required String title, @Required Date date, String tags) {
+  public void addNews(@Required String path, @Required String title, @Required Date date, String tags) {
     checkAuthenticity();
     if (validation.hasErrors()) forbidden(validation.errorsMap().toString());
     WebPage.News parent = WebPage.forPath(path);
@@ -376,14 +377,14 @@ public class WebAdmin extends Controller {
     redirect(page.path);
   }
 
-  public static void addFileDialog(String path, String redirectTo) {
+  public void addFileDialog(String path, String redirectTo) {
     WebPage page = WebPage.forPath(path);
     renderArgs.put("page", page);
     renderArgs.put("redirectTo", redirectTo);
     render();
   }
 
-  public static void addFile(@Required String path, @Required String name, @Required String title, String redirectTo) {
+  public void addFile(@Required String path, @Required String name, @Required String title, String redirectTo) {
     checkAuthenticity();
     if (validation.hasErrors()) forbidden(validation.errorsMap().toString());
     WebPage page = WebPage.forPath(path);
@@ -398,7 +399,7 @@ public class WebAdmin extends Controller {
     return page.dir.child("template.html").exists() ? page.dir.child("template.html").contentAsString() : Messages.get("web.admin.defaultContent");
   }
 
-  public static void metadataDialog(String path) {
+  public void metadataDialog(String path) {
     WebPage page = WebPage.forPath(path);
     List<WebPage.Template> templates = WebPage.availableTemplates();
     renderArgs.put("page", page);
@@ -406,7 +407,7 @@ public class WebAdmin extends Controller {
     render();
   }
 
-  public static void saveMetadata(@Required String path) throws IOException {
+  public void saveMetadata(@Required String path) throws IOException {
     checkAuthenticity();
     if (validation.hasErrors()) forbidden(validation.errorsMap().toString());
     WebPage page = WebPage.forPath(path);
@@ -428,14 +429,14 @@ public class WebAdmin extends Controller {
     redirect(page.path);
   }
 
-  public static void copyPage(String path, String name) throws IOException {
+  public void copyPage(String path, String name) throws IOException {
     checkAuthenticity();
     WebPage page = WebPage.forPath(path);
     copyDirectory(page.dir.getRealFile(), new File(page.dir.getRealFile().getParentFile(), name));
     redirect(page.parent().path + name);
   }
 
-  public static void deletePage(String path) throws IOException {
+  public void deletePage(String path) throws IOException {
     checkAuthenticity();
     WebPage page = WebPage.forPath(path);
     deleteDirectory(page.dir.getRealFile());
