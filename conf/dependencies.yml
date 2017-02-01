@@ -1,4 +1,4 @@
-self: play -> web 2.3
+self: play -> web 2.4
 
 require:
     - play 1.4+
@@ -15,7 +15,7 @@ require:
         exclude:
             - org.hamcrest
 
-    - play-codeborne -> rebel 0.6
+    - play-codeborne -> rebel 0.6.2
 
 repositories:
 

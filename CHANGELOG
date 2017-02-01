@@ -1,5 +1,9 @@
 == Changelog
 
+=== 2.4 (01.02.2017)
+* send email synchronously (don't use Controller.await method)
+* ... with timeout 5 seconds
+
 === 2.3 (21.01.2017)
 * use play-rebel 0.6, extend RebelController
 

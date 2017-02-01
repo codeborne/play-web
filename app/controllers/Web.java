@@ -44,6 +44,7 @@ import static java.awt.RenderingHints.*;
 import static java.lang.Math.min;
 import static java.util.Arrays.asList;
 import static java.util.Comparator.comparingInt;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static models.WebPage.ALLOWED_FILE_TYPES;
 import static models.WebPage.rootForLocale;
 import static org.apache.commons.io.FilenameUtils.getExtension;
@@ -299,7 +300,7 @@ public class Web extends RebelController {
     msg.setFrom(Play.configuration.getProperty("email.from"), Play.configuration.getProperty("email.from.name"));
 
     logger.info("Sending web form to " + msg.getToAddresses() + ": " + body);
-    if (await(Mail.send(msg))) {
+    if (Mail.send(msg).get(5, SECONDS)) {
       flash.success(Messages.get("web.form.sent"));
       redirect(page.path);
     }
