@@ -23,6 +23,8 @@ import play.libs.MimeTypes;
 import play.libs.XML;
 import play.mvc.*;
 import play.rebel.RebelController;
+import play.security.AuthorizationService;
+import play.security.Secured;
 import play.templates.BaseTemplate;
 import play.templates.TagContext;
 import play.vfs.VirtualFile;
@@ -30,6 +32,7 @@ import plugins.SetLangByURL;
 import util.WebPageIndexer;
 
 import javax.imageio.ImageIO;
+import javax.inject.Inject;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -52,11 +55,13 @@ import static org.apache.commons.lang.StringUtils.*;
 import static plugins.WebContentPlugin.cacheEnabled;
 import static util.UrlEncoder.safeUrlEncode;
 
-@With(Security.class) @NoTransaction
+@Secured
+@NoTransaction
 public class Web extends RebelController {
   private static final Logger logger = LoggerFactory.getLogger(Web.class);
   private static boolean usePlayGroovyTemplates = "true".equals(Play.configuration.getProperty("web.usePlayGroovyTemplates", "true"));
   static WebPageIndexer indexer = WebPageIndexer.getInstance();
+  @Inject static AuthorizationService authorizationService;
 
   @After public void setHeaders() {
     Http.Response.current().setHeader("X-XSS-Protection", "1; mode=block");
@@ -65,7 +70,7 @@ public class Web extends RebelController {
 
   @Before
   public void before() {
-    renderArgs.put("includeHiddenPages", Security.check("cms"));
+    renderArgs.put("includeHiddenPages", authorizationService.check("cms"));
   }
 
   @SetLangByURL @CacheFor("5mn")

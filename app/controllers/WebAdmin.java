@@ -14,9 +14,12 @@ import play.data.validation.Required;
 import play.i18n.Messages;
 import play.mvc.*;
 import play.rebel.RebelController;
+import play.security.AuthenticationService;
+import play.security.Secured;
 import play.vfs.VirtualFile;
 import util.Git.*;
 
+import javax.inject.Inject;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -37,10 +40,11 @@ import static org.apache.commons.lang.StringUtils.*;
 import static util.Git.*;
 
 @Check("cms")
-@With(Security.class)
+@Secured
 public class WebAdmin extends RebelController {
   private static final Logger logger = LoggerFactory.getLogger(WebAdmin.class);
   private static final Pattern LINKS = Pattern.compile("(href|src)=\"([^\"]*)\"");
+  @Inject static AuthenticationService authenticationService;
 
   public void status() throws IOException, InterruptedException, ExecException {
     git("add", ".");
@@ -79,7 +83,7 @@ public class WebAdmin extends RebelController {
 
     List<String> args = new ArrayList<>(asList("commit",
         "-m", defaultIfEmpty(message, "no message specified"),
-        "--author=" + Security.connected() + " <" + Security.connected() + ">"));
+        "--author=" + authenticationService.connected() + " <" + authenticationService.connected() + ">"));
     if (paths != null) args.addAll(asList(paths));
     String committed = git(args);
 
