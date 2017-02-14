@@ -1,7 +1,7 @@
-self: play -> web 2.5
+self: play -> web 2.6
 
 require:
-    - play 1.4+
+    - play 1.5.+
 
     - org.apache.lucene -> lucene-core 4.3.0
     - org.apache.lucene -> lucene-analyzers-common 4.3.0
@@ -10,12 +10,12 @@ require:
 
     - com.google.guava -> guava 21.0
 
-    - org.mockito -> mockito-core 2.6.4:
+    - org.mockito -> mockito-core 2.7.6:
         exclude:
             - org.hamcrest
 
     - play-codeborne -> secure 0.6
-    - play-codeborne -> rebel 0.6.5
+    - play-codeborne -> rebel 1.0
 
 repositories:
 
