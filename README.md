@@ -7,9 +7,10 @@ Adding to dependencies.yml
 --------------------------
 
     require:
-      - play
-      - play -> secure
-      - play-web -> web 1.9.7
+      - play 1.5.+
+      - play-codeborne -> secure 0.6
+      - play-codeborne -> rebel 0.6.5
+      - play-codeborne -> web 2.4
 
     repositories:
       - codeborne:
@@ -17,6 +18,14 @@ Adding to dependencies.yml
         artifact: https://repo.codeborne.com/[organization]/[module]-[revision].zip
         contains:
           - play-web
+
+    repositories:
+        - codeborne-modules-jars:
+            type: http
+            artifact: https://repo.codeborne.com/play-[module]/[module]-[revision].jar
+            contains:
+                - play-codeborne -> rebel
+                - play-codeborne -> secure
 
 Web content
 -----------
@@ -73,7 +82,7 @@ This will just display the content.html that is located in the page's directory 
 Administration
 --------------
 
-Your project must use play's default secure module.
+Your project must use module play-secure (see https://repo.codeborne.com/play-secure/)
 
 Make sure your Secure.check implementation will check for profile 'cms' in order to give some users cms editing permissions.
 

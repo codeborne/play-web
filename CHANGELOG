@@ -1,5 +1,8 @@
 == Changelog
 
+=== 2.5 (14.02.2017)
+* depend on play-codeborne:play-secure instead of built-in Play! module "secure"
+
 === 2.4 (01.02.2017)
 * send email synchronously (don't use Controller.await method)
 * ... with timeout 5 seconds

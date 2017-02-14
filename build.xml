@@ -51,8 +51,6 @@
     <javac destdir="tmp/test-classes" target="1.8" source="1.8" debug="true">
       <src path="test"/>
       <src path="app"/>
-      <src path="mocked-sources-for-test"/>
-      <src path="${play.path}/modules/secure/app"/>
       <classpath>
         <path path="tmp/classes"/>
         <path refid="project.classpath"/>

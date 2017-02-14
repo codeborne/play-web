@@ -1,8 +1,7 @@
-self: play -> web 2.4
+self: play -> web 2.5
 
 require:
     - play 1.4+
-    - play -> secure
 
     - org.apache.lucene -> lucene-core 4.3.0
     - org.apache.lucene -> lucene-analyzers-common 4.3.0
@@ -15,7 +14,8 @@ require:
         exclude:
             - org.hamcrest
 
-    - play-codeborne -> rebel 0.6.2
+    - play-codeborne -> secure 0.6
+    - play-codeborne -> rebel 0.6.5
 
 repositories:
 
@@ -24,3 +24,4 @@ repositories:
         artifact: https://repo.codeborne.com/play-[module]/[module]-[revision].jar
         contains:
             - play-codeborne -> rebel
+            - play-codeborne -> secure
