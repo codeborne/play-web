@@ -1,5 +1,8 @@
 == Changelog
 
+=== 2.7 (14.03.2017)
+* job WebContentPull writes warnings (instead of full stack traces) if could not update web dir
+
 === 2.6 (14.02.2017)
 * upgrade to play-rebel 1.0 and play 1.5.+
 
