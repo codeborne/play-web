@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Scanner;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 public class Git {
   public static PullListener pullListener;
 
@@ -38,7 +40,7 @@ public class Git {
   static String exec(String ... cmdLine) throws IOException, ExecException, InterruptedException {
     Process proc = execProc(cmdLine);
     try (InputStream in = proc.getInputStream()) {
-      String out = IOUtils.toString(in);
+      String out = IOUtils.toString(in, UTF_8);
       int status = proc.waitFor();
       if (status != 0)
         throw new ExecException(status, out);
