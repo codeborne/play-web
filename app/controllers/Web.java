@@ -22,6 +22,7 @@ import play.libs.Mail;
 import play.libs.MimeTypes;
 import play.libs.XML;
 import play.mvc.*;
+import play.mvc.results.Redirect;
 import play.rebel.RebelController;
 import play.security.AuthorizationService;
 import play.security.Secured;
@@ -159,8 +160,13 @@ public class Web extends RebelController {
     render();
   }
 
-  public void locale(String locale) {
-    redirect(Play.configuration.getProperty("web." + locale + ".home"));
+  public Redirect locale(String locale) {
+    String url = Play.configuration.getProperty("web." + locale + ".home");
+    if (isBlank(url)) {
+      logger.warn("Unknown locale: {}", locale);
+      url = Play.configuration.getProperty("web." + Play.langs.get(0) + ".home");
+    }
+    return new Redirect(url);
   }
 
   @SetLangByURL

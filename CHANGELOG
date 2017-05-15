@@ -1,5 +1,8 @@
 == Changelog
 
+=== 2.7.1 (15.05.2017)
+* fix NPE in /web/locale when unknown locale parameter is received
+
 === 2.7 (14.03.2017)
 * job WebContentPull writes warnings (instead of full stack traces) if could not update web dir
 

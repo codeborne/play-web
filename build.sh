@@ -5,9 +5,9 @@ DESTINATION=/var/www/repo/play-$MODULE
 TARGET=$DESTINATION/$MODULE-$VERSION.zip
 
 rm -fr dist
-play dependencies --sync || exit $?
+play deps || exit $?
 play build-module || exit $?
-zip --delete dist/*.zip "modules/secure" "lib/mockito*" "lib/hamcrest*" "lib/objenesis*"
+zip --delete dist/*.zip "lib/mockito*" "lib/hamcrest*" "lib/objenesis*"
 
 if [ -d $DESTINATION ]; then
   if [ -e $TARGET ]; then

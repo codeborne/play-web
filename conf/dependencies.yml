@@ -1,4 +1,4 @@
-self: play -> web 2.7
+self: play -> web 2.7.1
 
 require:
     - play 1.5.+
@@ -10,7 +10,7 @@ require:
 
     - com.google.guava -> guava 21.0
 
-    - org.mockito -> mockito-core 2.7.17:
+    - org.mockito -> mockito-core 2.7.22:
         exclude:
             - org.hamcrest
 
